@@ -1,0 +1,16 @@
+diff --git a/rtl/spi_host_window.sv b/rtl/spi_host_window.sv
+index 999c119..7e11214 100644
+--- a/rtl/spi_host_window.sv
++++ b/rtl/spi_host_window.sv
+@@ -79,9 +79,11 @@ module spi_host_window (
+     .we_o(),
+     .addr_o(),
+     .wdata_o(tx_data_o),
++    .wdata_cap_o(),
+     .wmask_o(bit_mask),
+     .intg_error_o(),
+     .rdata_i('0),
++    .rdata_cap_i(1'b0),
+     .rvalid_i('0),
+     .rerror_i('0),
+     .compound_txn_in_progress_o(),

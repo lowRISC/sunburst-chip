@@ -1,0 +1,184 @@
+diff --git a/mem_bkdr_util.core b/mem_bkdr_util.core
+index 63e06e9..32f186a 100644
+--- a/mem_bkdr_util.core
++++ b/mem_bkdr_util.core
+@@ -8,6 +8,6 @@ description: "Backdoor read/write memory for DV"
+ filesets:
+   files_dv:
+     depend:
+-      - lowrisc:opentitan:bus_params_pkg
++      - lowrisc:constants:top_pkg
+       - lowrisc:dv:dv_utils
+       - lowrisc:prim:secded:0.1
+diff --git a/mem_bkdr_util.sv b/mem_bkdr_util.sv
+index e11e346..5e833f6 100644
+--- a/mem_bkdr_util.sv
++++ b/mem_bkdr_util.sv
+@@ -202,7 +202,7 @@ class mem_bkdr_util extends uvm_object;
+   // Returns 1 if the given address falls within the memory's range, else 0.
+   //
+   // If addr is invalid, it throws UVM error before returning 0.
+-  protected virtual function bit check_addr_valid(bit [bus_params_pkg::BUS_AW-1:0] addr);
++  protected virtual function bit check_addr_valid(bit [top_pkg::TL_AW-1:0] addr);
+     if (addr >= size_bytes) begin
+       `uvm_error(`gfn, $sformatf("addr %0h is out of bounds: size = %0h", addr, size_bytes))
+       return 1'b0;
+@@ -218,7 +218,7 @@ class mem_bkdr_util extends uvm_object;
+   // Returns the entire width of the memory at the given address, including the ECC bits. The data
+   // returned is 'raw' i.e. it includes the parity bits. It also does not de-scramble the data if
+   // encryption is enabled.
+-  virtual function uvm_hdl_data_t read(bit [bus_params_pkg::BUS_AW-1:0] addr);
++  virtual function uvm_hdl_data_t read(bit [top_pkg::TL_AW-1:0] addr);
+     bit res;
+     uint32_t index;
+     uvm_hdl_data_t data;
+@@ -236,39 +236,39 @@ class mem_bkdr_util extends uvm_object;
+   // Read a single byte at specified address.
+   //
+   // The data returned does not include the parity bits.
+-  virtual function logic [7:0] read8(bit [bus_params_pkg::BUS_AW-1:0] addr);
++  virtual function logic [7:0] read8(bit [top_pkg::TL_AW-1:0] addr);
+     uvm_hdl_data_t data = read(addr);
+     int byte_offset = addr % bytes_per_word;
+     return (data >> (byte_offset * byte_width)) & 8'hff;
+   endfunction
+ 
+-  virtual function logic [15:0] read16(bit [bus_params_pkg::BUS_AW-1:0] addr);
++  virtual function logic [15:0] read16(bit [top_pkg::TL_AW-1:0] addr);
+     `_ACCESS_CHECKS(addr, 16)
+     return {read8(addr + 1), read8(addr)};
+   endfunction
+ 
+-  virtual function logic [31:0] read32(bit [bus_params_pkg::BUS_AW-1:0] addr);
++  virtual function logic [31:0] read32(bit [top_pkg::TL_AW-1:0] addr);
+     `_ACCESS_CHECKS(addr, 32)
+     return {read16(addr + 2), read16(addr)};
+   endfunction
+ 
+   // this is used to read 32bit of data plus 7 raw integrity bits.
+-  virtual function logic [38:0] read39integ(bit [bus_params_pkg::BUS_AW-1:0] addr);
++  virtual function logic [38:0] read39integ(bit [top_pkg::TL_AW-1:0] addr);
+     `_ACCESS_CHECKS(addr, 32) // this is essentially an aligned 32bit access.
+     return read(addr) & 39'h7fffffffff;
+   endfunction
+ 
+-  virtual function logic [63:0] read64(bit [bus_params_pkg::BUS_AW-1:0] addr);
++  virtual function logic [63:0] read64(bit [top_pkg::TL_AW-1:0] addr);
+     `_ACCESS_CHECKS(addr, 64)
+     return {read32(addr + 4), read32(addr)};
+   endfunction
+ 
+-  virtual function logic [127:0] read128(bit [bus_params_pkg::BUS_AW-1:0] addr);
++  virtual function logic [127:0] read128(bit [top_pkg::TL_AW-1:0] addr);
+     `_ACCESS_CHECKS(addr, 128)
+     return {read64(addr + 8), read64(addr)};
+   endfunction
+ 
+-  virtual function logic [255:0] read256(bit [bus_params_pkg::BUS_AW-1:0] addr);
++  virtual function logic [255:0] read256(bit [top_pkg::TL_AW-1:0] addr);
+     `_ACCESS_CHECKS(addr, 256)
+     return {read128(addr + 16), read128(addr)};
+   endfunction
+@@ -332,7 +332,7 @@ class mem_bkdr_util extends uvm_object;
+   // invocation.
+   //
+   // Updates the entire width of the memory at the given address, including the ECC bits.
+-  virtual function void write(bit [bus_params_pkg::BUS_AW-1:0] addr, uvm_hdl_data_t data);
++  virtual function void write(bit [top_pkg::TL_AW-1:0] addr, uvm_hdl_data_t data);
+     bit res;
+     uint32_t index;
+     if (!check_addr_valid(addr)) return;
+@@ -345,7 +345,7 @@ class mem_bkdr_util extends uvm_object;
+   //
+   // Does a read-modify-write on the whole word. It updates the byte at the given address and
+   // computes the parity and ECC bits as applicable.
+-  virtual function void write8(bit [bus_params_pkg::BUS_AW-1:0] addr, logic [7:0] data);
++  virtual function void write8(bit [top_pkg::TL_AW-1:0] addr, logic [7:0] data);
+     uvm_hdl_data_t rw_data;
+     uint32_t word_idx;
+     uint32_t byte_idx;
+@@ -373,14 +373,14 @@ class mem_bkdr_util extends uvm_object;
+     write(addr, rw_data);
+   endfunction
+ 
+-  virtual function void write16(bit [bus_params_pkg::BUS_AW-1:0] addr, logic [15:0] data);
++  virtual function void write16(bit [top_pkg::TL_AW-1:0] addr, logic [15:0] data);
+     `_ACCESS_CHECKS(addr, 16)
+     if (!check_addr_valid(addr)) return;
+     write8(addr, data[7:0]);
+     write8(addr + 1, data[15:8]);
+   endfunction
+ 
+-  virtual function void write32(bit [bus_params_pkg::BUS_AW-1:0] addr, logic [31:0] data);
++  virtual function void write32(bit [top_pkg::TL_AW-1:0] addr, logic [31:0] data);
+     `_ACCESS_CHECKS(addr, 32)
+     if (!check_addr_valid(addr)) return;
+     write16(addr, data[15:0]);
+@@ -388,27 +388,27 @@ class mem_bkdr_util extends uvm_object;
+   endfunction
+ 
+   // this is used to write 32bit of data plus 7 raw integrity bits.
+-  virtual function void write39integ(bit [bus_params_pkg::BUS_AW-1:0] addr, logic [38:0] data);
++  virtual function void write39integ(bit [top_pkg::TL_AW-1:0] addr, logic [38:0] data);
+     `_ACCESS_CHECKS(addr, 32) // this is essentially an aligned 32bit access.
+     if (!check_addr_valid(addr)) return;
+     write(addr, data);
+   endfunction
+ 
+-  virtual function void write64(bit [bus_params_pkg::BUS_AW-1:0] addr, logic [63:0] data);
++  virtual function void write64(bit [top_pkg::TL_AW-1:0] addr, logic [63:0] data);
+     `_ACCESS_CHECKS(addr, 64)
+     if (!check_addr_valid(addr)) return;
+     write32(addr, data[31:0]);
+     write32(addr + 4, data[63:32]);
+   endfunction
+ 
+-  virtual function void write128(bit [bus_params_pkg::BUS_AW-1:0] addr, logic [127:0] data);
++  virtual function void write128(bit [top_pkg::TL_AW-1:0] addr, logic [127:0] data);
+     `_ACCESS_CHECKS(addr, 128)
+     if (!check_addr_valid(addr)) return;
+     write64(addr, data[63:0]);
+     write64(addr + 8, data[127:63]);
+   endfunction
+ 
+-  virtual function void write256(bit [bus_params_pkg::BUS_AW-1:0] addr, logic [255:0] data);
++  virtual function void write256(bit [top_pkg::TL_AW-1:0] addr, logic [255:0] data);
+     `_ACCESS_CHECKS(addr, 256)
+     if (!check_addr_valid(addr)) return;
+     write128(addr, data[127:0]);
+@@ -425,7 +425,7 @@ class mem_bkdr_util extends uvm_object;
+   // - (28, 22) and (64, 57) ECC configurations aren't supported
+ 
+   // Intended for use with memories which have data width of 16 bits and 6 ECC bits.
+-  virtual function secded_22_16_t ecc_read16(bit [bus_params_pkg::BUS_AW-1:0] addr);
++  virtual function secded_22_16_t ecc_read16(bit [top_pkg::TL_AW-1:0] addr);
+     uvm_hdl_data_t data;
+     if (!check_addr_valid(addr)) return 'x;
+     data = read(addr);
+@@ -447,7 +447,7 @@ class mem_bkdr_util extends uvm_object;
+   endfunction
+ 
+   // Intended for use with memories which have data width of 32 bits and 7 ECC bits.
+-  virtual function secded_39_32_t ecc_read32(bit [bus_params_pkg::BUS_AW-1:0] addr);
++  virtual function secded_39_32_t ecc_read32(bit [top_pkg::TL_AW-1:0] addr);
+     uvm_hdl_data_t data;
+     if (!check_addr_valid(addr)) return 'x;
+     data = read(addr);
+@@ -469,7 +469,7 @@ class mem_bkdr_util extends uvm_object;
+   endfunction
+ 
+   // Intended for use with memories which have data width of 64 bits and 8 ECC bits.
+-  virtual function secded_72_64_t ecc_read64(bit [bus_params_pkg::BUS_AW-1:0] addr);
++  virtual function secded_72_64_t ecc_read64(bit [top_pkg::TL_AW-1:0] addr);
+     uvm_hdl_data_t data;
+     if (!check_addr_valid(addr)) return 'x;
+     data = read(addr);
+@@ -564,7 +564,7 @@ class mem_bkdr_util extends uvm_object;
+   endfunction
+ 
+   // Inject ECC or parity errors to the memory word at the given address.
+-  virtual function void inject_errors(bit [bus_params_pkg::BUS_AW-1:0] addr,
++  virtual function void inject_errors(bit [top_pkg::TL_AW-1:0] addr,
+                                       uint32_t inject_num_errors);
+     uvm_hdl_data_t rw_data, err_mask;
+     if (!check_addr_valid(addr)) return;

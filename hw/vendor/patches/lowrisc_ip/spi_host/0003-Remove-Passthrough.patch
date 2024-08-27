@@ -1,0 +1,114 @@
+diff --git a/rtl/spi_host.sv b/rtl/spi_host.sv
+index d38c486..a121f1d 100644
+--- a/rtl/spi_host.sv
++++ b/rtl/spi_host.sv
+@@ -25,10 +25,6 @@ module spi_host import spi_host_reg_pkg::*; (
+   output logic [3:0]       cio_sd_en_o,
+   input        [3:0]       cio_sd_i,
+ 
+-  // Passthrough interface
+-  input  spi_device_pkg::passthrough_req_t passthrough_i,
+-  output spi_device_pkg::passthrough_rsp_t passthrough_o,
+-
+   output logic             intr_error_o,
+   output logic             intr_spi_event_o
+ );
+@@ -64,62 +60,13 @@ module spi_host import spi_host_reg_pkg::*; (
+ 
+   assign sd_en     = output_en ? sd_en_core : 4'h0;
+ 
+-  if (NumCS == 1) begin : gen_passthrough_implementation
+-    logic passthrough_en;
+-    assign passthrough_en  = passthrough_i.passthrough_en;
+-
+-    logic        pt_sck;
+-    logic        pt_sck_en;
+-    logic [0:0]  pt_csb;
+-    logic [0:0]  pt_csb_en;
+-    logic [3:0]  pt_sd_out;
+-    logic [3:0]  pt_sd_en;
+-
+-    assign pt_sck       = passthrough_i.sck;
+-    assign pt_sck_en    = passthrough_i.sck_en;
+-    assign pt_csb[0]    = passthrough_i.csb;
+-    assign pt_csb_en[0] = passthrough_i.csb_en;
+-    assign pt_sd_out    = passthrough_i.s;
+-    assign pt_sd_en     = passthrough_i.s_en;
+-
+-    assign cio_sck_o    = passthrough_en ? pt_sck    : sck;
+-    assign cio_sck_en_o = passthrough_en ? pt_sck_en : output_en;
+-    assign cio_csb_o    = passthrough_en ? pt_csb    : csb;
+-    assign cio_csb_en_o = passthrough_en ? pt_csb_en : output_en;
+-    assign cio_sd_o     = passthrough_en ? pt_sd_out : sd_out;
+-    assign cio_sd_en_o  = passthrough_en ? pt_sd_en  : sd_en;
+-
+-  end                   : gen_passthrough_implementation
+-  else begin            : gen_passthrough_ignore
+-     // Passthrough only supported for instances with one CSb line
+-    `ASSERT(PassthroughNumCSCompat_A, !passthrough_i.passthrough_en, clk_i, rst_ni)
+-
+-    assign cio_sck_o    = sck;
+-    assign cio_sck_en_o = output_en;
+-    assign cio_csb_o    = csb;
+-    assign cio_csb_en_o = {NumCS{output_en}};
+-    assign cio_sd_o     = sd_out;
+-    assign cio_sd_en_o  = sd_en;
+-
+-    logic       unused_pt_en;
+-    logic       unused_pt_sck;
+-    logic       unused_pt_sck_en;
+-    logic       unused_pt_csb;
+-    logic       unused_pt_csb_en;
+-    logic [3:0] unused_pt_sd_out;
+-    logic [3:0] unused_pt_sd_en;
+-
+-    assign unused_pt_en     = passthrough_i.passthrough_en;
+-    assign unused_pt_sck    = passthrough_i.sck;
+-    assign unused_pt_sck_en = passthrough_i.sck_en;
+-    assign unused_pt_csb    = passthrough_i.csb;
+-    assign unused_pt_csb_en = passthrough_i.csb_en;
+-    assign unused_pt_sd_out = passthrough_i.s;
+-    assign unused_pt_sd_en  = passthrough_i.s_en;
+-
+-  end                   : gen_passthrough_ignore
+-
+-  assign passthrough_o.s = cio_sd_i;
++  assign cio_sck_o    = sck;
++  assign cio_sck_en_o = output_en;
++  assign cio_csb_o    = csb;
++  assign cio_csb_en_o = {NumCS{output_en}};
++  assign cio_sd_o     = sd_out;
++  assign cio_sd_en_o  = sd_en;
++
+   assign sd_i            = cio_sd_i;
+ 
+   assign hw2reg.status.byteorder.d  = ByteOrder;
+@@ -553,15 +553,8 @@ module spi_host import spi_host_reg_pkg::*; (
+   `ASSERT_KNOWN(CioSckEnKnownO_A, cio_sck_en_o)
+   `ASSERT_KNOWN(CioCsbKnownO_A, cio_csb_o)
+   `ASSERT_KNOWN(CioCsbEnKnownO_A, cio_csb_en_o)
+-  `ASSERT_KNOWN_IF(CioSdKnownO_A, cio_sd_o, !passthrough_i.passthrough_en |
+-    (passthrough_i.passthrough_en && passthrough_i.csb_en && !passthrough_i.csb),
+-    passthrough_i.sck_en & passthrough_i.sck)
++  `ASSERT_KNOWN(CioSdKnownO_A, cio_sd_o)
+   `ASSERT_KNOWN(CioSdEnKnownO_A, cio_sd_en_o)
+   `ASSERT_KNOWN(IntrSpiEventKnownO_A, intr_spi_event_o)
+   `ASSERT_KNOWN(IntrErrorKnownO_A, intr_error_o)
+-
+-  // passthrough_o.s is passed through to spi_device, it may contain unknown data,
+-  // but the unknown data won't be used based on the SPI protocol.
+-  // Hence, instead of checking known data, here does a connectivity check.
+-  `ASSERT(PassthroughConn_A, passthrough_o.s === cio_sd_i)
+ endmodule : spi_host
+diff --git a/spi_host.core b/spi_host.core
+index db52aeb..664aa13 100644
+--- a/spi_host.core
++++ b/spi_host.core
+@@ -12,7 +12,6 @@ filesets:
+       - lowrisc:prim:all
+       - lowrisc:prim:flop_en
+       - lowrisc:ip:tlul
+-      - lowrisc:ip:spi_device_pkg
+     files:
+       - rtl/spi_host_reg_pkg.sv
+       - rtl/spi_host_cmd_pkg.sv

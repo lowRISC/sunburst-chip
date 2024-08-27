@@ -1,0 +1,83 @@
+diff --git a/rtl/aon_timer.sv b/rtl/aon_timer.sv
+index 894d805811..b04497dae0 100644
+--- a/rtl/aon_timer.sv
++++ b/rtl/aon_timer.sv
+@@ -17,7 +17,6 @@ module aon_timer import aon_timer_reg_pkg::*;
+   output tlul_pkg::tl_d2h_t   tl_o,
+ 
+   // clk_i domain
+-  input  lc_ctrl_pkg::lc_tx_t lc_escalate_en_i,
+   output logic                intr_wkup_timer_expired_o,
+   output logic                intr_wdog_timer_bark_o,
+   output logic                nmi_wdog_timer_bark_o,
+@@ -41,8 +41,6 @@ module aon_timer import aon_timer_reg_pkg::*;
+   logic [63:0]               aon_wkup_count_wr_data;
+   logic                      aon_wdog_count_reg_wr;
+   logic [31:0]               aon_wdog_count_wr_data;
+-  // Other sync signals
+-  lc_ctrl_pkg::lc_tx_t [2:0] lc_escalate_en;
+   // Interrupt signals
+   logic                      aon_wkup_intr_set;
+   logic                      aon_wdog_intr_set;
+@@ -91,14 +90,4 @@ module aon_timer import aon_timer_reg_pkg::*;
+     .hw2reg
+   );
+-
+-  // Lifecycle sync
+-  prim_lc_sync #(
+-    .NumCopies(3)
+-  ) u_lc_sync_escalate_en (
+-    .clk_i   (clk_aon_i),
+-    .rst_ni  (rst_aon_ni),
+-    .lc_en_i (lc_escalate_en_i),
+-    .lc_en_o (lc_escalate_en)
+-  );
+ 
+   ////////////////
+@@ -109,7 +100,6 @@ module aon_timer import aon_timer_reg_pkg::*;
+     .clk_aon_i,
+     .rst_aon_ni,
+     .sleep_mode_i              (aon_sleep_mode),
+-    .lc_escalate_en_i          (lc_escalate_en),
+     .reg2hw_i                  (reg2hw),
+     .wkup_count_reg_wr_o       (aon_wkup_count_reg_wr),
+     .wkup_count_wr_data_o      (aon_wkup_count_wr_data),
+diff --git a/rtl/aon_timer_core.sv b/rtl/aon_timer_core.sv
+index 3ebed3a842..c41dc9ac4b 100644
+--- a/rtl/aon_timer_core.sv
++++ b/rtl/aon_timer_core.sv
+@@ -7,7 +7,6 @@ module aon_timer_core import aon_timer_reg_pkg::*; (
+   input  logic                      clk_aon_i,
+   input  logic                      rst_aon_ni,
+ 
+-  input  lc_ctrl_pkg::lc_tx_t [2:0] lc_escalate_en_i,
+   input  logic                      sleep_mode_i,
+ 
+   // Register interface
+@@ -40,7 +39,6 @@ module aon_timer_core import aon_timer_reg_pkg::*; (
+   // Prescaler counter
+   assign prescale_count_d = wkup_incr ? 12'h000 : (prescale_count_q + 12'h001);
+-  assign prescale_en      = reg2hw_i.wkup_ctrl.enable.q &
+-                            lc_ctrl_pkg::lc_tx_test_false_strict(lc_escalate_en_i[0]);
++  assign prescale_en      = reg2hw_i.wkup_ctrl.enable.q;
+ 
+   always_ff @(posedge clk_aon_i or negedge rst_aon_ni) begin
+     if (!rst_aon_ni) begin
+@@ -54,8 +52,7 @@ module aon_timer_core import aon_timer_reg_pkg::*; (
+   assign wkup_thold = {reg2hw_i.wkup_thold_hi.q, reg2hw_i.wkup_thold_lo.q};
+ 
+   // Wakeup timer count
+-  assign wkup_incr = lc_ctrl_pkg::lc_tx_test_false_strict(lc_escalate_en_i[1]) &
+-                     reg2hw_i.wkup_ctrl.enable.q &
++  assign wkup_incr = reg2hw_i.wkup_ctrl.enable.q &
+                      (prescale_count_q == reg2hw_i.wkup_ctrl.prescaler.q);
+ 
+   assign wkup_count_reg_wr_o  = wkup_incr;
+@@ -70,7 +67,6 @@ module aon_timer_core import aon_timer_reg_pkg::*; (
+ 
+   // Watchdog timer count
+   assign wdog_incr = reg2hw_i.wdog_ctrl.enable.q &
+-                     lc_ctrl_pkg::lc_tx_test_false_strict(lc_escalate_en_i[2]) &
+                      ~(sleep_mode_i & reg2hw_i.wdog_ctrl.pause_in_sleep.q);
+ 
+   assign wdog_count_reg_wr_o  = wdog_incr;

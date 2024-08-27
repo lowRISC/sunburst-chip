@@ -1,0 +1,25 @@
+diff --git a/adapter_host.core b/adapter_host.core
+index 786da3a..a16933d 100644
+--- a/adapter_host.core
++++ b/adapter_host.core
+@@ -8,7 +8,7 @@ description: "Req/Grant/RValid to TL-UL adapter (host)"
+ filesets:
+   files_rtl:
+     depend:
+-      - lowrisc:prim:all
++      - lowrisc:prim:assert
+       - lowrisc:tlul:common
+       - lowrisc:tlul:trans_intg
+       - lowrisc:constants:top_pkg
+diff --git a/common.core b/common.core
+index ebf18737ff..8871105305 100644
+--- a/common.core
++++ b/common.core
+@@ -8,7 +8,6 @@ description: "TL-UL common building blocks"
+ filesets:
+   files_rtl:
+     depend:
+-      - lowrisc:dv:pins_if
+       - lowrisc:prim:assert
+       - lowrisc:prim:fifo
+       - lowrisc:tlul:headers

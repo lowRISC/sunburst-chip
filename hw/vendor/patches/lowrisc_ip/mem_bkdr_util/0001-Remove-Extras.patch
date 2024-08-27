@@ -1,0 +1,69 @@
+diff --git a/mem_bkdr_util.core b/mem_bkdr_util.core
+index 63e06e9..32f186a 100644
+--- a/mem_bkdr_util.core
++++ b/mem_bkdr_util.core
+@@ -8,25 +8,12 @@ description: "Backdoor read/write memory for DV"
+ filesets:
+   files_dv:
+     depend:
+       - lowrisc:opentitan:bus_params_pkg
+       - lowrisc:dv:dv_utils
+-      - lowrisc:dv:crypto_dpi_prince:0.1
+-      - lowrisc:dv:crypto_dpi_present:0.1
+-      - lowrisc:prim:cipher_pkg:0.1
+       - lowrisc:prim:secded:0.1
+-      - lowrisc:ip:otp_ctrl_pkg:1.0
+-      - lowrisc:ip_interfaces:flash_ctrl_pkg
+-      - lowrisc:dv:digestpp_dpi
+-      - lowrisc:ip:kmac_pkg
+     files:
+-      - otp_scrambler_pkg.sv
+-      - sram_scrambler_pkg.sv
+       - mem_bkdr_util_pkg.sv
+       - mem_bkdr_util.sv: {is_include_file: true}
+-      - mem_bkdr_util__otp.sv: {is_include_file: true}
+-      - mem_bkdr_util__rom.sv: {is_include_file: true}
+-      - mem_bkdr_util__sram.sv: {is_include_file: true}
+-      - mem_bkdr_util__flash.sv: {is_include_file: true}
+     file_type: systemVerilogSource
+ 
+ targets:
+diff --git a/mem_bkdr_util_pkg.sv
+index b9bc489..0b35ac9 100644
+--- a/mem_bkdr_util_pkg.sv
++++ b/mem_bkdr_util_pkg.sv
+@@ -6,12 +6,7 @@ package mem_bkdr_util_pkg;
+   // dep packages
+   import bus_params_pkg::BUS_AW;
+   import dv_utils_pkg::uint32_t, dv_utils_pkg::addr_range_t;
+-  import lc_ctrl_state_pkg::*;
+-  import otp_ctrl_part_pkg::*;
+-  import otp_ctrl_reg_pkg::*;
+-  import otp_scrambler_pkg::*;
+   import prim_secded_pkg::*;
+-  import sram_scrambler_pkg::*;
+   import uvm_pkg::*;
+ 
+   // Represents the various forms of error detection / correction supported.
+diff --git a/mem_bkdr_util.sv b/mem_bkdr_util.sv
+index e11e346..5e833f6 100644
+--- a/mem_bkdr_util.sv
++++ b/mem_bkdr_util.sv
+@@ -579,17 +579,5 @@ class mem_bkdr_util extends uvm_object;
+               addr, rw_data, err_mask, rw_data ^ err_mask), UVM_HIGH)
+   endfunction
+ 
+-  // Wrapper function for backdoor write OTP partitions.
+-  `include "mem_bkdr_util__otp.sv"
+-
+-  // Wrapper functions for encrypted SRAM reads and writes.
+-  `include "mem_bkdr_util__sram.sv"
+-
+-  // Wrapper function for encrypted ROM reads.
+-  `include "mem_bkdr_util__rom.sv"
+-
+-  // Wrapper function for encrypted FLASH writes.
+-  `include "mem_bkdr_util__flash.sv"
+-
+   `undef HAS_ECC
+   `undef HAS_PARITY

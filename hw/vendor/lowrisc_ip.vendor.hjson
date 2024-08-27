@@ -1,0 +1,43 @@
+// Copyright lowRISC contributors.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+{
+    name: "lowrisc_ip",
+    target_dir: "lowrisc_ip",
+    patch_dir: "patches/lowrisc_ip",
+
+    upstream: {
+        url: "https://github.com/lowRISC/opentitan"
+        rev: "master"
+    }
+
+    mapping: [
+        {from: "util/tlgen.py", to: "util/tlgen.py"},
+        {from: "util/tlgen",    to: "util/tlgen"},
+        {from: "util/reggen",   to: "util/reggen"},
+
+        {from: "hw/ip/aon_timer",    to: "ip/aon_timer", patch_dir: "aon_timer"},
+        {from: "hw/ip/gpio",         to: "ip/gpio",      patch_dir: "gpio"},
+        {from: "hw/ip/i2c",          to: "ip/i2c",       patch_dir: "i2c"},
+        {from: "hw/ip/spi_host",     to: "ip/spi_host",  patch_dir: "spi_host"},
+        {from: "hw/ip/tlul",         to: "ip/tlul",      patch_dir: "tlul"},
+        {from: "hw/ip/rv_timer",     to: "ip/rv_timer",  patch_dir: "rv_timer"},
+        {from: "hw/ip/uart",         to: "ip/uart",      patch_dir: "uart"},
+        {from: "hw/ip/lc_ctrl",      to: "ip/lc_ctrl"},
+        {from: "hw/ip/prim",         to: "ip/prim"},
+        {from: "hw/lint",            to: "lint"},
+        {from: "hw/ip/prim_generic", to: "ip/prim_generic"},
+        {from: "hw/ip/prim_xilinx",  to: "ip/prim_xilinx"},
+
+        {from: "hw/dv/dpi/uartdpi",  to: "dv/dpi/uartdpi", patch_dir: "uartdpi"},
+
+        {from: "hw/dv/sv/common_ifs",    to: "dv/sv/common_ifs"},
+        {from: "hw/dv/sv/dv_utils",      to: "dv/sv/dv_utils", patch_dir: "dv_utils"},
+        {from: "hw/dv/sv/str_utils",     to: "dv/sv/str_utils"},
+        {from: "hw/dv/sv/mem_bkdr_util", to: "dv/sv/mem_bkdr_util", patch_dir: "mem_bkdr_util"},
+        {from: "hw/dv/verilator",        to: "dv/verilator"},
+        {from: "hw/dv/tools",            to: "dv/tools", patch_dir: "dv_tools"},
+
+        {from: "util/dvsim", to: "util/dvsim"},
+    ]
+}
