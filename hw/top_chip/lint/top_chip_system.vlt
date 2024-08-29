@@ -1,0 +1,24 @@
+// Copyright lowRISC contributors (Sunburst project).
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+
+`verilator_config
+
+// Turn off lint for any vendored in RTL that is not verilator lint clean
+
+// CHERIoT Ibex
+lint_off -file "*/*ibex_tracer*/rtl/*"
+lint_off -file "*/*ibex_top*/rtl/*"
+lint_off -file "*/*ibex_core*/rtl/*"
+// I2C
+lint_off -file "*/*ip_i2c*/rtl/*"
+// UART
+lint_off -file "*/*ip_uart*/rtl/*"
+// SPI Host
+lint_off -file "*/*ip_spi_host*/rtl/*"
+// RV Timer
+lint_off -file "*/*ip_rv_timer*/rtl/*"
+// GPIO
+lint_off -file "*/*ip_gpio*/rtl/*"
+
+lint_off -rule UNOPTFLAT

@@ -1,0 +1,16 @@
+CAPI=2:
+# Copyright lowRISC contributors (Sunburst project).
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+name: "lowrisc:sunburst:top_chip_system_pkg"
+description: "Package file for top_chip_system"
+filesets:
+  files_rtl:
+    files:
+      - rtl/top_chip_system_pkg.sv
+    file_type: systemVerilogSource
+
+targets:
+  default: &default_target
+    filesets:
+      - files_rtl

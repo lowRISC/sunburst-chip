@@ -1,0 +1,87 @@
+// Copyright lowRISC contributors (Sunburst project).
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+
+{ name: "main",
+  type: "xbar",
+
+  clock: "clk_sys_i",
+  clock_connections: {
+    clk_sys_i:  "main",
+    clk_peri_i: "peri",
+  },
+
+  reset: "rst_sys_ni",
+  reset_connections: {
+    rst_sys_ni:  "main",
+    rst_peri_ni: "peri",
+  },
+
+  nodes: [
+    { name:     "rv_core_ibex.corei",
+      type:     "host",
+      clock:    "clk_sys_i",
+      reset:    "rst_sys_ni",
+      xbar:     false,
+      pipeline: false
+    },
+    { name:     "rv_core_ibex.cored",
+      type:     "host",
+      clock:    "clk_sys_i",
+      reset:    "rst_sys_ni",
+      xbar:     false,
+      pipeline: false
+    },
+    { name:  "rom",
+      type:  "device",
+      clock: "clk_sys_i",
+      reset: "rst_sys_ni",
+      xbar:  false,
+
+      addr_range: [{
+        base_addr: "0x00100000",
+        size_byte: "0x00001000",
+      }],
+    },
+    { name:  "sram",
+      type:  "device",
+      clock: "clk_sys_i",
+      reset: "rst_sys_ni",
+      xbar:  false,
+
+      addr_range: [{
+        base_addr: "0x00200000",
+        size_byte: "0x00040000",
+      }],
+    },
+    { name:  "revocation_ram",
+      type:  "device",
+      clock: "clk_sys_i",
+      reset: "rst_sys_ni",
+      xbar:  false,
+
+      addr_range: [{
+        base_addr: "0x00300000",
+        size_byte: "0x00000800",
+      }],
+    },
+    { name:          "peri",
+      type:          "device",
+      clock:         "clk_peri_i",
+      reset:         "rst_peri_ni",
+      pipeline:      true,
+      req_fifo_pass: false,
+      rsp_fifo_pass: false,
+      xbar:          false,
+
+      addr_range: [{
+        base_addr: "0x40000000",
+        size_byte: "0x40000000",
+      }],
+    },
+  ],
+  connections: {
+    rv_core_ibex.corei: ["sram", "rom"],
+    rv_core_ibex.cored: ["sram", "rom", "revocation_ram", "peri"]
+  }
+}

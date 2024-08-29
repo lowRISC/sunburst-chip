@@ -1,0 +1,132 @@
+// Copyright lowRISC contributors (Sunburst project).
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+
+{ name: "peri",
+  type: "xbar",
+
+  clock: "clk_peri_i",
+  clock_connections: {
+    clk_peri_i: "peri",
+  },
+
+  reset: "rst_peri_ni",
+  reset_connections: {
+    rst_peri_ni: "peri",
+  },
+
+  nodes: [
+    { name:  "main",
+      type:  "host",
+      clock: "clk_peri_i",
+      reset: "rst_peri_ni",
+      xbar:  "true",
+      pipeline: false
+    },
+
+    { name:  "aon_timer",
+      type:  "device",
+      clock: "clk_peri_i",
+      reset: "rst_peri_ni",
+      xbar:  false,
+      pipeline: false
+      addr_range: [{
+        base_addr: "0x40000000",
+        size_byte: "0x00001000",
+      }],
+    },
+    { name:  "rv_timer",
+      type:  "device",
+      clock: "clk_peri_i",
+      reset: "rst_peri_ni",
+      xbar:  false,
+      pipeline: false
+      addr_range: [{
+        base_addr: "0x40001000",
+        size_byte: "0x00001000",
+      }],
+    },
+    { name:  "gpio",
+      type:  "device",
+      clock: "clk_peri_i",
+      reset: "rst_peri_ni",
+      xbar:  false,
+      pipeline: false
+      addr_range: [{
+        base_addr: "0x40002000",
+        size_byte: "0x00001000",
+      }],
+    },
+    { name:  "i2c0", // I2C bus 0
+      type:  "device",
+      clock: "clk_peri_i",
+      reset: "rst_peri_ni",
+      xbar:  false,
+      pipeline: false
+      addr_range: [{
+        base_addr: "0x40100000",
+        size_byte: "0x00001000",
+      }],
+    },
+    { name:  "i2c1", // I2C bus 1
+      type:  "device",
+      clock: "clk_peri_i",
+      reset: "rst_peri_ni",
+      xbar:  false,
+      pipeline: false
+      addr_range: [{
+        base_addr: "0x40101000",
+        size_byte: "0x00001000",
+      }],
+    },
+    { name:  "spi_host0",
+      type:  "device",
+      clock: "clk_peri_i",
+      reset: "rst_peri_ni",
+      xbar:  false,
+      pipeline: false
+      addr_range: [{
+        base_addr: "0x40200000",
+        size_byte: "0x00001000",
+      }],
+    },
+    { name:  "spi_host1",
+      type:  "device",
+      clock: "clk_peri_i",
+      reset: "rst_peri_ni",
+      xbar:  false,
+      pipeline: false
+      addr_range: [{
+        base_addr: "0x40201000",
+        size_byte: "0x00001000",
+      }],
+    },
+    { name:  "uart0",
+      type:  "device",
+      clock: "clk_peri_i",
+      reset: "rst_peri_ni",
+      xbar:  false,
+      pipeline: false
+      addr_range: [{
+        base_addr: "0x40300000",
+        size_byte: "0x00001000",
+      }],
+    },
+    { name:  "uart1",
+      type:  "device",
+      clock: "clk_peri_i",
+      reset: "rst_peri_ni",
+      xbar:  false,
+      pipeline: false
+      addr_range: [{
+        base_addr: "0x40301000",
+        size_byte: "0x00001000",
+      }],
+    },
+
+  ],
+  connections: {
+    main: ["rv_timer", "aon_timer", "gpio" "i2c0", "i2c1", "spi_host0",
+      "spi_host1", "uart0", "uart1"],
+  }
+}

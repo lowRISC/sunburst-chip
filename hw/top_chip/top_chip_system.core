@@ -1,0 +1,60 @@
+CAPI=2:
+# Copyright lowRISC contributors (Sunburst project).
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
+name: "lowrisc:sunburst:top_chip_system"
+description: "System top-level for Sunburst chip"
+filesets:
+  files_rtl_generic:
+    depend:
+      - lowrisc:ip:gpio
+      - lowrisc:ip:rv_timer
+      - lowrisc:ip:spi_host
+      - lowrisc:ip:i2c
+      - lowrisc:ip:aon_timer
+      - lowrisc:ip:uart
+      - lowrisc:ip:xbar_main
+      - lowrisc:ip:xbar_peri
+      - lowrisc:sunburst:top_chip_system_pkg
+      - lowrisc:constants:top_pkg
+      - lowrisc:sunburst:sram
+      - lowrisc:sunburst:rom
+      - lowrisc:sunburst:core_ibex
+    files:
+      - rtl/top_chip_system.sv
+    file_type: systemVerilogSource
+
+  files_verilator_waiver:
+    files:
+      - lint/top_chip_system.vlt
+    file_type: vlt
+
+parameters:
+  SYNTHESIS:
+    datatype: bool
+    paramtype: vlogdefine
+
+targets:
+  default: &default_target
+    filesets:
+      - tool_verilator ? (files_verilator_waiver)
+      - files_rtl_generic
+    toplevel: top_chip_system
+
+  sim:
+    default_tool: verilator
+    filesets:
+      - files_rtl_generic
+    toplevel: top_chip_system
+
+  lint:
+    <<: *default_target
+    default_tool: verilator
+    parameters:
+      - SYNTHESIS=true
+    tools:
+      verilator:
+        mode: lint-only
+        verilator_options:
+          - "-Wall"
