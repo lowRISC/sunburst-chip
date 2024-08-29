@@ -1,0 +1,12 @@
+// Copyright lowRISC contributors (Sunburst project).
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+
+`verilator_config
+
+lint_off -file "*uartdpi.sv"
+
+// Bug seem in Verilator v5.020 where trace chandles produces a C++ compilation
+// error (generated C++ doesn't currently specify a type an internal verilator
+// function)
+tracing_off -file "*uartdpi.sv"
