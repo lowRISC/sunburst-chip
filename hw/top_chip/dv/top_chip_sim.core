@@ -1,0 +1,40 @@
+CAPI=2:
+# Copyright lowRISC contributors (Sunburst project).
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+name: "lowrisc:sunburst_dv:top_chip_sim:0.1"
+description: "Chip-level simulation for sunburst chip"
+filesets:
+  files_dv:
+    depend:
+      - lowrisc:sunburst_dv:top_chip_dv_test
+      - lowrisc:dv:mem_bkdr_util
+      - lowrisc:dv:pins_if
+      - lowrisc:dv:common_ifs
+      - lowrisc:dv:dv_macros
+      - lowrisc:prim:prim_pkg
+      - lowrisc:ip:xbar_main
+      - lowrisc:dv_dpi_c:uartdpi:0.1
+      - lowrisc:dv_dpi_sv:uartdpi:0.1
+      - lowrisc:sunburst:top_chip_asic
+    files:
+      - tb/tb.sv
+      - tb/chip_hier_macros.svh: {is_include_file: true}
+    file_type: systemVerilogSource
+
+
+targets:
+  sim:
+    parameters:
+      - PRIM_DEFAULT_IMPL=prim_pkg::ImplGeneric
+    filesets:
+      - files_dv
+    toplevel: tb
+    default_tool: vcs
+
+parameters:
+  PRIM_DEFAULT_IMPL:
+    datatype: str
+    paramtype: vlogdefine
+    description: Primitives implementation to use, e.g. "prim_pkg::ImplGeneric".
+    default: prim_pkg::ImplGeneric

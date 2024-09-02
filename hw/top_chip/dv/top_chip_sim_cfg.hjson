@@ -1,0 +1,60 @@
+// Copyright lowRISC contributors (Sunburst project).
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+{
+  // Name of the sim cfg - typically same as the name of the DUT.
+  name: top_chip_sim
+
+  // Top level dut name (sv module).
+  dut: top_chip_asic
+
+  // Top level testbench name (sv module).
+  tb: top_chip_asic_tb
+
+  // Simulator used to sign off this block
+  tool: xcelium
+
+  // Fusesoc core file used for building the file list.
+  fusesoc_core: lowrisc:sunburst_dv:top_chip_sim:0.1
+
+  // Testplan hjson file.
+  testplan: ""
+
+  // Import additional common sim cfg files.
+  import_cfgs: [
+      // Project wide common sim cfg file
+      "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/common_sim_cfg.hjson"
+  ]
+
+  sim_tops: [""]
+
+  build_opts: ["+define+RVFI=1"]
+
+  // Default iterations for all tests - each test entry can override this.
+  reseed: 1
+
+  gen_ral_pkg_cmd: ""
+  gen_ral_pkg_dir: ""
+  gen_ral_pkg_opts: []
+
+  // Default UVM test and seq class name.
+  uvm_test: top_chip_dv_base_test
+  uvm_test_seq: top_chip_base_vseq
+
+  // List of test specifications.
+  tests: [
+    {
+      name: top_chip_smoke
+      uvm_test_seq: top_chip_base_vseq
+      run_opts: ["+ChipMemROM_image_file={proj_root}/scratch_sw/bare_metal/build/checks/chip_check.vmem"]
+    }
+  ]
+
+  // List of regressions.
+  regressions: [
+    {
+      name: smoke
+      tests: ["top_chip_smoke"]
+    }
+  ]
+}
