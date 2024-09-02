@@ -1,0 +1,42 @@
+CAPI=2:
+# Copyright lowRISC contributors (Sunburst project).
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
+name: "lowrisc:sunburst:top_chip_asic"
+description: "ASIC top-level for Sunburst chip"
+filesets:
+  files_rtl_generic:
+    depend:
+      - lowrisc:sunburst:top_chip_system
+      - lowrisc:sunburst:intr_ctrl
+      - lowrisc:sunburst:clk_rst_gen
+      - lowrisc:prim:pad_wrapper
+      - lowrisc:prim:mubi
+    files:
+      - rtl/padring.sv
+      - rtl/top_chip_asic.sv
+    file_type: systemVerilogSource
+
+targets:
+  default: &default_target
+    filesets:
+      - files_rtl_generic
+    toplevel: top_chip_system
+
+  sim:
+    default_tool: verilator
+    filesets:
+      - files_rtl_generic
+    toplevel: top_chip_system
+
+  lint:
+    <<: *default_target
+    default_tool: verilator
+    parameters:
+      - SYNTHESIS=true
+    tools:
+      verilator:
+        mode: lint-only
+        verilator_options:
+          - "-Wall"
