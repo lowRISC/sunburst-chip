@@ -1,0 +1,8 @@
+sunburst-py-venv/
+build/
+scratch/
+
+*.pyc
+*.log
+*.fst
+*.shm

@@ -14,9 +14,9 @@ dependencies in a virtual environment to isolate them from the rest of your
 system.  Python 3.9 or higher is required.
 
 ```sh
-python -m venv ./sunburst-py-venv
+python3 -m venv ./sunburst-py-venv
 source ./sunburst-py-venv/bin/activate
-pip install -r ./python-requirements.txt
+pip3 install -r ./hw/vendor/lowrisc_ibex/python-requirements.txt
 ```
 
 It is strongly recommended you build Verilator from source as packaged versions
@@ -40,9 +40,10 @@ fusesoc --cores-root=. run \
 in the command above.*
 
 A test program can be built with scratch_sw/ (a suitable CHERIoT tool chain must
-be available on your path):
+be available on your path or specified by `CHERIOT_LLVM_BIN`):
 
 ```sh
+# CHERIOT_LLVM_BIN=/path/to/cheriot-llvm/bin
 cmake -B scratch_sw/bare_metal/build -S scratch_sw/bare_metal
 cmake --build scratch_sw/bare_metal/build
 ```
