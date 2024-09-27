@@ -1,0 +1,62 @@
+diff --git a/dv/env/i2c_env_pkg.sv b/dv/env/i2c_env_pkg.sv
+index 56323d0..07673e5 100644
+--- a/dv/env/i2c_env_pkg.sv
++++ b/dv/env/i2c_env_pkg.sv
+@@ -81,8 +81,8 @@ package i2c_env_pkg;
+   parameter uint I2C_ACQ_FIFO_DEPTH = i2c_reg_pkg::AcqFifoDepth;
+ 
+   // alerts
+-  parameter uint NUM_ALERTS = i2c_reg_pkg::NumAlerts;
+-  parameter string LIST_OF_ALERTS[] = {"fatal_fault"};
++  parameter uint NUM_ALERTS = 0;
++  parameter string LIST_OF_ALERTS[] = {};
+ 
+   function automatic i2c_acqdata_item acq2item(bit [bus_params_pkg::BUS_DW-1:0] data);
+     i2c_acqdata_item item;
+diff --git a/dv/i2c_sim_cfg.hjson b/dv/i2c_sim_cfg.hjson
+index 4edfc9c..bbeb8b0 100644
+--- a/dv/i2c_sim_cfg.hjson
++++ b/dv/i2c_sim_cfg.hjson
+@@ -25,13 +25,13 @@
+ 
+   // Import additional common sim cfg files.
+   import_cfgs: [// Project wide common sim cfg file
+-                "{proj_root}/hw/dv/tools/dvsim/common_sim_cfg.hjson",
++                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/common_sim_cfg.hjson",
+                 // Common CIP test lists
+-                "{proj_root}/hw/dv/tools/dvsim/tests/csr_tests.hjson",
+-                "{proj_root}/hw/dv/tools/dvsim/tests/alert_test.hjson",
+-                "{proj_root}/hw/dv/tools/dvsim/tests/intr_test.hjson",
+-                "{proj_root}/hw/dv/tools/dvsim/tests/sec_cm_tests.hjson",
+-                "{proj_root}/hw/dv/tools/dvsim/tests/tl_access_tests.hjson"]
++                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/csr_tests.hjson",
++                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/alert_test.hjson",
++                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/intr_test.hjson",
++                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/sec_cm_tests.hjson",
++                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/tl_access_tests.hjson"]
+ 
+   // Add additional tops for simulation.
+   sim_tops: ["i2c_bind", "sec_cm_prim_onehot_check_bind"]
+diff --git a/dv/tb/tb.sv b/dv/tb/tb.sv
+index 5ae4816..f70036f 100644
+--- a/dv/tb/tb.sv
++++ b/dv/tb/tb.sv
+@@ -77,6 +77,8 @@ module tb;
+   // clk and rst_n is used for alert_if in `DV_ALERT_IF_CONNECT
+   `DV_ALERT_IF_CONNECT()
+ 
++  assign alert_tx = '0;
++
+   // dut
+   i2c dut (
+     .clk_i                   (clk        ),
+@@ -86,9 +88,6 @@ module tb;
+     .tl_i                    (tl_if.h2d  ),
+     .tl_o                    (tl_if.d2h  ),
+ 
+-    .alert_rx_i              (alert_rx   ),
+-    .alert_tx_o              (alert_tx   ),
+-
+     .cio_scl_i               (cio_scl               ),
+     .cio_scl_o               (/*hardcoded to 0*/    ),
+     .cio_scl_en_o            (cio_scl_en            ),

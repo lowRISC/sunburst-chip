@@ -1,0 +1,64 @@
+diff --git a/dv/env/gpio_env_pkg.sv b/dv/env/gpio_env_pkg.sv
+index 1c94585..8e45251 100644
+--- a/dv/env/gpio_env_pkg.sv
++++ b/dv/env/gpio_env_pkg.sv
+@@ -23,8 +23,8 @@ package gpio_env_pkg;
+   // no. of cycles for noise filter
+   parameter uint FILTER_CYCLES = 16;
+   // No. of alerts
+-  parameter uint NUM_ALERTS = 1;
+-  parameter string LIST_OF_ALERTS[] = {"fatal_fault"};
++  parameter uint NUM_ALERTS = 0;
++  parameter string LIST_OF_ALERTS[] = {};
+ 
+   typedef virtual pins_if #(NUM_GPIOS) gpio_vif;
+   typedef class gpio_env_cfg;
+diff --git a/dv/gpio_sim_cfg.hjson b/gpio_sim_cfg.hjson
+index 6a8910a..fe53e6e 100644
+--- a/dv/gpio_sim_cfg.hjson
++++ b/dv/gpio_sim_cfg.hjson
+@@ -25,14 +25,14 @@
+ 
+   // Import additional common sim cfg files.
+   import_cfgs: [// Project wide common sim cfg file
+-                "{proj_root}/hw/dv/tools/dvsim/common_sim_cfg.hjson",
++                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/common_sim_cfg.hjson",
+                 // Common CIP test lists
+-                "{proj_root}/hw/dv/tools/dvsim/tests/csr_tests.hjson",
+-                "{proj_root}/hw/dv/tools/dvsim/tests/alert_test.hjson",
+-                "{proj_root}/hw/dv/tools/dvsim/tests/intr_test.hjson",
+-                "{proj_root}/hw/dv/tools/dvsim/tests/tl_access_tests.hjson",
+-                "{proj_root}/hw/dv/tools/dvsim/tests/sec_cm_tests.hjson",
+-                "{proj_root}/hw/dv/tools/dvsim/tests/stress_tests.hjson"]
++                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/csr_tests.hjson",
++                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/alert_test.hjson",
++                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/intr_test.hjson",
++                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/tl_access_tests.hjson",
++                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/sec_cm_tests.hjson",
++                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/stress_tests.hjson"]
+ 
+   // Add additional tops for simulation.
+   sim_tops: ["gpio_bind", "sec_cm_prim_onehot_check_bind"]
+diff --git a/dv/tb/tb.sv b/dv/tb/tb.sv
+index 651063c..b79eeef 100644
+--- a/dv/tb/tb.sv
++++ b/dv/tb/tb.sv
+@@ -26,6 +26,8 @@ module tb;
+ 
+   `DV_ALERT_IF_CONNECT()
+ 
++  assign alert_tx = '0;
++
+   // interfaces
+   clk_rst_if clk_rst_if (
+     .clk  (clk),
+@@ -56,9 +58,6 @@ module tb;
+ 
+     .intr_gpio_o(gpio_intr),
+ 
+-    .alert_rx_i(alert_rx),
+-    .alert_tx_o(alert_tx),
+-
+     .cio_gpio_i   (gpio_i),
+     .cio_gpio_o   (gpio_o),
+     .cio_gpio_en_o(gpio_oe)

@@ -1,7 +1,7 @@
-diff --git a/mem_bkdr_util.core b/mem_bkdr_util.core
+diff --git a/mem_bkdr_util/mem_bkdr_util.core b/mem_bkdr_util/mem_bkdr_util.core
 index 63e06e9..32f186a 100644
---- a/mem_bkdr_util.core
-+++ b/mem_bkdr_util.core
+--- a/mem_bkdr_util/mem_bkdr_util.core
++++ b/mem_bkdr_util/mem_bkdr_util.core
 @@ -8,6 +8,6 @@ description: "Backdoor read/write memory for DV"
  filesets:
    files_dv:
@@ -10,10 +10,10 @@ index 63e06e9..32f186a 100644
 +      - lowrisc:constants:top_pkg
        - lowrisc:dv:dv_utils
        - lowrisc:prim:secded:0.1
-diff --git a/mem_bkdr_util.sv b/mem_bkdr_util.sv
+diff --git a/mem_bkdr_util/mem_bkdr_util.sv b/mem_bkdr_util/mem_bkdr_util.sv
 index e11e346..5e833f6 100644
---- a/mem_bkdr_util.sv
-+++ b/mem_bkdr_util.sv
+--- a/mem_bkdr_util/mem_bkdr_util.sv
++++ b/mem_bkdr_util/mem_bkdr_util.sv
 @@ -202,7 +202,7 @@ class mem_bkdr_util extends uvm_object;
    // Returns 1 if the given address falls within the memory's range, else 0.
    //

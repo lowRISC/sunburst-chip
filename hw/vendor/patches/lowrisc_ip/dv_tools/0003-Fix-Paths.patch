@@ -1,0 +1,26 @@
+diff --git a/dvsim/tests/stress_tests.hjson b/dvsim/tests/stress_tests.hjson
+index 2fe58c6..799831f 100644
+--- a/dvsim/tests/stress_tests.hjson
++++ b/dvsim/tests/stress_tests.hjson
+@@ -4,7 +4,7 @@
+ 
+ // this contains stress_all and stress_all_with_rand_reset
+ {
+-  import_cfgs: ["{proj_root}/hw/dv/tools/dvsim/tests/stress_all_test.hjson"]
++  import_cfgs: ["{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/stress_all_test.hjson"]
+   tests: [
+     {
+       name: "{name}_stress_all_with_rand_reset"
+diff --git a/ralgen/ralgen.py b/ralgen/ralgen.py
+index 4281666..a9760ea 100755
+--- a/ralgen/ralgen.py
++++ b/ralgen/ralgen.py
+@@ -20,7 +20,7 @@ except ImportError:
+ 
+ # Repo root is 4 levels up. Note that this will require an update if the path to
+ # this tool is changed.
+-REPO_ROOT = "../../../.."
++REPO_ROOT = "../../.."
+ 
+ 
+ def main():
