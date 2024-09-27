@@ -1,0 +1,190 @@
+diff --git a/dv/env/spi_host_env.sv b/dv/env/spi_host_env.sv
+index 85d64af..67274b2 100644
+--- a/dv/env/spi_host_env.sv
++++ b/dv/env/spi_host_env.sv
+@@ -22,10 +22,6 @@ class spi_host_env extends cip_base_env #(
+     m_spi_agent = spi_agent::type_id::create("m_spi_agent", this);
+     uvm_config_db#(spi_agent_cfg)::set(this, "m_spi_agent*", "cfg", cfg.m_spi_agent_cfg);
+     cfg.m_spi_agent_cfg.en_cov = cfg.en_cov;
+-    if (!uvm_config_db#(virtual spi_passthrough_if)::get(this, "",
+-       "spi_passthrough_vif", cfg.spi_passthrough_vif)) begin
+-      `uvm_fatal(get_full_name(), "failed to get spi_passthrough_if from uvm_config_db")
+-    end
+   endfunction : build_phase
+ 
+   function void connect_phase(uvm_phase phase);
+diff --git a/dv/env/spi_host_env_pkg.sv b/dv/env/spi_host_env_pkg.sv
+index c582cda..dfa6796 100644
+--- a/dv/env/spi_host_env_pkg.sv
++++ b/dv/env/spi_host_env_pkg.sv
+@@ -155,7 +155,7 @@ package spi_host_env_pkg;
+ 
+   // alerts
+   parameter uint NUM_ALERTS = 1;
+-  parameter string LIST_OF_ALERTS[] = {"fatal_fault"};
++  parameter string LIST_OF_ALERTS[] = {};
+ 
+   // functions
+ 
+diff --git a/dv/spi_host_sim_cfg.hjson b/dv/spi_host_sim_cfg.hjson
+index c27bc3f..aca0d8c 100644
+--- a/dv/spi_host_sim_cfg.hjson
++++ b/dv/spi_host_sim_cfg.hjson
+@@ -25,16 +25,16 @@
+ 
+   // Import additional common sim cfg files.
+   import_cfgs: [// Project wide common sim cfg file
+-                "{proj_root}/hw/dv/tools/dvsim/common_sim_cfg.hjson",
++                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/common_sim_cfg.hjson",
+                 // Common CIP test lists
+-                "{proj_root}/hw/dv/tools/dvsim/tests/csr_tests.hjson",
+-                "{proj_root}/hw/dv/tools/dvsim/tests/intr_test.hjson",
+-                "{proj_root}/hw/dv/tools/dvsim/tests/mem_tests.hjson",
+-                "{proj_root}/hw/dv/tools/dvsim/tests/alert_test.hjson",
+-                "{proj_root}/hw/dv/tools/dvsim/tests/intr_test.hjson",
+-                "{proj_root}/hw/dv/tools/dvsim/tests/sec_cm_tests.hjson",
++                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/csr_tests.hjson",
++                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/intr_test.hjson",
++                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/mem_tests.hjson",
++                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/alert_test.hjson",
++                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/intr_test.hjson",
++                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/sec_cm_tests.hjson",
+                 //"{proj_root}/hw/dv/tools/dvsim/tests/stress_tests.hjson", // TODO(#18886): enable for V3
+-                "{proj_root}/hw/dv/tools/dvsim/tests/tl_access_tests.hjson"]
++                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/tl_access_tests.hjson"]
+ 
+   // Add additional tops for simulation.
+   sim_tops: ["spi_host_bind", "sec_cm_prim_onehot_check_bind"]
+diff --git a/dv/sva/spi_host_data_stable_sva.sv b/dv/sva/spi_host_data_stable_sva.sv
+index f95d495..9ee85f1 100644
+--- a/dv/sva/spi_host_data_stable_sva.sv
++++ b/dv/sva/spi_host_data_stable_sva.sv
+@@ -8,8 +8,7 @@ module spi_host_data_stable_sva (
+   input logic [spi_host_reg_pkg::NumCS-1:0]                 cio_csb_o,
+   input logic [3:0]                                         cio_sd_i,
+   input logic [3:0]                                         cio_sd_en_o,
+-  input spi_host_reg_pkg::spi_host_reg2hw_configopts_mreg_t configopts,
+-  input spi_device_pkg::passthrough_req_t                   passthrough_i
++  input spi_host_reg_pkg::spi_host_reg2hw_configopts_mreg_t configopts
+  );
+ 
+   // Check to ensure cio_sd_o[i] stays stable for a whole clock cycle
+@@ -45,7 +44,7 @@ module spi_host_data_stable_sva (
+      .signal2check_i (cio_sd_i),
+      .sampled_negedge_enable (sampled_negedge_enable),
+      .sampled_posedge_enable (sampled_posedge_enable),
+-     .passthrough_en (passthrough_i.passthrough_en)
++     .passthrough_en (1'b0)
+      );
+ 
+   whole_cycle_data_stable_signal_checker #(.VECTOR_WIDTH(4))
+@@ -56,7 +55,7 @@ module spi_host_data_stable_sva (
+      .signal2check_i (cio_sd_en_o),
+      .sampled_negedge_enable (sampled_negedge_enable),
+      .sampled_posedge_enable (sampled_posedge_enable),
+-     .passthrough_en (passthrough_i.passthrough_en)
++     .passthrough_en (1'b0)
+      );
+ 
+ 
+diff --git a/dv/tb.sv b/dv/tb.sv
+index dc4f409..4b9a89b 100644
+--- a/dv/tb.sv
++++ b/dv/tb.sv
+@@ -12,9 +12,6 @@ module tb;
+   import spi_host_reg_pkg::*;
+   import lc_ctrl_pkg::*;
+ 
+-  import spi_device_pkg::passthrough_req_t;
+-  import spi_device_pkg::passthrough_rsp_t;
+-
+   // macro includes
+   `include "uvm_macros.svh"
+   `include "dv_macros.svh"
+@@ -36,18 +33,17 @@ module tb;
+   logic                         intr_error;
+   logic                         intr_event;
+ 
+-  passthrough_req_t             passthrough_i;
+-  passthrough_rsp_t             passthrough_o;
+ 
+   // interfaces
+   clk_rst_if   clk_rst_if(.clk(clk), .rst_n(rst_n));
+   pins_if #(NUM_MAX_INTERRUPTS) intr_if(.pins(interrupts));
+   tl_if        tl_if(.clk(clk), .rst_n(rst_n));
+   spi_if       spi_if(.rst_n(rst_n), .sio(sio));
+-  spi_passthrough_if       spi_passthrough_if(.rst_n(rst_n));
+ 
+   `DV_ALERT_IF_CONNECT()
+ 
++  assign alert_tx = '0;
++
+   // dut
+   spi_host dut (
+     .clk_i                (clk),
+@@ -56,9 +52,6 @@ module tb;
+     // tl i/f
+     .tl_i                 (tl_if.h2d),
+     .tl_o                 (tl_if.d2h),
+-    // alerts
+-    .alert_rx_i           (alert_rx),
+-    .alert_tx_o           (alert_tx),
+     // spi i/o
+     .cio_sck_o            (cio_sck_o),
+     .cio_sck_en_o         (cio_sck_en_o),
+@@ -67,31 +60,12 @@ module tb;
+     .cio_sd_o             (cio_sd_o),
+     .cio_sd_en_o          (cio_sd_en_o),
+     .cio_sd_i             (cio_sd_i),
+-    // passthrough i/o
+-    .passthrough_i        (passthrough_i),
+-    .passthrough_o        (passthrough_o),
+     // intr i/f
+     .intr_error_o         (intr_error),
+     .intr_spi_event_o     (intr_event)
+   );
+ 
+-  assign passthrough_i.passthrough_en = spi_passthrough_if.passthrough_en;
+-  assign passthrough_i.sck_en         = spi_passthrough_if.sck_en;
+-  assign passthrough_i.csb_en         = spi_passthrough_if.csb_en;
+-  assign passthrough_i.s_en           = spi_passthrough_if.s_en;
+-  assign passthrough_i.csb            = spi_passthrough_if.csb;
+-  assign passthrough_i.sck            = spi_passthrough_if.sck;
+-
+-  assign passthrough_i.s                 = spi_passthrough_if.is;
+-  assign spi_passthrough_if.os           = passthrough_o.s;
+-  assign spi_passthrough_if.cio_sck_o    = cio_sck_o;
+-  assign spi_passthrough_if.cio_sck_en_o = cio_sck_en_o;
+-  assign spi_passthrough_if.cio_csb_o    = cio_csb_o;
+-  assign spi_passthrough_if.cio_csb_en_o = cio_csb_en_o;
+-  assign spi_passthrough_if.cio_sd_en_o  = cio_sd_en_o;
+-  assign spi_passthrough_if.cio_sd_o     = cio_sd_o;
+-
+-  assign cio_sd_i = spi_passthrough_if.passthrough_en ? spi_passthrough_if.cio_sd_i : si_pulldown;
++  assign cio_sd_i =  si_pulldown;
+ 
+   // configure spi_if i/o
+   assign spi_if.sck = (cio_sck_en_o) ? cio_sck_o : 1'bz;
+@@ -115,22 +89,9 @@ module tb;
+     clk_rst_if.set_active();
+     uvm_config_db#(virtual clk_rst_if)::set(null, "*.env", "clk_rst_vif", clk_rst_if);
+     uvm_config_db#(intr_vif)::set(null, "*.env", "intr_vif", intr_if);
+-    uvm_config_db#(virtual spi_passthrough_if)::set(null, "*.env", "spi_passthrough_vif",
+-                                                 spi_passthrough_if);
+     uvm_config_db#(virtual tl_if)::set(null, "*.env.m_tl_agent*", "vif", tl_if);
+     uvm_config_db#(virtual spi_if)::set(null, "*.env.m_spi_agent*", "vif", spi_if);
+     $timeformat(-12, 0, " ps", 12);
+     run_test();
+   end
+-
+-  `ASSERT(Sck_A,   passthrough_i.passthrough_en -> passthrough_i.sck == cio_sck_o, clk, !rst_n)
+-  `ASSERT(Sck_En_A,passthrough_i.passthrough_en -> passthrough_i.sck_en == cio_sck_en_o,
+-          clk, !rst_n)
+-  `ASSERT(Csb_A,   passthrough_i.passthrough_en -> passthrough_i.csb == cio_csb_o, clk, !rst_n)
+-  `ASSERT(Csb_En_A,passthrough_i.passthrough_en -> passthrough_i.csb_en == cio_csb_en_o,
+-          clk, !rst_n)
+-  `ASSERT(S_En_A,  passthrough_i.passthrough_en -> passthrough_i.s_en == cio_sd_en_o, clk, !rst_n)
+-  `ASSERT(Sd_O_A,  passthrough_i.passthrough_en -> passthrough_i.s == cio_sd_o, clk, !rst_n)
+-  `ASSERT(Sd_I_A,  passthrough_i.passthrough_en -> passthrough_o.s == cio_sd_i, clk, !rst_n)
+-
+ endmodule
