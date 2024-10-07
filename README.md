@@ -100,3 +100,30 @@ the artifacts from the test run. These are:
  - `uart0.log`: The output from uart0
  - `run.log`: The log from the simulation run
  - `waves.shm`: The wave trace (only present when DVsim is run with `-w shm`)
+
+# Run block level DV
+
+Block level DV for all of the IP blocks from OpenTitan can be run directly from
+this repository, using the dvsim tool. Below are the dvsim commands to run the
+smoke test regression for each block on Xcelium. At the time of writing spi_host
+was having issues running properly on xcelium but all other blocks pass their
+smoke regressions:
+
+These commands are run from the repository root. Logs and other collateral in
+the `scratch/` directory. To obtain a wave trace add `-w shm` to the dvsim
+command options.
+
+```sh
+# Run aon_timer smoke regression
+./hw/vendor/lowrisc_ip/util/dvsim/dvsim.py ./hw/vendor/lowrisc_ip/ip/aon_timer/dv/aon_timer_sim_cfg.hjson -i smoke --tool xcelium
+# Run gpio smoke regression
+./hw/vendor/lowrisc_ip/util/dvsim/dvsim.py ./hw/vendor/lowrisc_ip/ip/gpio/dv/gpio_sim_cfg.hjson -i smoke --tool xcelium
+# Run i2c smoke regression
+./hw/vendor/lowrisc_ip/util/dvsim/dvsim.py ./hw/vendor/lowrisc_ip/ip/i2c/dv/i2c_sim_cfg.hjson -i smoke --tool xcelium
+# Run rv_timer smoke regression
+./hw/vendor/lowrisc_ip/util/dvsim/dvsim.py ./hw/vendor/lowrisc_ip/ip/rv_timer/dv/rv_timer_sim_cfg.hjson -i smoke --tool xcelium
+# Run spi_host smoke regression
+./hw/vendor/lowrisc_ip/util/dvsim/dvsim.py ./hw/vendor/lowrisc_ip/ip/spi_host/dv/spi_host_sim_cfg.hjson -i smoke --tool xcelium
+# Run uart smoke regression
+./hw/vendor/lowrisc_ip/util/dvsim/dvsim.py ./hw/vendor/lowrisc_ip/ip/uart/dv/uart_sim_cfg.hjson -i smoke --tool xcelium
+```
