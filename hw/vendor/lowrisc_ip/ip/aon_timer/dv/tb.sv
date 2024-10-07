@@ -27,6 +27,10 @@ module tb;
 
   tl_if tl_if(.clk(clk), .rst_n(rst_n));
 
+  // lc_escalate_en is unused as the security hardening features have been removed in this version
+  // of the IP, however the signal if left here in the testbench to minimize changes required to the
+  // DV environment.
+
   // An input to the DUT that shows whether the CPU is enabled. Rather than wire up an interface
   // with an lc_tx_t member, we expose lc_escalate_en as a single bit and translate it to the right
   // type here.
@@ -46,6 +50,8 @@ module tb;
 
  `DV_ALERT_IF_CONNECT()
 
+ assign alert_tx = '0;
+
   aon_timer dut (
     .clk_i                     (clk),
     .rst_ni                    (rst_n),
@@ -53,9 +59,6 @@ module tb;
     .rst_aon_ni                (rst_aon_n),
     .tl_i                      (tl_if.h2d),
     .tl_o                      (tl_if.d2h),
-    .alert_rx_i                (alert_rx),
-    .alert_tx_o                (alert_tx),
-    .lc_escalate_en_i          (lc_escalate_en),
     .intr_wkup_timer_expired_o (wkup_expired),
     .intr_wdog_timer_bark_o    (wdog_bark),
     .nmi_wdog_timer_bark_o     (wdog_bark_nmi),

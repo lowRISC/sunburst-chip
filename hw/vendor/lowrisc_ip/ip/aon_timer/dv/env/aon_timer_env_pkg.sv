@@ -20,8 +20,8 @@ package aon_timer_env_pkg;
 
   // parameters
   // alerts
-  parameter uint NUM_ALERTS = 1;
-  parameter string LIST_OF_ALERTS[] = {"fatal_fault"};
+  parameter uint NUM_ALERTS = 0;
+  parameter string LIST_OF_ALERTS[] = {};
 
   // types
 

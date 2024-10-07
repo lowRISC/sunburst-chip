@@ -8,8 +8,7 @@ module spi_host_data_stable_sva (
   input logic [spi_host_reg_pkg::NumCS-1:0]                 cio_csb_o,
   input logic [3:0]                                         cio_sd_i,
   input logic [3:0]                                         cio_sd_en_o,
-  input spi_host_reg_pkg::spi_host_reg2hw_configopts_mreg_t configopts,
-  input spi_device_pkg::passthrough_req_t                   passthrough_i
+  input spi_host_reg_pkg::spi_host_reg2hw_configopts_mreg_t configopts
  );
 
   // Check to ensure cio_sd_o[i] stays stable for a whole clock cycle
@@ -45,7 +44,7 @@ module spi_host_data_stable_sva (
      .signal2check_i (cio_sd_i),
      .sampled_negedge_enable (sampled_negedge_enable),
      .sampled_posedge_enable (sampled_posedge_enable),
-     .passthrough_en (passthrough_i.passthrough_en)
+     .passthrough_en (1'b0)
      );
 
   whole_cycle_data_stable_signal_checker #(.VECTOR_WIDTH(4))
@@ -56,7 +55,7 @@ module spi_host_data_stable_sva (
      .signal2check_i (cio_sd_en_o),
      .sampled_negedge_enable (sampled_negedge_enable),
      .sampled_posedge_enable (sampled_posedge_enable),
-     .passthrough_en (passthrough_i.passthrough_en)
+     .passthrough_en (1'b0)
      );
 
 

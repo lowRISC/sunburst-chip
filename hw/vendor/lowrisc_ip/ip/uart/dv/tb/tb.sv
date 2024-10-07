@@ -36,6 +36,8 @@ module tb;
 
  `DV_ALERT_IF_CONNECT()
 
+  assign alert_tx = '0;
+
   // dut
   uart dut (
     .clk_i                (clk        ),
@@ -43,9 +45,6 @@ module tb;
 
     .tl_i                 (tl_if.h2d  ),
     .tl_o                 (tl_if.d2h  ),
-
-    .alert_rx_i           (alert_rx   ),
-    .alert_tx_o           (alert_tx   ),
 
     .cio_rx_i             (uart_rx    ),
     .cio_tx_o             (uart_tx    ),
