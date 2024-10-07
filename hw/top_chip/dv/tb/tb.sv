@@ -12,6 +12,10 @@ module top_chip_asic_tb;
   import top_chip_dv_env_pkg::*;
   import mem_bkdr_util_pkg::mem_bkdr_util;
 
+  // Dedicated pins.
+  wire USB_P;
+  wire USB_N;
+
   wire IO0;
   wire IO1;
   wire IO2;
@@ -141,11 +145,15 @@ module top_chip_asic_tb;
     .IO60,
     .IO61,
     .IO62,
-    .IO63
+    .IO63,
+
+    .USB_P,
+    .USB_N
   );
 
   clk_rst_if sys_clk_if(.clk(u_dut.clk_sys), .rst_n(u_dut.rst_sys_n));
   clk_rst_if peri_clk_if(.clk(u_dut.clk_peri), .rst_n(u_dut.rst_peri_n));
+  clk_rst_if usb_clk_if(.clk(u_dut.clk_usb), .rst_n(u_dut.rst_usb_n));
   clk_rst_if aon_clk_if(.clk(u_dut.clk_aon), .rst_n(u_dut.rst_aon_n));
 
   pins_if#(NGpioPins) gpio_pins_if({
@@ -218,10 +226,15 @@ module top_chip_asic_tb;
   initial begin
     sys_clk_if.set_active(1'b0, 1'b0);
     peri_clk_if.set_active(1'b0, 1'b0);
+    usb_clk_if.set_active(1'b0, 1'b0);
     aon_clk_if.set_active(1'b0, 1'b0);
+
+    // Since there is no contention for the USB SENSE pin presently, always enable the USB DPI model
+    u_usb20_if.enable_driver(1'b1);
 
     uvm_config_db#(virtual clk_rst_if)::set(null, "*", "sys_clk_if", sys_clk_if);
     uvm_config_db#(virtual clk_rst_if)::set(null, "*", "peri_clk_if", peri_clk_if);
+    uvm_config_db#(virtual clk_rst_if)::set(null, "*", "usb_clk_if", usb_clk_if);
     uvm_config_db#(virtual clk_rst_if)::set(null, "*", "aon_clk_if", aon_clk_if);
 
     uvm_config_db#(virtual pins_if#(NGpioPins))::set(null, "*", "gpio_pins_vif", gpio_pins_if);
@@ -238,5 +251,51 @@ module top_chip_asic_tb;
     .active(1'b1),
     .tx_o(IO59),
     .rx_i(IO60)
+  );
+
+  // The USB DPI model (simulated host controller) has its own clock and reset signal,
+  // since it is asynchronous with the USB device and there is no clock transmission over the USB.
+  //
+  // TODO: use a clk_rst_if here instead?
+  logic clk_usbdpi;
+  logic rst_usbdpi_n;
+
+  clk_osc #(.ClkFreq(top_chip_system_pkg::UsbClkFreq)) u_usbdpi_clk_osc (
+    .clk_en(1'b1),
+    .clk_o(clk_usbdpi)
+  );
+
+  rst_gen u_usbdpi_rst_gen (
+    .rst_o(rst_usbdpi_n)
+  );
+
+  // Interface presently just permits the DPI model to be easily connected and
+  // disconnected as required, since the pin count is limited and some deployments
+  // may not require USB.
+  usb20_if u_usb20_if (
+    .clk_i            (clk_usbdpi),
+    .rst_ni           (rst_usbdpi_n),
+
+    .usb_vbus         (IO63),
+    .usb_p            (USB_P),
+    .usb_n            (USB_N)
+  );
+
+  // Instantiate & connect the USB DPI model for top-level testing.
+  usb20_usbdpi u_usb20_usbdpi (
+    .clk_i            (clk_usbdpi),
+    .rst_ni           (rst_usbdpi_n),
+
+    .enable           (1'b1),
+
+    // Outputs from the DPI module
+    .usb_sense_p2d_o  (u_usb20_if.usb_sense_p2d),
+    .usb_dp_en_p2d_o  (u_usb20_if.usb_dp_en_p2d),
+    .usb_dn_en_p2d_o  (u_usb20_if.usb_dn_en_p2d),
+    .usb_dp_p2d_o     (u_usb20_if.usb_dp_p2d),
+    .usb_dn_p2d_o     (u_usb20_if.usb_dn_p2d),
+
+    .usb_p            (USB_P),
+    .usb_n            (USB_N)
   );
   endmodule

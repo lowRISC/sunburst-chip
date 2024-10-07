@@ -8,11 +8,13 @@
   clock: "clk_peri_i",
   clock_connections: {
     clk_peri_i: "peri",
+    clk_usb_i: "usb",
   },
 
   reset: "rst_peri_ni",
   reset_connections: {
     rst_peri_ni: "peri",
+    rst_usb_ni: "usb",
   },
 
   nodes: [
@@ -123,10 +125,21 @@
         size_byte: "0x00001000",
       }],
     },
+    { name:  "usbdev",
+      type:  "device",
+      clock: "clk_usb_i",
+      reset: "rst_usb_ni",
+      xbar:  false
+      pipeline: false
+      addr_range: [{
+        base_addr: "0x40400000",
+        size_byte: "0x00001000",
+      }],
+    },
 
   ],
   connections: {
     main: ["rv_timer", "aon_timer", "gpio" "i2c0", "i2c1", "spi_host0",
-      "spi_host1", "uart0", "uart1"],
+      "spi_host1", "uart0", "uart1", "usbdev"],
   }
 }

@@ -1,0 +1,13 @@
+diff --git a/usbdpi.h b/usbdpi.h
+index e18b1a3..e344a75 100644
+--- a/usbdpi.h
++++ b/usbdpi.h
+@@ -30,7 +30,7 @@ typedef uint32_t svBitVecVal;
+ //        single bus frame yet, simulation can take a long time and risk timing
+ //        out. Users may want to set this to 0 to reduce simulation time. Note
+ //        that reducing the frame interval is not spec-compliant.
+-#define FULL_FRAME 1
++#define FULL_FRAME 0
+ 
+ // How many bits in our frame
+ //

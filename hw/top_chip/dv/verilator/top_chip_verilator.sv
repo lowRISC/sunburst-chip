@@ -9,16 +9,18 @@ module top_chip_verilator (input logic clk_i, rst_ni);
   localparam UartClockFrequency = 50_000_000;
   localparam BaudRate           = 921_600;
 
-  logic clk_sys, clk_peri, clk_aon;
-  logic rst_sys_n, rst_peri_n, rst_aon_n;
+  logic clk_sys, clk_peri, clk_usb, clk_aon;
+  logic rst_sys_n, rst_peri_n, rst_usb_n, rst_aon_n;
 
   // All resets and clocks identical for simplicity in the verilator testbench
   assign clk_sys  = clk_i;
   assign clk_peri = clk_i;
+  assign clk_usb  = clk_i;
   assign clk_aon  = clk_i;
 
   assign rst_sys_n  = rst_ni;
   assign rst_peri_n = rst_ni;
+  assign rst_usb_n  = rst_ni;
   assign rst_aon_n  = rst_ni;
 
   logic        ibex_irq_software;
@@ -43,17 +45,37 @@ module top_chip_verilator (input logic clk_i, rst_ni);
   top_chip_system_pkg::uart_intr_t uart0_intr;
   top_chip_system_pkg::uart_intr_t uart1_intr;
 
+  top_chip_system_pkg::usbdev_intr_t usbdev_intr;
+
   logic uart_sys_tx, uart_sys_tx_raw, uart_sys_tx_en, uart_sys_rx;
+
+  // USBDEV
+  logic cio_usbdev_sense_i;
+  logic cio_usbdev_usb_dp_i;
+  logic cio_usbdev_usb_dn_i;
+  logic cio_usbdev_rx_d_i;
+  logic cio_usbdev_usb_dp_o;
+  logic cio_usbdev_usb_dp_en_o;
+  logic cio_usbdev_usb_dn_o;
+  logic cio_usbdev_usb_dn_en_o;
+  logic cio_usbdev_tx_d_o;
+  logic cio_usbdev_tx_se0_o;
+  logic cio_usbdev_tx_use_d_se0_o;
+  logic cio_usbdev_dp_pullup_o;
+  logic cio_usbdev_dn_pullup_o;
+  logic cio_usbdev_rx_enable_o;
 
   logic [31:0] gpio_pins;
 
   top_chip_system u_top_chip_system (
     .clk_sys_i (clk_sys),
     .clk_peri_i(clk_peri),
+    .clk_usb_i (clk_usb),
     .clk_aon_i (clk_aon),
 
     .rst_sys_ni (rst_sys_n),
     .rst_peri_ni(rst_peri_n),
+    .rst_usb_ni (rst_usb_n),
     .rst_aon_ni (rst_aon_n),
 
     .ibex_irq_software_i(ibex_irq_software),
@@ -77,6 +99,8 @@ module top_chip_verilator (input logic clk_i, rst_ni);
 
     .uart0_intr_o(uart0_intr),
     .uart1_intr_o(uart1_intr),
+
+    .usbdev_intr_o(usbdev_intr),
 
     .cio_gpio_i   ('0),
     .cio_gpio_o   (gpio_pins),
@@ -120,6 +144,21 @@ module top_chip_verilator (input logic clk_i, rst_ni);
     .cio_uart1_tx_o   (),
     .cio_uart1_tx_en_o(),
 
+    .cio_usbdev_sense_i,
+    .cio_usbdev_usb_dp_i,
+    .cio_usbdev_usb_dn_i,
+    .cio_usbdev_rx_d_i,
+    .cio_usbdev_usb_dp_o,
+    .cio_usbdev_usb_dp_en_o,
+    .cio_usbdev_usb_dn_o,
+    .cio_usbdev_usb_dn_en_o,
+    .cio_usbdev_tx_d_o,
+    .cio_usbdev_tx_se0_o,
+    .cio_usbdev_tx_use_d_se0_o,
+    .cio_usbdev_dp_pullup_o,
+    .cio_usbdev_dn_pullup_o,
+    .cio_usbdev_rx_enable_o,
+
     .aon_timer_wkup_req_o(),
     .aon_timer_rst_req_o (),
 
@@ -153,7 +192,9 @@ module top_chip_verilator (input logic clk_i, rst_ni);
     .spi_host1_intr_i(spi_host1_intr),
 
     .uart0_intr_i(uart0_intr),
-    .uart1_intr_i(uart1_intr)
+    .uart1_intr_i(uart1_intr),
+
+    .usbdev_intr_i(usbdev_intr)
   );
 
   assign uart_sys_tx = uart_sys_tx_raw & uart_sys_tx_en;
@@ -168,6 +209,32 @@ module top_chip_verilator (input logic clk_i, rst_ni);
     .active(1'b1       ),
     .tx_o  (uart_sys_rx),
     .rx_i  (uart_sys_tx)
+  );
+
+  // DPI model of USB host controller.
+  usbdpi u_usbdpi (
+    .clk_i           (clk_usb),
+    .rst_ni          (rst_usb_n),
+    .clk_48MHz_i     (clk_usb),
+    .enable          (1'b1),
+    .dp_en_p2d       (),
+    .dp_p2d          (cio_usbdev_usb_dp_i),
+    .dp_d2p          (cio_usbdev_usb_dp_o),
+    .dp_en_d2p       (cio_usbdev_usb_dp_en_o),
+    .dn_en_p2d       (),
+    .dn_p2d          (cio_usbdev_usb_dn_i),
+    .dn_d2p          (cio_usbdev_usb_dn_o),
+    .dn_en_d2p       (cio_usbdev_usb_dn_en_o),
+    .d_p2d           (cio_usbdev_rx_d_i),
+    .d_d2p           (cio_usbdev_tx_d_o),
+    .d_en_d2p        (cio_usbdev_usb_dp_en_o),
+    .se0_d2p         (cio_usbdev_tx_se0_o),
+    .rx_enable_d2p   (cio_usbdev_rx_enable_o),
+    .tx_use_d_se0_d2p(cio_usbdev_tx_use_d_se0_o),
+
+    .sense_p2d       (cio_usbdev_sense_i),
+    .pullupdp_d2p    (cio_usbdev_dp_pullup_o),
+    .pullupdn_d2p    (cio_usbdev_dn_pullup_o)
   );
 
   logic [2:0] finish_count;

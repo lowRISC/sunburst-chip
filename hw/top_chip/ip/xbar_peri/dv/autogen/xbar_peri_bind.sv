@@ -68,5 +68,11 @@ module xbar_peri_bind;
     .h2d    (tl_uart1_o),
     .d2h    (tl_uart1_i)
   );
+  bind xbar_peri tlul_assert #(.EndpointType("Host")) tlul_assert_device_usbdev (
+    .clk_i  (clk_usb_i),
+    .rst_ni (rst_usb_ni),
+    .h2d    (tl_usbdev_o),
+    .d2h    (tl_usbdev_i)
+  );
 `endif
 endmodule

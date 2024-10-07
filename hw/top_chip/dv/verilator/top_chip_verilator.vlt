@@ -10,3 +10,13 @@ lint_off -file "*uartdpi.sv"
 // error (generated C++ doesn't currently specify a type an internal verilator
 // function)
 tracing_off -file "*uartdpi.sv"
+
+// Operand not explicitly widened in increment operation.
+lint_off -rule WIDTH -file "*usbdev_counter.sv"
+// Not all reg2hw bits are used.
+lint_off -rule UNUSED -file "*usbdev.sv"
+
+// USBDPI model includes diagnostic nets for viewing in waveforms, as well as having some unused
+// bit in the net 'p2d'.
+lint_off -rule UNUSED -file "*usbdpi.sv" -match "*Signal is not used*"
+lint_off -rule UNUSED -file "*usbdpi.sv" -match "*Bits of signal are not used*"

@@ -44,6 +44,27 @@ typedef struct packed {
   logic tx_empty;
 } uart_intr_t;
 
+typedef struct packed {
+  logic pkt_received;
+  logic pkt_sent;
+  logic disconnected;
+  logic host_lost;
+  logic link_reset;
+  logic link_suspend;
+  logic link_resume;
+  logic av_out_empty;
+  logic rx_full;
+  logic av_overflow;
+  logic link_in_err;
+  logic rx_crc_err;
+  logic rx_pid_err;
+  logic rx_bitstuff_err;
+  logic frame;
+  logic powered;
+  logic link_out_err;
+  logic av_setup_empty;
+} usbdev_intr_t;
+
 // 512k SRAM must be kept in sync with address space size in crossbar
 parameter int unsigned SRAMAddrWidth = 19;
 // 4k ROM must be kept in sync with address space size in crossbar
@@ -53,6 +74,9 @@ parameter int unsigned ROMAddrWidth = 12;
 parameter int unsigned SysClkFreq = 250_000_000;
 // 50 MHz Peripheral clock
 parameter int unsigned PeriClkFreq = 50_000_000;
+// 48 MHz USB clock
+// Note: this oscillator must be adjusted to track that of the USB Host Controller.
+parameter int unsigned UsbClkFreq = 48_000_000;
 // 400 kHz always-on clock
 parameter int unsigned AonClkFreq = 400_000;
 

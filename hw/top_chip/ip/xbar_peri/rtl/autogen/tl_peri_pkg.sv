@@ -15,6 +15,7 @@ package tl_peri_pkg;
   localparam logic [31:0] ADDR_SPACE_SPI_HOST1 = 32'h 40201000;
   localparam logic [31:0] ADDR_SPACE_UART0     = 32'h 40300000;
   localparam logic [31:0] ADDR_SPACE_UART1     = 32'h 40301000;
+  localparam logic [31:0] ADDR_SPACE_USBDEV    = 32'h 40400000;
 
   localparam logic [31:0] ADDR_MASK_AON_TIMER = 32'h 00000fff;
   localparam logic [31:0] ADDR_MASK_RV_TIMER  = 32'h 00000fff;
@@ -25,9 +26,10 @@ package tl_peri_pkg;
   localparam logic [31:0] ADDR_MASK_SPI_HOST1 = 32'h 00000fff;
   localparam logic [31:0] ADDR_MASK_UART0     = 32'h 00000fff;
   localparam logic [31:0] ADDR_MASK_UART1     = 32'h 00000fff;
+  localparam logic [31:0] ADDR_MASK_USBDEV    = 32'h 00000fff;
 
   localparam int N_HOST   = 1;
-  localparam int N_DEVICE = 9;
+  localparam int N_DEVICE = 10;
 
   typedef enum int {
     TlAonTimer = 0,
@@ -38,7 +40,8 @@ package tl_peri_pkg;
     TlSpiHost0 = 5,
     TlSpiHost1 = 6,
     TlUart0 = 7,
-    TlUart1 = 8
+    TlUart1 = 8,
+    TlUsbdev = 9
   } tl_device_e;
 
   typedef enum int {

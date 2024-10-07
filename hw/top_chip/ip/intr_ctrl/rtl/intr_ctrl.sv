@@ -26,7 +26,9 @@ module intr_ctrl (
   input top_chip_system_pkg::spi_host_intr_t spi_host1_intr_i,
 
   input top_chip_system_pkg::uart_intr_t uart0_intr_i,
-  input top_chip_system_pkg::uart_intr_t uart1_intr_i
+  input top_chip_system_pkg::uart_intr_t uart1_intr_i,
+
+  input top_chip_system_pkg::usbdev_intr_t usbdev_intr_i
 );
   // Basic registered pass-through interrupt 'controller'. Acts as a stand-in
   // for a real interrupt controller in advance of one being created.
@@ -42,7 +44,8 @@ module intr_ctrl (
   assign ibex_irq_external_unsync = 1'b0;
 
   assign ibex_irq_fast_unsync = {
-    7'b0,
+    6'b0,
+    |usbdev_intr_i,
     |gpio_intr_i,
     |aon_timer_intr_i,
     |i2c0_intr_i,
