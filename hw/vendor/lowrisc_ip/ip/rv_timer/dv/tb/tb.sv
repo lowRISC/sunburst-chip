@@ -25,6 +25,8 @@ module tb;
 
  `DV_ALERT_IF_CONNECT()
 
+ assign alert_tx = '0;
+
   // dut
   rv_timer dut (
     .clk_i                 (clk        ),
@@ -32,9 +34,6 @@ module tb;
 
     .tl_i                  (tl_if.h2d  ),
     .tl_o                  (tl_if.d2h  ),
-
-    .alert_rx_i            (alert_rx   ),
-    .alert_tx_o            (alert_tx   ),
 
     .intr_timer_expired_hart0_timer0_o(intr_timer_expired[0][0])
   );

@@ -81,8 +81,8 @@ package i2c_env_pkg;
   parameter uint I2C_ACQ_FIFO_DEPTH = i2c_reg_pkg::AcqFifoDepth;
 
   // alerts
-  parameter uint NUM_ALERTS = i2c_reg_pkg::NumAlerts;
-  parameter string LIST_OF_ALERTS[] = {"fatal_fault"};
+  parameter uint NUM_ALERTS = 0;
+  parameter string LIST_OF_ALERTS[] = {};
 
   function automatic i2c_acqdata_item acq2item(bit [bus_params_pkg::BUS_DW-1:0] data);
     i2c_acqdata_item item;

@@ -77,6 +77,8 @@ module tb;
   // clk and rst_n is used for alert_if in `DV_ALERT_IF_CONNECT
   `DV_ALERT_IF_CONNECT()
 
+  assign alert_tx = '0;
+
   // dut
   i2c dut (
     .clk_i                   (clk        ),
@@ -85,9 +87,6 @@ module tb;
 
     .tl_i                    (tl_if.h2d  ),
     .tl_o                    (tl_if.d2h  ),
-
-    .alert_rx_i              (alert_rx   ),
-    .alert_tx_o              (alert_tx   ),
 
     .cio_scl_i               (cio_scl               ),
     .cio_scl_o               (/*hardcoded to 0*/    ),

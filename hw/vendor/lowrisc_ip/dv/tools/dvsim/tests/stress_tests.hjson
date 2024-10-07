@@ -4,7 +4,7 @@
 
 // this contains stress_all and stress_all_with_rand_reset
 {
-  import_cfgs: ["{proj_root}/hw/dv/tools/dvsim/tests/stress_all_test.hjson"]
+  import_cfgs: ["{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/stress_all_test.hjson"]
   tests: [
     {
       name: "{name}_stress_all_with_rand_reset"

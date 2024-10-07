@@ -26,6 +26,8 @@ module tb;
 
   `DV_ALERT_IF_CONNECT()
 
+  assign alert_tx = '0;
+
   // interfaces
   clk_rst_if clk_rst_if (
     .clk  (clk),
@@ -55,9 +57,6 @@ module tb;
     .tl_o(tl_if.d2h),
 
     .intr_gpio_o(gpio_intr),
-
-    .alert_rx_i(alert_rx),
-    .alert_tx_o(alert_tx),
 
     .cio_gpio_i   (gpio_i),
     .cio_gpio_o   (gpio_o),
