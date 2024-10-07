@@ -13,11 +13,13 @@ module top_chip_system #(
   // Clock & reset
   input clk_sys_i,
   input clk_peri_i,
+  input clk_usb_i,
   input clk_aon_i,
 
   input rst_sys_ni,
   input rst_peri_ni,
   input rst_aon_ni,
+  input rst_usb_ni,
 
   // Ibex interrupts in
   input  logic        ibex_irq_software_i,
@@ -42,6 +44,8 @@ module top_chip_system #(
 
   output top_chip_system_pkg::uart_intr_t uart0_intr_o,
   output top_chip_system_pkg::uart_intr_t uart1_intr_o,
+
+  output top_chip_system_pkg::usbdev_intr_t usbdev_intr_o,
 
   // Pad I/O
   // GPIO
@@ -91,6 +95,22 @@ module top_chip_system #(
   input  logic cio_uart1_rx_i,
   output logic cio_uart1_tx_o,
   output logic cio_uart1_tx_en_o,
+
+  // USBDEV
+  input  logic cio_usbdev_sense_i,
+  input  logic cio_usbdev_usb_dp_i,
+  input  logic cio_usbdev_usb_dn_i,
+  input  logic cio_usbdev_rx_d_i,
+  output logic cio_usbdev_usb_dp_o,
+  output logic cio_usbdev_usb_dp_en_o,
+  output logic cio_usbdev_usb_dn_o,
+  output logic cio_usbdev_usb_dn_en_o,
+  output logic cio_usbdev_tx_d_o,
+  output logic cio_usbdev_tx_se0_o,
+  output logic cio_usbdev_tx_use_d_se0_o,
+  output logic cio_usbdev_dp_pullup_o,
+  output logic cio_usbdev_dn_pullup_o,
+  output logic cio_usbdev_rx_enable_o,
 
   // AON timer wakeup and reset requests (clk_aon_i domain)
   output logic aon_timer_wkup_req_o,
@@ -211,10 +231,14 @@ module top_chip_system #(
   tlul_pkg::tl_d2h_t tl_uart0_d2h;
   tlul_pkg::tl_h2d_t tl_uart1_h2d;
   tlul_pkg::tl_d2h_t tl_uart1_d2h;
+  tlul_pkg::tl_h2d_t tl_usbdev_h2d;
+  tlul_pkg::tl_d2h_t tl_usbdev_d2h;
 
   xbar_peri u_xbar_peri (
     .clk_peri_i,
+    .clk_usb_i,
     .rst_peri_ni,
+    .rst_usb_ni,
 
     // Host interfaces
     .tl_main_i(tl_peri_h2d),
@@ -239,6 +263,8 @@ module top_chip_system #(
     .tl_uart0_i    (tl_uart0_d2h),
     .tl_uart1_o    (tl_uart1_h2d),
     .tl_uart1_i    (tl_uart1_d2h),
+    .tl_usbdev_o   (tl_usbdev_h2d),
+    .tl_usbdev_i   (tl_usbdev_d2h),
 
     .scanmode_i
   );
@@ -490,4 +516,70 @@ module top_chip_system #(
     .clk_i (clk_peri_i),
     .rst_ni(rst_peri_ni)
   );
+
+  usbdev u_usbdev (
+    // Input
+    .cio_sense_i        (cio_usbdev_sense_i),
+    .cio_usb_dp_i       (cio_usbdev_usb_dp_i),
+    .cio_usb_dn_i       (cio_usbdev_usb_dn_i),
+    .usb_rx_d_i         (cio_usbdev_rx_d_i),
+
+    // Output
+    .cio_usb_dp_o       (cio_usbdev_usb_dp_o),
+    .cio_usb_dp_en_o    (cio_usbdev_usb_dp_en_o),
+    .cio_usb_dn_o       (cio_usbdev_usb_dn_o),
+    .cio_usb_dn_en_o    (cio_usbdev_usb_dn_en_o),
+    .usb_tx_d_o         (cio_usbdev_tx_d_o),
+    .usb_tx_se0_o       (cio_usbdev_tx_se0_o),
+    .usb_tx_use_d_se0_o (cio_usbdev_tx_use_d_se0_o),
+    .usb_dp_pullup_o    (cio_usbdev_dp_pullup_o),
+    .usb_dn_pullup_o    (cio_usbdev_dn_pullup_o),
+    .usb_rx_enable_o    (cio_usbdev_rx_enable_o),
+
+    // Interrupt
+    .intr_pkt_received_o    (usbdev_intr_o.pkt_received),
+    .intr_pkt_sent_o        (usbdev_intr_o.pkt_sent),
+    .intr_disconnected_o    (usbdev_intr_o.disconnected),
+    .intr_host_lost_o       (usbdev_intr_o.host_lost),
+    .intr_link_reset_o      (usbdev_intr_o.link_reset),
+    .intr_link_suspend_o    (usbdev_intr_o.link_suspend),
+    .intr_link_resume_o     (usbdev_intr_o.link_resume),
+    .intr_av_out_empty_o    (usbdev_intr_o.av_out_empty),
+    .intr_rx_full_o         (usbdev_intr_o.rx_full),
+    .intr_av_overflow_o     (usbdev_intr_o.av_overflow),
+    .intr_link_in_err_o     (usbdev_intr_o.link_in_err),
+    .intr_rx_crc_err_o      (usbdev_intr_o.rx_crc_err),
+    .intr_rx_pid_err_o      (usbdev_intr_o.rx_pid_err),
+    .intr_rx_bitstuff_err_o (usbdev_intr_o.rx_bitstuff_err),
+    .intr_frame_o           (usbdev_intr_o.frame),
+    .intr_powered_o         (usbdev_intr_o.powered),
+    .intr_link_out_err_o    (usbdev_intr_o.link_out_err),
+    .intr_av_setup_empty_o  (usbdev_intr_o.av_setup_empty),
+
+    // Inter-module signals
+    .usb_ref_val_o          (), //usbdev_usb_ref_val_o),
+    .usb_ref_pulse_o        (), //usbdev_usb_ref_pulse_o),
+
+    // AON/Wake functionality not included.
+    .usb_aon_suspend_req_o        (),
+    .usb_aon_wake_ack_o           (),
+    .usb_aon_bus_reset_i          (1'b0),
+    .usb_aon_sense_lost_i         (1'b0),
+    .usb_aon_bus_not_idle_i       (1'b0),
+    .usb_aon_wake_detect_active_i (1'b0),
+
+    // Tilelink
+    .tl_i       (tl_usbdev_h2d),
+    .tl_o       (tl_usbdev_d2h),
+
+    // Clock and reset connections
+    .clk_i      (clk_usb_i),
+    .clk_aon_i  (clk_aon_i),
+    .rst_ni     (rst_usb_ni),
+    .rst_aon_ni (rst_aon_ni),
+
+    // Misc
+    .ram_cfg_i  (ram_1p_cfg_i)
+  );
+
 endmodule

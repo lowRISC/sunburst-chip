@@ -12,10 +12,13 @@ filesets:
       - lowrisc:dv:pins_if
       - lowrisc:dv:common_ifs
       - lowrisc:dv:dv_macros
+      - lowrisc:dv:usb20_usbdpi:0.1
       - lowrisc:prim:prim_pkg
       - lowrisc:ip:xbar_main
       - lowrisc:dv_dpi_c:uartdpi:0.1
       - lowrisc:dv_dpi_sv:uartdpi:0.1
+      - lowrisc:dv_dpi_c:usbdpi:0.1
+      - lowrisc:dv_dpi_sv:usbdpi:0.1
       - lowrisc:sunburst:top_chip_asic
     files:
       - tb/tb.sv

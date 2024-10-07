@@ -33,6 +33,9 @@ tl_device_t xbar_devices[$] = '{
     }},
     '{"uart1", '{
         '{32'h40301000, 32'h40301fff}
+    }},
+    '{"usbdev", '{
+        '{32'h40400000, 32'h40400fff}
 }}};
 
   // List of Xbar hosts
@@ -46,5 +49,6 @@ tl_host_t xbar_hosts[$] = '{
         "spi_host0",
         "spi_host1",
         "uart0",
-        "uart1"}}
+        "uart1",
+        "usbdev"}}
 };

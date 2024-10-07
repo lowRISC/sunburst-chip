@@ -27,6 +27,7 @@
         {from: "hw/ip/tlul",         to: "ip/tlul",      patch_dir: "tlul"},
         {from: "hw/ip/rv_timer",     to: "ip/rv_timer",  patch_dir: "rv_timer"},
         {from: "hw/ip/uart",         to: "ip/uart",      patch_dir: "uart"},
+        {from: "hw/ip/usbdev",       to: "ip/usbdev",    patch_dir: "usbdev"},
         {from: "hw/ip/lc_ctrl",      to: "ip/lc_ctrl"},
         {from: "hw/ip/prim",         to: "ip/prim"},
         {from: "hw/lint",            to: "lint"},
@@ -34,6 +35,7 @@
         {from: "hw/ip/prim_xilinx",  to: "ip/prim_xilinx"},
 
         {from: "hw/dv/dpi/uartdpi",  to: "dv/dpi/uartdpi", patch_dir: "uartdpi"},
+        {from: "hw/dv/dpi/usbdpi",   to: "dv/dpi/usbdpi", patch_dir: "usbdpi"},
 
         {from: "hw/dv/sv",        to: "dv/sv", patch_dir: "dv_sv"},
         {from: "hw/dv/verilator", to: "dv/verilator"},

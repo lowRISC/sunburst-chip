@@ -14,6 +14,7 @@ filesets:
       - lowrisc:ip:i2c
       - lowrisc:ip:aon_timer
       - lowrisc:ip:uart
+      - lowrisc:ip:usbdev
       - lowrisc:ip:xbar_main
       - lowrisc:ip:xbar_peri
       - lowrisc:sunburst:top_chip_system_pkg

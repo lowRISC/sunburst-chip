@@ -66,12 +66,19 @@ module top_chip_asic (
   inout IO60,
   inout IO61,
   inout IO62,
-  inout IO63
-);
-  localparam int NPads = 64;
+  inout IO63,
 
-  wire clk_sys, clk_peri, clk_aon;
-  wire rst_sys_n, rst_peri_n, rst_aon_n;
+  // Dedicated Pads
+  inout USB_P,
+  inout USB_N
+);
+  localparam int NPads = 66;
+
+  localparam int PadUsbP = 64;
+  localparam int PadUsbN = 65;
+
+  wire clk_sys, clk_peri, clk_usb, clk_aon;
+  wire rst_sys_n, rst_peri_n, rst_usb_n, rst_aon_n;
 
 
   logic        ibex_irq_software;
@@ -95,6 +102,8 @@ module top_chip_asic (
 
   top_chip_system_pkg::uart_intr_t uart0_intr;
   top_chip_system_pkg::uart_intr_t uart1_intr;
+
+  top_chip_system_pkg::usbdev_intr_t usbdev_intr;
 
   logic uart_sys_tx, uart_sys_tx_raw, uart_sys_tx_en, uart_sys_rx;
 
@@ -146,23 +155,43 @@ module top_chip_asic (
   logic cio_uart1_tx_o;
   logic cio_uart1_tx_en_o;
 
+  // USBDEV
+  logic cio_usbdev_sense_i;
+  logic cio_usbdev_usb_dp_i;
+  logic cio_usbdev_usb_dn_i;
+  logic cio_usbdev_rx_d_i;
+  logic cio_usbdev_usb_dp_o;
+  logic cio_usbdev_usb_dp_en_o;
+  logic cio_usbdev_usb_dn_o;
+  logic cio_usbdev_usb_dn_en_o;
+  logic cio_usbdev_tx_d_o;
+  logic cio_usbdev_tx_se0_o;
+  logic cio_usbdev_tx_use_d_se0_o;
+  logic cio_usbdev_dp_pullup_o;
+  logic cio_usbdev_dn_pullup_o;
+  logic cio_usbdev_rx_enable_o;
+
   clk_rst_gen u_clk_rst_gen (
     .clk_sys_o (clk_sys),
     .clk_peri_o(clk_peri),
+    .clk_usb_o (clk_usb),
     .clk_aon_o (clk_aon),
 
     .rst_sys_n (rst_sys_n),
     .rst_peri_n(rst_peri_n),
+    .rst_usb_n (rst_usb_n),
     .rst_aon_n (rst_aon_n)
   );
 
   top_chip_system u_top_chip_system (
     .clk_sys_i (clk_sys),
     .clk_peri_i(clk_peri),
+    .clk_usb_i (clk_usb),
     .clk_aon_i (clk_aon),
 
     .rst_sys_ni (rst_sys_n),
     .rst_peri_ni(rst_peri_n),
+    .rst_usb_ni (rst_usb_n),
     .rst_aon_ni (rst_aon_n),
 
     .ibex_irq_software_i(ibex_irq_software),
@@ -186,6 +215,8 @@ module top_chip_asic (
 
     .uart0_intr_o(uart0_intr),
     .uart1_intr_o(uart1_intr),
+
+    .usbdev_intr_o(usbdev_intr),
 
     .cio_gpio_i,
     .cio_gpio_o,
@@ -229,6 +260,21 @@ module top_chip_asic (
     .cio_uart1_tx_o,
     .cio_uart1_tx_en_o,
 
+    .cio_usbdev_sense_i,
+    .cio_usbdev_usb_dp_i,
+    .cio_usbdev_usb_dn_i,
+    .cio_usbdev_rx_d_i,
+    .cio_usbdev_usb_dp_o,
+    .cio_usbdev_usb_dp_en_o,
+    .cio_usbdev_usb_dn_o,
+    .cio_usbdev_usb_dn_en_o,
+    .cio_usbdev_tx_d_o,
+    .cio_usbdev_tx_se0_o,
+    .cio_usbdev_tx_use_d_se0_o,
+    .cio_usbdev_dp_pullup_o,
+    .cio_usbdev_dn_pullup_o,
+    .cio_usbdev_rx_enable_o,
+
     .aon_timer_wkup_req_o(),
     .aon_timer_rst_req_o (),
 
@@ -237,6 +283,40 @@ module top_chip_asic (
     .ram_2p_cfg_i('0),
     .rom_cfg_i   ('0)
   );
+
+  // Differential receiver for USB device; this is required for compliance with the
+  // Universal Bus Specification 2.0.
+  //
+  // The internal logic permits synchronisation with the host controller across a portion of the
+  // required frequency range. On FPGA board implementations an external USB transceiver usually
+  // performs this function.
+
+  // Calibration and power inputs presently unavailable.
+  wire core_pok_h = 1'b0;
+  wire [31:0] usb_io_pu_cal = '0;
+  // Observability output presently not required.
+  logic usb_diff_rx_osb;
+
+  // Note: this differential receiver also applies pullup resistors to the USB DP/DN line(s) to
+  //       signal device presence and communication speed to the USB host controller.
+  prim_usb_diff_rx #(
+    .CalibW(32)
+  ) u_prim_usb_diff_rx (
+    .input_pi          ( USB_P                  ),
+    .input_ni          ( USB_N                  ),
+    .input_en_i        ( cio_usbdev_rx_enable_o ),
+    .core_pok_h_i      ( core_pok_h             ),
+    .pullup_p_en_i     ( cio_usbdev_dp_pullup_o ),
+    .pullup_n_en_i     ( cio_usbdev_dn_pullup_o ),
+    .calibration_i     ( usb_io_pu_cal          ),
+    .usb_diff_rx_obs_o ( usb_diff_rx_obs        ),
+    .input_o           ( cio_usbdev_rx_d_i      )
+  );
+
+  // Direct differential inputs to the USB device; these are required to detect 'SE0' signalling
+  // (e.g. Bus Reset or End Of Packet) even when the above differential receiver is enabled.
+  assign cio_usbdev_usb_dp_i = USB_P;
+  assign cio_usbdev_usb_dn_i = USB_N;
 
   intr_ctrl u_intr_ctrl (
     .clk_i (clk_sys),
@@ -262,7 +342,9 @@ module top_chip_asic (
     .spi_host1_intr_i(spi_host1_intr),
 
     .uart0_intr_i(uart0_intr),
-    .uart1_intr_i(uart1_intr)
+    .uart1_intr_i(uart1_intr),
+
+    .usbdev_intr_i(usbdev_intr)
   );
 
   wire  [NPads-1:0] pad_io;
@@ -272,8 +354,9 @@ module top_chip_asic (
   logic [NPads-1:0] pad_in;
   prim_pad_wrapper_pkg::pad_attr_t pad_attr [NPads];
 
-  for (genvar i_pad=0;i_pad < NPads;i_pad++) begin
-    assign pad_attr[i_pad] = '0;
+  for (genvar i_pad=0;i_pad < NPads;i_pad++) begin : gen_drive_strength
+    // `Strong` drive strength required for USB_P/USB_N to overpower the pullup.
+    assign pad_attr[i_pad] = '{drive_strength: (i_pad == PadUsbP || i_pad == PadUsbN), default: '0};
   end
 
   always_comb begin
@@ -325,6 +408,15 @@ module top_chip_asic (
     cio_uart1_rx_i = pad_in[61];
     pad_out[62] = cio_uart1_tx_o;
     pad_oe[62]  = cio_uart1_tx_en_o;
+
+    cio_usbdev_sense_i = pad_in[63];
+    // no output driver required.
+
+    // USB_P/N may require special treatment beyond the drive strength.
+    pad_out[PadUsbP] = cio_usbdev_usb_dp_o;
+    pad_oe[PadUsbP]  = cio_usbdev_usb_dp_en_o;
+    pad_out[PadUsbN] = cio_usbdev_usb_dn_o;
+    pad_oe[PadUsbN]  = cio_usbdev_usb_dn_en_o;
   end
 
   padring #(.NPads(NPads)) u_padring (
@@ -332,6 +424,10 @@ module top_chip_asic (
     .scanmode_i(prim_mubi_pkg::MuBi4False),
 
     .pad_io ({
+      // Dedicated pads.
+      USB_N,
+      USB_P,
+
       IO63,
       IO62,
       IO61,
