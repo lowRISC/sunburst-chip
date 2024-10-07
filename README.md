@@ -16,7 +16,7 @@ system.  Python 3.9 or higher is required.
 ```sh
 python3 -m venv ./sunburst-py-venv
 source ./sunburst-py-venv/bin/activate
-pip3 install -r ./hw/vendor/lowrisc_ibex/python-requirements.txt
+pip3 install -r ./python-requirements.txt
 ```
 
 It is strongly recommended you build Verilator from source as packaged versions
