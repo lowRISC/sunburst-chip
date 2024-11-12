@@ -67,6 +67,10 @@ module top_chip_verilator (input logic clk_i, rst_ni);
 
   logic [31:0] gpio_pins;
 
+  logic [31:0] cio_gpio_o;
+  logic [31:0] cio_gpio_en_o;
+  assign gpio_pins = cio_gpio_o & cio_gpio_en_o;
+
   top_chip_system u_top_chip_system (
     .clk_sys_i (clk_sys),
     .clk_peri_i(clk_peri),
@@ -103,8 +107,8 @@ module top_chip_verilator (input logic clk_i, rst_ni);
     .usbdev_intr_o(usbdev_intr),
 
     .cio_gpio_i   ('0),
-    .cio_gpio_o   (gpio_pins),
-    .cio_gpio_en_o(),
+    .cio_gpio_o   (cio_gpio_o),
+    .cio_gpio_en_o(cio_gpio_en_o),
 
     .cio_i2c0_sda_i   ('0),
     .cio_i2c0_scl_i   ('0),
