@@ -10,6 +10,20 @@ start:
   // ca0 (first argument) contains the read-write root
   cspecialr        ca0, mtdc
 
+  // Clear the revocation bitmap before entering C/C++ code.
+  // The bitmap is not cleared upon reset so memset to return it to a
+  // pristine state; also prevent Xs in sim.
+  //
+  // 8KiB with one bit covering each 64 bits (8 bytes) corresponding to 512KiB SRAM.
+  li               a1, 0x00300000
+  csetaddr         ca1, ca0, a1
+  li               a2, 0x2000  // 8KiB.
+0:
+  csw              zero, 0(ca1)
+  cincoffset       ca1, ca1, 4
+  addi             a2, a2, -4
+  bnez             a2, 0b
+
   // No bounds on stack, grows down from the end of IRAM
   li               sp, 0x00230000
 

@@ -65,9 +65,9 @@ typedef struct packed {
   logic av_setup_empty;
 } usbdev_intr_t;
 
-// 512k SRAM must be kept in sync with address space size in crossbar
+// 512KiB SRAM must be kept in sync with address space size in crossbar
 parameter int unsigned SRAMAddrWidth = 19;
-// 4k ROM must be kept in sync with address space size in crossbar
+// 4KiB ROM must be kept in sync with address space size in crossbar
 parameter int unsigned ROMAddrWidth = 12;
 
 // 250 MHz System clock

@@ -12,8 +12,8 @@ package tl_main_pkg;
   localparam logic [31:0] ADDR_SPACE_PERI           = 32'h 40000000;
 
   localparam logic [31:0] ADDR_MASK_ROM            = 32'h 00000fff;
-  localparam logic [31:0] ADDR_MASK_SRAM           = 32'h 0003ffff;
-  localparam logic [31:0] ADDR_MASK_REVOCATION_RAM = 32'h 000007ff;
+  localparam logic [31:0] ADDR_MASK_SRAM           = 32'h 0007ffff;
+  localparam logic [31:0] ADDR_MASK_REVOCATION_RAM = 32'h 00001fff;
   localparam logic [31:0] ADDR_MASK_PERI           = 32'h 3fffffff;
 
   localparam int N_HOST   = 2;

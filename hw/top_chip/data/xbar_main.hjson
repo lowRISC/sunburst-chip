@@ -51,7 +51,7 @@
 
       addr_range: [{
         base_addr: "0x00200000",
-        size_byte: "0x00040000",
+        size_byte: "0x00080000",
       }],
     },
     { name:  "revocation_ram",
@@ -62,7 +62,7 @@
 
       addr_range: [{
         base_addr: "0x00300000",
-        size_byte: "0x00000800",
+        size_byte: "0x00002000",
       }],
     },
     { name:          "peri",
