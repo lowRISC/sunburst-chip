@@ -25,6 +25,8 @@ initial force dut.rst_usb_ni = rst_n;
 `CONNECT_TL_DEVICE_IF(gpio, dut, clk_peri_i, rst_n)
 `CONNECT_TL_DEVICE_IF(i2c0, dut, clk_peri_i, rst_n)
 `CONNECT_TL_DEVICE_IF(i2c1, dut, clk_peri_i, rst_n)
+`CONNECT_TL_DEVICE_IF(pattgen, dut, clk_peri_i, rst_n)
+`CONNECT_TL_DEVICE_IF(pwm, dut, clk_peri_i, rst_n)
 `CONNECT_TL_DEVICE_IF(spi_host0, dut, clk_peri_i, rst_n)
 `CONNECT_TL_DEVICE_IF(spi_host1, dut, clk_peri_i, rst_n)
 `CONNECT_TL_DEVICE_IF(uart0, dut, clk_peri_i, rst_n)
