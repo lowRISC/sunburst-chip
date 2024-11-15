@@ -23,6 +23,8 @@
         {from: "hw/ip/aon_timer",    to: "ip/aon_timer", patch_dir: "aon_timer"},
         {from: "hw/ip/gpio",         to: "ip/gpio",      patch_dir: "gpio"},
         {from: "hw/ip/i2c",          to: "ip/i2c",       patch_dir: "i2c"},
+        {from: "hw/ip/pattgen",      to: "ip/pattgen",   patch_dir: "pattgen"},
+        {from: "hw/ip/pwm",          to: "ip/pwm",       patch_dir: "pwm"},
         {from: "hw/ip/spi_host",     to: "ip/spi_host",  patch_dir: "spi_host"},
         {from: "hw/ip/tlul",         to: "ip/tlul",      patch_dir: "tlul"},
         {from: "hw/ip/rv_timer",     to: "ip/rv_timer",  patch_dir: "rv_timer"},

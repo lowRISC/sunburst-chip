@@ -22,3 +22,4 @@ lint_off -file "*/*ip_rv_timer*/rtl/*"
 lint_off -file "*/*ip_gpio*/rtl/*"
 
 lint_off -rule UNOPTFLAT
+lint_off -rule IMPERFECTSCH

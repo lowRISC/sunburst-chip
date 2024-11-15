@@ -39,6 +39,8 @@ module top_chip_verilator (input logic clk_i, rst_ni);
   top_chip_system_pkg::i2c_intr_t i2c0_intr;
   top_chip_system_pkg::i2c_intr_t i2c1_intr;
 
+  top_chip_system_pkg::pattgen_intr_t pattgen_intr;
+
   top_chip_system_pkg::spi_host_intr_t spi_host0_intr;
   top_chip_system_pkg::spi_host_intr_t spi_host1_intr;
 
@@ -98,6 +100,8 @@ module top_chip_verilator (input logic clk_i, rst_ni);
     .i2c0_intr_o(i2c0_intr),
     .i2c1_intr_o(i2c1_intr),
 
+    .pattgen_intr_o(pattgen_intr),
+
     .spi_host0_intr_o(spi_host0_intr),
     .spi_host1_intr_o(spi_host1_intr),
 
@@ -123,6 +127,18 @@ module top_chip_verilator (input logic clk_i, rst_ni);
     .cio_i2c1_sda_en_o(),
     .cio_i2c1_scl_o   (),
     .cio_i2c1_scl_en_o(),
+
+    .cio_pattgen_pda0_tx_o    (),
+    .cio_pattgen_pda0_tx_en_o (),
+    .cio_pattgen_pcl0_tx_o    (),
+    .cio_pattgen_pcl0_tx_en_o (),
+    .cio_pattgen_pda1_tx_o    (),
+    .cio_pattgen_pda1_tx_en_o (),
+    .cio_pattgen_pcl1_tx_o    (),
+    .cio_pattgen_pcl1_tx_en_o (),
+
+    .cio_pwm_o        (),
+    .cio_pwm_en_o     (),
 
     .cio_spi_host0_sd_i    ('0),
     .cio_spi_host0_sck_o   (),
@@ -191,6 +207,8 @@ module top_chip_verilator (input logic clk_i, rst_ni);
 
     .i2c0_intr_i(i2c0_intr),
     .i2c1_intr_i(i2c1_intr),
+
+    .pattgen_intr_i(pattgen_intr),
 
     .spi_host0_intr_i(spi_host0_intr),
     .spi_host1_intr_i(spi_host1_intr),

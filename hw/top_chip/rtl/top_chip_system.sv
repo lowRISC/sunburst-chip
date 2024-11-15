@@ -8,7 +8,9 @@ module top_chip_system #(
   // parameters for i2c0
   parameter int I2c0InputDelayCycles = 0,
   // parameters for i2c1
-  parameter int I2c1InputDelayCycles = 0
+  parameter int I2c1InputDelayCycles = 0,
+  // parameters for pwm
+  parameter int unsigned PwmNumOutputs = 6
 ) (
   // Clock & reset
   input clk_sys_i,
@@ -39,6 +41,8 @@ module top_chip_system #(
   output top_chip_system_pkg::i2c_intr_t i2c0_intr_o,
   output top_chip_system_pkg::i2c_intr_t i2c1_intr_o,
 
+  output top_chip_system_pkg::pattgen_intr_t pattgen_intr_o,
+
   output top_chip_system_pkg::spi_host_intr_t spi_host0_intr_o,
   output top_chip_system_pkg::spi_host_intr_t spi_host1_intr_o,
 
@@ -67,6 +71,20 @@ module top_chip_system #(
   output logic cio_i2c1_sda_en_o,
   output logic cio_i2c1_scl_o,
   output logic cio_i2c1_scl_en_o,
+
+  // Pattgen
+  output logic cio_pattgen_pda0_tx_o,
+  output logic cio_pattgen_pda0_tx_en_o,
+  output logic cio_pattgen_pcl0_tx_o,
+  output logic cio_pattgen_pcl0_tx_en_o,
+  output logic cio_pattgen_pda1_tx_o,
+  output logic cio_pattgen_pda1_tx_en_o,
+  output logic cio_pattgen_pcl1_tx_o,
+  output logic cio_pattgen_pcl1_tx_en_o,
+
+  // PWM
+  output logic [PwmNumOutputs-1:0] cio_pwm_o,
+  output logic [PwmNumOutputs-1:0] cio_pwm_en_o,
 
   // SPI Host 0
   input  logic [3:0] cio_spi_host0_sd_i,
@@ -223,6 +241,10 @@ module top_chip_system #(
   tlul_pkg::tl_d2h_t tl_i2c0_d2h;
   tlul_pkg::tl_h2d_t tl_i2c1_h2d;
   tlul_pkg::tl_d2h_t tl_i2c1_d2h;
+  tlul_pkg::tl_h2d_t tl_pattgen_h2d;
+  tlul_pkg::tl_d2h_t tl_pattgen_d2h;
+  tlul_pkg::tl_h2d_t tl_pwm_h2d;
+  tlul_pkg::tl_d2h_t tl_pwm_d2h;
   tlul_pkg::tl_h2d_t tl_spi_host0_h2d;
   tlul_pkg::tl_d2h_t tl_spi_host0_d2h;
   tlul_pkg::tl_h2d_t tl_spi_host1_h2d;
@@ -255,6 +277,10 @@ module top_chip_system #(
     .tl_i2c0_i     (tl_i2c0_d2h),
     .tl_i2c1_o     (tl_i2c1_h2d),
     .tl_i2c1_i     (tl_i2c1_d2h),
+    .tl_pattgen_o  (tl_pattgen_h2d),
+    .tl_pattgen_i  (tl_pattgen_d2h),
+    .tl_pwm_o      (tl_pwm_h2d),
+    .tl_pwm_i      (tl_pwm_d2h),
     .tl_spi_host0_o(tl_spi_host0_h2d),
     .tl_spi_host0_i(tl_spi_host0_d2h),
     .tl_spi_host1_o(tl_spi_host1_h2d),
@@ -409,6 +435,46 @@ module top_chip_system #(
 
     // Misc
     .ram_cfg_i(ram_1p_cfg_i)
+  );
+
+  pattgen u_pattgen (
+    // Output
+    .cio_pda0_tx_o    (cio_pattgen_pda0_tx_o),
+    .cio_pda0_tx_en_o (cio_pattgen_pda0_tx_en_o),
+    .cio_pcl0_tx_o    (cio_pattgen_pcl0_tx_o),
+    .cio_pcl0_tx_en_o (cio_pattgen_pcl0_tx_en_o),
+    .cio_pda1_tx_o    (cio_pattgen_pda1_tx_o),
+    .cio_pda1_tx_en_o (cio_pattgen_pda1_tx_en_o),
+    .cio_pcl1_tx_o    (cio_pattgen_pcl1_tx_o),
+    .cio_pcl1_tx_en_o (cio_pattgen_pcl1_tx_en_o),
+
+    // Interrupt
+    .intr_done_ch0_o  (pattgen_intr_o.done_ch0),
+    .intr_done_ch1_o  (pattgen_intr_o.done_ch1),
+
+    // TileLink
+    .tl_i             (tl_pattgen_h2d),
+    .tl_o             (tl_pattgen_d2h),
+
+    // Clock and reset connections
+    .clk_i            (clk_peri_i),
+    .rst_ni           (rst_peri_ni)
+  );
+
+  pwm u_pwm (
+    // Output
+    .cio_pwm_o    (cio_pwm_o),
+    .cio_pwm_en_o (cio_pwm_en_o),
+
+    // TileLink
+    .tl_i         (tl_pwm_h2d),
+    .tl_o         (tl_pwm_d2h),
+
+    // Clock and reset connections
+    .clk_i        (clk_peri_i),
+    .clk_core_i   (clk_sys_i),
+    .rst_ni       (rst_peri_ni),
+    .rst_core_ni  (rst_sys_ni)
   );
 
   spi_host u_spi_host0 (

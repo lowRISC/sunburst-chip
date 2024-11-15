@@ -22,6 +22,8 @@ module intr_ctrl (
   input top_chip_system_pkg::i2c_intr_t i2c0_intr_i,
   input top_chip_system_pkg::i2c_intr_t i2c1_intr_i,
 
+  input top_chip_system_pkg::pattgen_intr_t pattgen_intr_i,
+
   input top_chip_system_pkg::spi_host_intr_t spi_host0_intr_i,
   input top_chip_system_pkg::spi_host_intr_t spi_host1_intr_i,
 
@@ -44,12 +46,13 @@ module intr_ctrl (
   assign ibex_irq_external_unsync = 1'b0;
 
   assign ibex_irq_fast_unsync = {
-    6'b0,
+    5'b0,
     |usbdev_intr_i,
     |gpio_intr_i,
     |aon_timer_intr_i,
     |i2c0_intr_i,
     |i2c1_intr_i,
+    |pattgen_intr_i,
     |spi_host0_intr_i,
     |spi_host1_intr_i,
     |uart0_intr_i,
