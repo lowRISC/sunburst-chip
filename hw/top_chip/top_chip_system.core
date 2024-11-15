@@ -13,6 +13,8 @@ filesets:
       - lowrisc:ip:spi_host
       - lowrisc:ip:i2c
       - lowrisc:ip:aon_timer
+      - lowrisc:ip:pattgen
+      - lowrisc:ip:pwm
       - lowrisc:ip:uart
       - lowrisc:ip:usbdev
       - lowrisc:ip:xbar_main

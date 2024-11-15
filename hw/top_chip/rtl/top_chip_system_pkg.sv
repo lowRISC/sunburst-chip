@@ -28,6 +28,11 @@ typedef struct packed {
 } i2c_intr_t;
 
 typedef struct packed {
+  logic done_ch0;
+  logic done_ch1;
+} pattgen_intr_t;
+
+typedef struct packed {
   logic error;
   logic spi_event;
 } spi_host_intr_t;
