@@ -107,8 +107,6 @@ module top_chip_asic (
 
   top_chip_system_pkg::usbdev_intr_t usbdev_intr;
 
-  logic uart_sys_tx, uart_sys_tx_raw, uart_sys_tx_en, uart_sys_rx;
-
   // GPIO
   logic [31:0] cio_gpio_i;
   logic [31:0] cio_gpio_o;
