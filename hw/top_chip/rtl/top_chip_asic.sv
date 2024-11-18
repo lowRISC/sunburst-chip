@@ -80,33 +80,6 @@ module top_chip_asic (
   wire clk_sys, clk_peri, clk_usb, clk_aon;
   wire rst_sys_n, rst_peri_n, rst_usb_n, rst_aon_n;
 
-
-  logic        ibex_irq_software;
-  logic        ibex_irq_timer;
-  logic        ibex_irq_external;
-  logic [14:0] ibex_irq_fast;
-  logic        ibex_irq_nm;
-
-  logic [31:0] gpio_intr;
-
-  top_chip_system_pkg::aon_timer_intr_t aon_timer_intr;
-  logic                                 aon_timer_nmi_wdog_timer_bark;
-
-  logic rv_timer_intr;
-
-  top_chip_system_pkg::i2c_intr_t i2c0_intr;
-  top_chip_system_pkg::i2c_intr_t i2c1_intr;
-
-  top_chip_system_pkg::pattgen_intr_t pattgen_intr;
-
-  top_chip_system_pkg::spi_host_intr_t spi_host0_intr;
-  top_chip_system_pkg::spi_host_intr_t spi_host1_intr;
-
-  top_chip_system_pkg::uart_intr_t uart0_intr;
-  top_chip_system_pkg::uart_intr_t uart1_intr;
-
-  top_chip_system_pkg::usbdev_intr_t usbdev_intr;
-
   // GPIO
   logic [31:0] cio_gpio_i;
   logic [31:0] cio_gpio_o;
@@ -207,32 +180,6 @@ module top_chip_asic (
     .rst_peri_ni(rst_peri_n),
     .rst_usb_ni (rst_usb_n),
     .rst_aon_ni (rst_aon_n),
-
-    .ibex_irq_software_i(ibex_irq_software),
-    .ibex_irq_timer_i   (ibex_irq_timer),
-    .ibex_irq_external_i(ibex_irq_external),
-    .ibex_irq_fast_i    (ibex_irq_fast),
-    .ibex_irq_nm_i      (ibex_irq_nm),
-
-    .gpio_intr_o(gpio_intr),
-
-    .aon_timer_intr_o               (aon_timer_intr),
-    .aon_timer_nmi_wdog_timer_bark_o(aon_timer_nmi_wdog_timer_bark),
-
-    .rv_timer_intr_o(rv_timer_intr),
-
-    .i2c0_intr_o(i2c0_intr),
-    .i2c1_intr_o(i2c1_intr),
-
-    .pattgen_intr_o(pattgen_intr),
-
-    .spi_host0_intr_o(spi_host0_intr),
-    .spi_host1_intr_o(spi_host1_intr),
-
-    .uart0_intr_o(uart0_intr),
-    .uart1_intr_o(uart1_intr),
-
-    .usbdev_intr_o(usbdev_intr),
 
     .cio_gpio_i,
     .cio_gpio_o,
@@ -345,37 +292,6 @@ module top_chip_asic (
   // (e.g. Bus Reset or End Of Packet) even when the above differential receiver is enabled.
   assign cio_usbdev_usb_dp_i = USB_P;
   assign cio_usbdev_usb_dn_i = USB_N;
-
-  intr_ctrl u_intr_ctrl (
-    .clk_i (clk_sys),
-    .rst_ni(rst_sys_n),
-
-    .ibex_irq_software_o(ibex_irq_software),
-    .ibex_irq_timer_o   (ibex_irq_timer),
-    .ibex_irq_external_o(ibex_irq_external),
-    .ibex_irq_fast_o    (ibex_irq_fast),
-    .ibex_irq_nm_o      (ibex_irq_nm),
-
-    .gpio_intr_i(gpio_intr),
-
-    .aon_timer_intr_i               (aon_timer_intr),
-    .aon_timer_nmi_wdog_timer_bark_i(aon_timer_nmi_wdog_timer_bark),
-
-    .rv_timer_intr_i(rv_timer_intr),
-
-    .i2c0_intr_i(i2c0_intr),
-    .i2c1_intr_i(i2c1_intr),
-
-    .pattgen_intr_i(pattgen_intr),
-
-    .spi_host0_intr_i(spi_host0_intr),
-    .spi_host1_intr_i(spi_host1_intr),
-
-    .uart0_intr_i(uart0_intr),
-    .uart1_intr_i(uart1_intr),
-
-    .usbdev_intr_i(usbdev_intr)
-  );
 
   wire  [NPads-1:0] pad_io;
 
