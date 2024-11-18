@@ -24,6 +24,7 @@ filesets:
       - lowrisc:sunburst:sram
       - lowrisc:sunburst:rom
       - lowrisc:sunburst:core_ibex
+      - lowrisc:opentitan:sunburst_rv_plic
     files:
       - rtl/top_chip_system.sv
     file_type: systemVerilogSource

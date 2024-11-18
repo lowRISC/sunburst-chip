@@ -1,0 +1,11 @@
+{
+  param_values: {
+    "topname": "sunburst",
+    "src": 32,
+    "target": 1,
+    "prio": 3
+  },
+
+  "instance_name": "sunburst_rv_plic"
+}
+
