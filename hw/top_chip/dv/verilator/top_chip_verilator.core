@@ -9,7 +9,6 @@ filesets:
     depend:
       - lowrisc:prim:mubi
       - lowrisc:sunburst:top_chip_system
-      - lowrisc:sunburst:intr_ctrl
 
   files_verilator:
     depend:

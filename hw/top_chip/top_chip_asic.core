@@ -9,7 +9,6 @@ filesets:
   files_rtl_generic:
     depend:
       - lowrisc:sunburst:top_chip_system
-      - lowrisc:sunburst:intr_ctrl
       - lowrisc:sunburst:clk_rst_gen
       - lowrisc:prim:pad_wrapper
       - lowrisc:prim:mubi
