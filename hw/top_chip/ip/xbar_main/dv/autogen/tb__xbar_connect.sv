@@ -24,4 +24,5 @@ initial force dut.rst_peri_ni = rst_n;
 `CONNECT_TL_DEVICE_IF(rom, dut, clk_sys_i, rst_n)
 `CONNECT_TL_DEVICE_IF(sram, dut, clk_sys_i, rst_n)
 `CONNECT_TL_DEVICE_IF(revocation_ram, dut, clk_sys_i, rst_n)
+`CONNECT_TL_DEVICE_IF(rv_plic, dut, clk_sys_i, rst_n)
 `CONNECT_TL_DEVICE_IF(peri, dut, clk_peri_i, rst_n)
