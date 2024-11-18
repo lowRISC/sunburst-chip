@@ -117,13 +117,6 @@ module top_chip_system #(
   import tl_peri_pkg::*;
   import prim_mubi_pkg::*;
 
-  // Interrupt signals from the PLIC to the CPU.
-  logic        ibex_irq_software;
-  logic        ibex_irq_timer;
-  logic        ibex_irq_external;
-  logic [14:0] ibex_irq_fast;
-  logic        ibex_irq_nm;
-
   // Interrupt signals from the peripherals to the PLIC.
   logic [31:0] gpio_intr;
 
@@ -145,6 +138,30 @@ module top_chip_system #(
 
   top_chip_system_pkg::usbdev_intr_t usbdev_intr;
 
+  // Interrupt signals from the PLIC to the CPU.
+  logic       rv_plic_msip;
+  logic       rv_plic_irq;
+
+  logic [31:0] intr_vector;
+  assign intr_vector = {
+    3'b0,
+    |gpio_intr,
+    2'b0,
+    |spi_host1_intr,
+    |spi_host0_intr,
+    6'b0,
+    |i2c1_intr,
+    |i2c0_intr,
+    6'b0,
+    |uart1_intr,
+    |uart0_intr,
+    |aon_timer_intr,
+    |pattgen_intr,
+    2'b0,
+    |usbdev_intr,
+    3'b0
+  };
+
   tlul_pkg::tl_h2d_t tl_rv_core_ibex__corei_h2d;
   tlul_pkg::tl_d2h_t tl_rv_core_ibex__corei_d2h;
   tlul_pkg::tl_h2d_t tl_rv_core_ibex__cored_h2d;
@@ -156,6 +173,8 @@ module top_chip_system #(
   tlul_pkg::tl_d2h_t tl_rom_d2h;
   tlul_pkg::tl_h2d_t tl_revocation_ram_h2d;
   tlul_pkg::tl_d2h_t tl_revocation_ram_d2h;
+  tlul_pkg::tl_h2d_t tl_rv_plic_h2d;
+  tlul_pkg::tl_d2h_t tl_rv_plic_d2h;
   tlul_pkg::tl_h2d_t tl_peri_h2d;
   tlul_pkg::tl_d2h_t tl_peri_d2h;
 
@@ -178,6 +197,8 @@ module top_chip_system #(
     .tl_rom_i           (tl_rom_d2h),
     .tl_revocation_ram_o(tl_revocation_ram_h2d),
     .tl_revocation_ram_i(tl_revocation_ram_d2h),
+    .tl_rv_plic_o       (tl_rv_plic_h2d),
+    .tl_rv_plic_i       (tl_rv_plic_d2h),
     .tl_peri_o          (tl_peri_h2d),
     .tl_peri_i          (tl_peri_d2h),
 
@@ -198,11 +219,11 @@ module top_chip_system #(
 
     .boot_addr_i(tl_main_pkg::ADDR_SPACE_ROM),
 
-    .irq_software_i(ibex_irq_software),
-    .irq_timer_i   (ibex_irq_timer),
-    .irq_external_i(ibex_irq_external),
-    .irq_fast_i    (ibex_irq_fast),
-    .irq_nm_i      (ibex_irq_nm),
+    .irq_software_i(rv_plic_msip),
+    .irq_timer_i   (rv_timer_intr),
+    .irq_external_i(rv_plic_irq),
+    .irq_fast_i    ('0),
+    .irq_nm_i      (aon_timer_nmi_wdog_timer_bark),
 
     .ram_2p_cfg_i
   );
@@ -477,35 +498,23 @@ module top_chip_system #(
     .rst_core_ni  (rst_sys_ni)
   );
 
-  intr_ctrl u_intr_ctrl (
-    .clk_i (clk_sys_i),
-    .rst_ni(rst_sys_ni),
+  rv_plic u_rv_plic (
+    .msip_o     (rv_plic_msip),
 
-    .ibex_irq_software_o(ibex_irq_software),
-    .ibex_irq_timer_o   (ibex_irq_timer),
-    .ibex_irq_external_o(ibex_irq_external),
-    .ibex_irq_fast_o    (ibex_irq_fast),
-    .ibex_irq_nm_o      (ibex_irq_nm),
+    // Interrupt notification to targets
+    .irq_o      (rv_plic_irq),
+    .irq_id_o   (),
 
-    .gpio_intr_i(gpio_intr),
+    // Interrupt Sources
+    .intr_src_i (intr_vector),
 
-    .aon_timer_intr_i               (aon_timer_intr),
-    .aon_timer_nmi_wdog_timer_bark_i(aon_timer_nmi_wdog_timer_bark),
+    // TileLink
+    .tl_i       (tl_rv_plic_h2d),
+    .tl_o       (tl_rv_plic_d2h),
 
-    .rv_timer_intr_i(rv_timer_intr),
-
-    .i2c0_intr_i(i2c0_intr),
-    .i2c1_intr_i(i2c1_intr),
-
-    .pattgen_intr_i(pattgen_intr),
-
-    .spi_host0_intr_i(spi_host0_intr),
-    .spi_host1_intr_i(spi_host1_intr),
-
-    .uart0_intr_i(uart0_intr),
-    .uart1_intr_i(uart1_intr),
-
-    .usbdev_intr_i(usbdev_intr)
+    // Clock and reset connections
+    .clk_i      (clk_sys_i),
+    .rst_ni     (rst_sys_ni)
   );
 
   spi_host u_spi_host0 (
