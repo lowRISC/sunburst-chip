@@ -23,34 +23,6 @@ module top_chip_system #(
   input rst_aon_ni,
   input rst_usb_ni,
 
-  // Ibex interrupts in
-  input  logic        ibex_irq_software_i,
-  input  logic        ibex_irq_timer_i,
-  input  logic        ibex_irq_external_i,
-  input  logic [14:0] ibex_irq_fast_i,
-  input  logic        ibex_irq_nm_i,
-
-  // Peripheral interrupts out (clock domain dependent upon the peripheral the interrupt is from)
-  output [31:0] gpio_intr_o,
-
-  output top_chip_system_pkg::aon_timer_intr_t aon_timer_intr_o,
-  output logic                                 aon_timer_nmi_wdog_timer_bark_o,
-
-  output logic rv_timer_intr_o,
-
-  output top_chip_system_pkg::i2c_intr_t i2c0_intr_o,
-  output top_chip_system_pkg::i2c_intr_t i2c1_intr_o,
-
-  output top_chip_system_pkg::pattgen_intr_t pattgen_intr_o,
-
-  output top_chip_system_pkg::spi_host_intr_t spi_host0_intr_o,
-  output top_chip_system_pkg::spi_host_intr_t spi_host1_intr_o,
-
-  output top_chip_system_pkg::uart_intr_t uart0_intr_o,
-  output top_chip_system_pkg::uart_intr_t uart1_intr_o,
-
-  output top_chip_system_pkg::usbdev_intr_t usbdev_intr_o,
-
   // Pad I/O
   // GPIO
   input        [31:0] cio_gpio_i,
@@ -145,6 +117,34 @@ module top_chip_system #(
   import tl_peri_pkg::*;
   import prim_mubi_pkg::*;
 
+  // Interrupt signals from the PLIC to the CPU.
+  logic        ibex_irq_software;
+  logic        ibex_irq_timer;
+  logic        ibex_irq_external;
+  logic [14:0] ibex_irq_fast;
+  logic        ibex_irq_nm;
+
+  // Interrupt signals from the peripherals to the PLIC.
+  logic [31:0] gpio_intr;
+
+  top_chip_system_pkg::aon_timer_intr_t aon_timer_intr;
+  logic                                 aon_timer_nmi_wdog_timer_bark;
+
+  logic rv_timer_intr;
+
+  top_chip_system_pkg::i2c_intr_t i2c0_intr;
+  top_chip_system_pkg::i2c_intr_t i2c1_intr;
+
+  top_chip_system_pkg::pattgen_intr_t pattgen_intr;
+
+  top_chip_system_pkg::spi_host_intr_t spi_host0_intr;
+  top_chip_system_pkg::spi_host_intr_t spi_host1_intr;
+
+  top_chip_system_pkg::uart_intr_t uart0_intr;
+  top_chip_system_pkg::uart_intr_t uart1_intr;
+
+  top_chip_system_pkg::usbdev_intr_t usbdev_intr;
+
   tlul_pkg::tl_h2d_t tl_rv_core_ibex__corei_h2d;
   tlul_pkg::tl_d2h_t tl_rv_core_ibex__corei_d2h;
   tlul_pkg::tl_h2d_t tl_rv_core_ibex__cored_h2d;
@@ -198,11 +198,11 @@ module top_chip_system #(
 
     .boot_addr_i(tl_main_pkg::ADDR_SPACE_ROM),
 
-    .irq_software_i(ibex_irq_software_i),
-    .irq_timer_i   (ibex_irq_timer_i),
-    .irq_external_i(ibex_irq_external_i),
-    .irq_fast_i    (ibex_irq_fast_i),
-    .irq_nm_i      (ibex_irq_nm_i),
+    .irq_software_i(ibex_irq_software),
+    .irq_timer_i   (ibex_irq_timer),
+    .irq_external_i(ibex_irq_external),
+    .irq_fast_i    (ibex_irq_fast),
+    .irq_nm_i      (ibex_irq_nm),
 
     .ram_2p_cfg_i
   );
@@ -297,9 +297,9 @@ module top_chip_system #(
 
   aon_timer u_aon_timer_aon (
     // Interrupt
-    .intr_wkup_timer_expired_o(aon_timer_intr_o.wkup_timer_expired),
-    .intr_wdog_timer_bark_o   (aon_timer_intr_o.wdog_timer_bark),
-    .nmi_wdog_timer_bark_o    (aon_timer_nmi_wdog_timer_bark_o),
+    .intr_wkup_timer_expired_o(aon_timer_intr.wkup_timer_expired),
+    .intr_wdog_timer_bark_o   (aon_timer_intr.wdog_timer_bark),
+    .nmi_wdog_timer_bark_o    (aon_timer_nmi_wdog_timer_bark),
 
     // aon domain signals
     .wkup_req_o         (aon_timer_wkup_req_o),
@@ -320,7 +320,7 @@ module top_chip_system #(
 
   rv_timer u_rv_timer (
     // Interrupt
-    .intr_timer_expired_hart0_timer0_o(rv_timer_intr_o),
+    .intr_timer_expired_hart0_timer0_o(rv_timer_intr),
 
     // Inter-module signals
     .tl_i(tl_rv_timer_h2d),
@@ -342,7 +342,7 @@ module top_chip_system #(
     .cio_gpio_en_o(cio_gpio_en_o),
 
     // Interrupt
-    .intr_gpio_o(gpio_intr_o),
+    .intr_gpio_o(gpio_intr),
 
     // Inter-module signals
     .tl_i(tl_gpio_h2d),
@@ -367,21 +367,21 @@ module top_chip_system #(
     .cio_scl_en_o(cio_i2c0_scl_en_o),
 
     // Interrupt
-    .intr_fmt_threshold_o   (i2c0_intr_o.fmt_threshold),
-    .intr_rx_threshold_o    (i2c0_intr_o.rx_threshold),
-    .intr_acq_threshold_o   (i2c0_intr_o.acq_threshold),
-    .intr_rx_overflow_o     (i2c0_intr_o.rx_overflow),
-    .intr_controller_halt_o (i2c0_intr_o.controller_halt),
-    .intr_scl_interference_o(i2c0_intr_o.scl_interference),
-    .intr_sda_interference_o(i2c0_intr_o.sda_interference),
-    .intr_stretch_timeout_o (i2c0_intr_o.stretch_timeout),
-    .intr_sda_unstable_o    (i2c0_intr_o.sda_unstable),
-    .intr_cmd_complete_o    (i2c0_intr_o.cmd_complete),
-    .intr_tx_stretch_o      (i2c0_intr_o.tx_stretch),
-    .intr_tx_threshold_o    (i2c0_intr_o.tx_threshold),
-    .intr_acq_stretch_o     (i2c0_intr_o.acq_stretch),
-    .intr_unexp_stop_o      (i2c0_intr_o.unexp_stop),
-    .intr_host_timeout_o    (i2c0_intr_o.host_timeout),
+    .intr_fmt_threshold_o   (i2c0_intr.fmt_threshold),
+    .intr_rx_threshold_o    (i2c0_intr.rx_threshold),
+    .intr_acq_threshold_o   (i2c0_intr.acq_threshold),
+    .intr_rx_overflow_o     (i2c0_intr.rx_overflow),
+    .intr_controller_halt_o (i2c0_intr.controller_halt),
+    .intr_scl_interference_o(i2c0_intr.scl_interference),
+    .intr_sda_interference_o(i2c0_intr.sda_interference),
+    .intr_stretch_timeout_o (i2c0_intr.stretch_timeout),
+    .intr_sda_unstable_o    (i2c0_intr.sda_unstable),
+    .intr_cmd_complete_o    (i2c0_intr.cmd_complete),
+    .intr_tx_stretch_o      (i2c0_intr.tx_stretch),
+    .intr_tx_threshold_o    (i2c0_intr.tx_threshold),
+    .intr_acq_stretch_o     (i2c0_intr.acq_stretch),
+    .intr_unexp_stop_o      (i2c0_intr.unexp_stop),
+    .intr_host_timeout_o    (i2c0_intr.host_timeout),
 
     // Tilelink
     .tl_i(tl_i2c0_h2d),
@@ -409,21 +409,21 @@ module top_chip_system #(
     .cio_scl_en_o(cio_i2c1_scl_en_o),
 
     // Interrupt
-    .intr_fmt_threshold_o   (i2c1_intr_o.fmt_threshold),
-    .intr_rx_threshold_o    (i2c1_intr_o.rx_threshold),
-    .intr_acq_threshold_o   (i2c1_intr_o.acq_threshold),
-    .intr_rx_overflow_o     (i2c1_intr_o.rx_overflow),
-    .intr_controller_halt_o (i2c1_intr_o.controller_halt),
-    .intr_scl_interference_o(i2c1_intr_o.scl_interference),
-    .intr_sda_interference_o(i2c1_intr_o.sda_interference),
-    .intr_stretch_timeout_o (i2c1_intr_o.stretch_timeout),
-    .intr_sda_unstable_o    (i2c1_intr_o.sda_unstable),
-    .intr_cmd_complete_o    (i2c1_intr_o.cmd_complete),
-    .intr_tx_stretch_o      (i2c1_intr_o.tx_stretch),
-    .intr_tx_threshold_o    (i2c1_intr_o.tx_threshold),
-    .intr_acq_stretch_o     (i2c1_intr_o.acq_stretch),
-    .intr_unexp_stop_o      (i2c1_intr_o.unexp_stop),
-    .intr_host_timeout_o    (i2c1_intr_o.host_timeout),
+    .intr_fmt_threshold_o   (i2c1_intr.fmt_threshold),
+    .intr_rx_threshold_o    (i2c1_intr.rx_threshold),
+    .intr_acq_threshold_o   (i2c1_intr.acq_threshold),
+    .intr_rx_overflow_o     (i2c1_intr.rx_overflow),
+    .intr_controller_halt_o (i2c1_intr.controller_halt),
+    .intr_scl_interference_o(i2c1_intr.scl_interference),
+    .intr_sda_interference_o(i2c1_intr.sda_interference),
+    .intr_stretch_timeout_o (i2c1_intr.stretch_timeout),
+    .intr_sda_unstable_o    (i2c1_intr.sda_unstable),
+    .intr_cmd_complete_o    (i2c1_intr.cmd_complete),
+    .intr_tx_stretch_o      (i2c1_intr.tx_stretch),
+    .intr_tx_threshold_o    (i2c1_intr.tx_threshold),
+    .intr_acq_stretch_o     (i2c1_intr.acq_stretch),
+    .intr_unexp_stop_o      (i2c1_intr.unexp_stop),
+    .intr_host_timeout_o    (i2c1_intr.host_timeout),
 
     // Tilelink
     .tl_i(tl_i2c1_h2d),
@@ -449,8 +449,8 @@ module top_chip_system #(
     .cio_pcl1_tx_en_o (cio_pattgen_pcl1_tx_en_o),
 
     // Interrupt
-    .intr_done_ch0_o  (pattgen_intr_o.done_ch0),
-    .intr_done_ch1_o  (pattgen_intr_o.done_ch1),
+    .intr_done_ch0_o  (pattgen_intr.done_ch0),
+    .intr_done_ch1_o  (pattgen_intr.done_ch1),
 
     // TileLink
     .tl_i             (tl_pattgen_h2d),
@@ -477,6 +477,37 @@ module top_chip_system #(
     .rst_core_ni  (rst_sys_ni)
   );
 
+  intr_ctrl u_intr_ctrl (
+    .clk_i (clk_sys_i),
+    .rst_ni(rst_sys_ni),
+
+    .ibex_irq_software_o(ibex_irq_software),
+    .ibex_irq_timer_o   (ibex_irq_timer),
+    .ibex_irq_external_o(ibex_irq_external),
+    .ibex_irq_fast_o    (ibex_irq_fast),
+    .ibex_irq_nm_o      (ibex_irq_nm),
+
+    .gpio_intr_i(gpio_intr),
+
+    .aon_timer_intr_i               (aon_timer_intr),
+    .aon_timer_nmi_wdog_timer_bark_i(aon_timer_nmi_wdog_timer_bark),
+
+    .rv_timer_intr_i(rv_timer_intr),
+
+    .i2c0_intr_i(i2c0_intr),
+    .i2c1_intr_i(i2c1_intr),
+
+    .pattgen_intr_i(pattgen_intr),
+
+    .spi_host0_intr_i(spi_host0_intr),
+    .spi_host1_intr_i(spi_host1_intr),
+
+    .uart0_intr_i(uart0_intr),
+    .uart1_intr_i(uart1_intr),
+
+    .usbdev_intr_i(usbdev_intr)
+  );
+
   spi_host u_spi_host0 (
     // Input
     .cio_sd_i    (cio_spi_host0_sd_i),
@@ -490,8 +521,8 @@ module top_chip_system #(
     .cio_sd_en_o (cio_spi_host0_sd_en_o),
 
     // Interrupt
-    .intr_error_o    (spi_host0_intr_o.error),
-    .intr_spi_event_o(spi_host0_intr_o.spi_event),
+    .intr_error_o    (spi_host0_intr.error),
+    .intr_spi_event_o(spi_host0_intr.spi_event),
 
     // Tilelink
     .tl_i(tl_spi_host0_h2d),
@@ -515,8 +546,8 @@ module top_chip_system #(
     .cio_sd_en_o (cio_spi_host1_sd_en_o),
 
     // Interrupt
-    .intr_error_o    (spi_host1_intr_o.error),
-    .intr_spi_event_o(spi_host1_intr_o.spi_event),
+    .intr_error_o    (spi_host1_intr.error),
+    .intr_spi_event_o(spi_host1_intr.spi_event),
 
     // Tilelink
     .tl_i(tl_spi_host1_h2d),
@@ -536,15 +567,15 @@ module top_chip_system #(
     .cio_tx_en_o(cio_uart0_tx_en_o),
 
     // Interrupt
-    .intr_tx_watermark_o (uart0_intr_o.tx_watermark),
-    .intr_rx_watermark_o (uart0_intr_o.rx_watermark),
-    .intr_tx_done_o      (uart0_intr_o.tx_done),
-    .intr_rx_overflow_o  (uart0_intr_o.rx_overflow),
-    .intr_rx_frame_err_o (uart0_intr_o.rx_frame_err),
-    .intr_rx_break_err_o (uart0_intr_o.rx_break_err),
-    .intr_rx_timeout_o   (uart0_intr_o.rx_timeout),
-    .intr_rx_parity_err_o(uart0_intr_o.rx_parity_err),
-    .intr_tx_empty_o     (uart0_intr_o.tx_empty),
+    .intr_tx_watermark_o (uart0_intr.tx_watermark),
+    .intr_rx_watermark_o (uart0_intr.rx_watermark),
+    .intr_tx_done_o      (uart0_intr.tx_done),
+    .intr_rx_overflow_o  (uart0_intr.rx_overflow),
+    .intr_rx_frame_err_o (uart0_intr.rx_frame_err),
+    .intr_rx_break_err_o (uart0_intr.rx_break_err),
+    .intr_rx_timeout_o   (uart0_intr.rx_timeout),
+    .intr_rx_parity_err_o(uart0_intr.rx_parity_err),
+    .intr_tx_empty_o     (uart0_intr.tx_empty),
 
     // Inter-module signals
     .tl_i(tl_uart0_h2d),
@@ -564,15 +595,15 @@ module top_chip_system #(
     .cio_tx_en_o(cio_uart1_tx_en_o),
 
     // Interrupt
-    .intr_tx_watermark_o (uart1_intr_o.tx_watermark),
-    .intr_rx_watermark_o (uart1_intr_o.rx_watermark),
-    .intr_tx_done_o      (uart1_intr_o.tx_done),
-    .intr_rx_overflow_o  (uart1_intr_o.rx_overflow),
-    .intr_rx_frame_err_o (uart1_intr_o.rx_frame_err),
-    .intr_rx_break_err_o (uart1_intr_o.rx_break_err),
-    .intr_rx_timeout_o   (uart1_intr_o.rx_timeout),
-    .intr_rx_parity_err_o(uart1_intr_o.rx_parity_err),
-    .intr_tx_empty_o     (uart1_intr_o.tx_empty),
+    .intr_tx_watermark_o (uart1_intr.tx_watermark),
+    .intr_rx_watermark_o (uart1_intr.rx_watermark),
+    .intr_tx_done_o      (uart1_intr.tx_done),
+    .intr_rx_overflow_o  (uart1_intr.rx_overflow),
+    .intr_rx_frame_err_o (uart1_intr.rx_frame_err),
+    .intr_rx_break_err_o (uart1_intr.rx_break_err),
+    .intr_rx_timeout_o   (uart1_intr.rx_timeout),
+    .intr_rx_parity_err_o(uart1_intr.rx_parity_err),
+    .intr_tx_empty_o     (uart1_intr.tx_empty),
 
     // Inter-module signals
     .tl_i(tl_uart1_h2d),
@@ -603,24 +634,24 @@ module top_chip_system #(
     .usb_rx_enable_o    (cio_usbdev_rx_enable_o),
 
     // Interrupt
-    .intr_pkt_received_o    (usbdev_intr_o.pkt_received),
-    .intr_pkt_sent_o        (usbdev_intr_o.pkt_sent),
-    .intr_disconnected_o    (usbdev_intr_o.disconnected),
-    .intr_host_lost_o       (usbdev_intr_o.host_lost),
-    .intr_link_reset_o      (usbdev_intr_o.link_reset),
-    .intr_link_suspend_o    (usbdev_intr_o.link_suspend),
-    .intr_link_resume_o     (usbdev_intr_o.link_resume),
-    .intr_av_out_empty_o    (usbdev_intr_o.av_out_empty),
-    .intr_rx_full_o         (usbdev_intr_o.rx_full),
-    .intr_av_overflow_o     (usbdev_intr_o.av_overflow),
-    .intr_link_in_err_o     (usbdev_intr_o.link_in_err),
-    .intr_rx_crc_err_o      (usbdev_intr_o.rx_crc_err),
-    .intr_rx_pid_err_o      (usbdev_intr_o.rx_pid_err),
-    .intr_rx_bitstuff_err_o (usbdev_intr_o.rx_bitstuff_err),
-    .intr_frame_o           (usbdev_intr_o.frame),
-    .intr_powered_o         (usbdev_intr_o.powered),
-    .intr_link_out_err_o    (usbdev_intr_o.link_out_err),
-    .intr_av_setup_empty_o  (usbdev_intr_o.av_setup_empty),
+    .intr_pkt_received_o    (usbdev_intr.pkt_received),
+    .intr_pkt_sent_o        (usbdev_intr.pkt_sent),
+    .intr_disconnected_o    (usbdev_intr.disconnected),
+    .intr_host_lost_o       (usbdev_intr.host_lost),
+    .intr_link_reset_o      (usbdev_intr.link_reset),
+    .intr_link_suspend_o    (usbdev_intr.link_suspend),
+    .intr_link_resume_o     (usbdev_intr.link_resume),
+    .intr_av_out_empty_o    (usbdev_intr.av_out_empty),
+    .intr_rx_full_o         (usbdev_intr.rx_full),
+    .intr_av_overflow_o     (usbdev_intr.av_overflow),
+    .intr_link_in_err_o     (usbdev_intr.link_in_err),
+    .intr_rx_crc_err_o      (usbdev_intr.rx_crc_err),
+    .intr_rx_pid_err_o      (usbdev_intr.rx_pid_err),
+    .intr_rx_bitstuff_err_o (usbdev_intr.rx_bitstuff_err),
+    .intr_frame_o           (usbdev_intr.frame),
+    .intr_powered_o         (usbdev_intr.powered),
+    .intr_link_out_err_o    (usbdev_intr.link_out_err),
+    .intr_av_setup_empty_o  (usbdev_intr.av_setup_empty),
 
     // Inter-module signals
     .usb_ref_val_o          (), //usbdev_usb_ref_val_o),
