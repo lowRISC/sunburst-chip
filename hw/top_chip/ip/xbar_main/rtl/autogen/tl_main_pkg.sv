@@ -9,21 +9,24 @@ package tl_main_pkg;
   localparam logic [31:0] ADDR_SPACE_ROM            = 32'h 00100000;
   localparam logic [31:0] ADDR_SPACE_SRAM           = 32'h 00200000;
   localparam logic [31:0] ADDR_SPACE_REVOCATION_RAM = 32'h 00300000;
+  localparam logic [31:0] ADDR_SPACE_RV_PLIC        = 32'h 88000000;
   localparam logic [31:0] ADDR_SPACE_PERI           = 32'h 40000000;
 
   localparam logic [31:0] ADDR_MASK_ROM            = 32'h 00000fff;
   localparam logic [31:0] ADDR_MASK_SRAM           = 32'h 0007ffff;
   localparam logic [31:0] ADDR_MASK_REVOCATION_RAM = 32'h 00001fff;
+  localparam logic [31:0] ADDR_MASK_RV_PLIC        = 32'h 03ffffff;
   localparam logic [31:0] ADDR_MASK_PERI           = 32'h 3fffffff;
 
   localparam int N_HOST   = 2;
-  localparam int N_DEVICE = 4;
+  localparam int N_DEVICE = 5;
 
   typedef enum int {
     TlRom = 0,
     TlSram = 1,
     TlRevocationRam = 2,
-    TlPeri = 3
+    TlRvPlic = 3,
+    TlPeri = 4
   } tl_device_e;
 
   typedef enum int {

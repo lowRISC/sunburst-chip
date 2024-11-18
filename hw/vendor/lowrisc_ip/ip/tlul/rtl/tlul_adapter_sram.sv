@@ -383,8 +383,10 @@ module tlul_adapter_sram
       d_data   : d_data,
       d_user   : '{default: '0, data_intg: data_intg, capability: d_cap},
       d_error  : d_valid && d_error,
+      /* verilator lint_off UNOPTFLAT */
       a_ready  : (gnt_i | missed_err_gnt_q) & reqfifo_wready & sramreqfifo_wready &
                   sramreqaddrfifo_wready
+      /* verilator lint_on UNOPTFLAT */
   };
 
   // a_ready depends on the FIFO full condition and grant from SRAM (or SRAM arbiter)
@@ -438,8 +440,8 @@ module tlul_adapter_sram
       for (int i = 0 ; i < top_pkg::TL_DW/8 ; i++) begin
         wmask_int[woffset][8*i +: 8] = {8{tl_i_int.a_mask[i]}};
         wdata_int[woffset][8*i +: 8] = (tl_i_int.a_mask[i] && we_o) ? tl_i_int.a_data[8*i+:8] : '0;
-        wcap_int = we_o ? tl_i_int.a_user.capability : 1'b0;
       end
+      wcap_int = we_o ? tl_i_int.a_user.capability : 1'b0;
     end
   end
 
