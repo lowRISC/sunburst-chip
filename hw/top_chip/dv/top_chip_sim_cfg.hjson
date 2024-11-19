@@ -46,7 +46,12 @@
     {
       name: top_chip_smoke
       uvm_test_seq: top_chip_base_vseq
-      run_opts: ["+ChipMemROM_image_file={proj_root}/scratch_sw/bare_metal/build/checks/chip_check.vmem"]
+      run_opts: ["+ChipMemSRAM_image_file={proj_root}/scratch_sw/bare_metal/build/checks/chip_check.vmem"]
+    }
+    {
+      name: test_runner
+      uvm_test_seq: top_chip_base_vseq
+      run_opts: ["+ChipMemSRAM_image_file={proj_root}/scratch_sw/bare_metal/build/tests/test_runner.vmem"]
     }
 
     {
@@ -60,7 +65,7 @@
   regressions: [
     {
       name: smoke
-      tests: ["top_chip_smoke", "top_usbdev_smoke"]
+      tests: ["top_chip_smoke", "top_usbdev_smoke", "test_runner"]
     }
   ]
 }

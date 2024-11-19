@@ -217,7 +217,9 @@ module top_chip_system #(
     .tl_revocation_ram_h2d_i(tl_revocation_ram_h2d),
     .tl_revocation_ram_d2h_o(tl_revocation_ram_d2h),
 
-    .boot_addr_i(tl_main_pkg::ADDR_SPACE_ROM),
+    // TODO: Changed by AL for PLIC bringup.
+    // .boot_addr_i(tl_main_pkg::ADDR_SPACE_ROM),
+    .boot_addr_i(tl_main_pkg::ADDR_SPACE_SRAM),
 
     .irq_software_i(rv_plic_msip),
     .irq_timer_i   (rv_timer_intr),

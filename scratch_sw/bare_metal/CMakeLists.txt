@@ -2,8 +2,10 @@ cmake_minimum_required(VERSION 3.13)
 include(FetchContent)
 
 FetchContent_Declare(CHERIOT_RTOS
-  GIT_REPOSITORY    https://github.com/CHERIoT-Platform/CHERIoT-RTOS
-  GIT_TAG           64d846091a43053fbdd0312fb9419e05429109c6
+  GIT_REPOSITORY    https://github.com/lowRISC/CHERIoT-RTOS
+  GIT_TAG           bf7584e971c553160d266c21e17a38635b349a38
+#  GIT_REPOSITORY    https://github.com/CHERIoT-Platform/CHERIoT-RTOS
+#  GIT_TAG           64d846091a43053fbdd0312fb9419e05429109c6
 )
 
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
@@ -14,6 +16,12 @@ if(NOT DEFINED CHERIOT_RTOS_SDK)
   FetchContent_Populate(CHERIOT_RTOS)
   set(CHERIOT_RTOS_SDK "${cheriot_rtos_SOURCE_DIR}/sdk")
 endif()
+
+FetchContent_Declare(REISFMT
+  GIT_REPOSITORY    https://github.com/engdoreis/reisfmt
+  GIT_TAG           4ce04e1bc88d37ad359da051b91b4071f740c3d8
+)
+FetchContent_Populate(REISFMT)
 
 project(sonata_system_cheriot_sw LANGUAGES C CXX ASM)
 
@@ -28,3 +36,5 @@ set(CHERIOT_SDK_INCLUDES
 )
 
 add_subdirectory(checks)
+add_subdirectory(common)
+add_subdirectory(tests)

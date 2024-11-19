@@ -13,17 +13,14 @@
 using namespace CHERI;
 
 /**
- * C++ entry point for the loader.  This is called from assembly, with the
- * read-write root in the first argument.
+ * C++ entry point. This is called from assembly, with the read-write root in the first argument.
  */
-[[noreturn]]
-extern "C" void rom_loader_entry(void *rwRoot)
-{
+extern "C" void entry_point(void *rwRoot) {
   Capability<void> root{rwRoot};
 
   //// Create a bounded capability to the UART
   Capability<volatile OpenTitanUart> uart = root.cast<volatile OpenTitanUart>();
-  uart.address() = UART0_ADDRESS;
+  uart.address() = UART_ADDRESS;
   uart.bounds()  = UART_BOUNDS;
 
   Capability<volatile OpenTitanGPIO> gpio = root.cast<volatile OpenTitanGPIO>();

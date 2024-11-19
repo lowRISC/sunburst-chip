@@ -67,12 +67,9 @@ static void rxCallback(void *rxHandle, uint8_t ep, bool setup, const uint8_t *da
 }
 
 /**
- * C++ entry point for the loader.  This is called from assembly, with the
- * read-write root in the first argument.
+ * C++ entry point. This is called from assembly, with the read-write root in the first argument.
  */
-[[noreturn]]
-extern "C" void rom_loader_entry(void *rwRoot)
-{
+extern "C" void entry_point(void *rwRoot) {
   // Buffer for data transfer to/from the USB device.
   //  uint8_t _Alignas(uint32_t) data[OpenTitanUsbdev::MaxPacketLength];
 
@@ -80,7 +77,7 @@ extern "C" void rom_loader_entry(void *rwRoot)
 
   // Create a bounded capability to the UART
   Capability<volatile OpenTitanUart> uart = root.cast<volatile OpenTitanUart>();
-  uart.address()                          = UART0_ADDRESS;
+  uart.address()                          = UART_ADDRESS;
   uart.bounds()                           = UART_BOUNDS;
 
   Capability<volatile OpenTitanUsbdev> usbdev = root.cast<volatile OpenTitanUsbdev>();
