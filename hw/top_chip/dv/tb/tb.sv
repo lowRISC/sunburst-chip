@@ -195,6 +195,7 @@ module top_chip_asic_tb;
     initial begin
       chip_mem_e    mem;
       mem_bkdr_util m_mem_bkdr_util[chip_mem_e];
+      mem_clear_util cap_sram_clear;
 
       m_mem_bkdr_util[ChipMemSRAM] = new(
         .name ("mem_bkdr_util[ChipMemSRAM]"),
@@ -203,7 +204,18 @@ module top_chip_asic_tb;
         .n_bits($bits(`SRAM_MEM_HIER)),
         .err_detection_scheme(mem_bkdr_util_pkg::ErrDetectionNone),
         .system_base_addr    (tl_main_pkg::ADDR_SPACE_SRAM));
+      // Zero-initialising the SRAM ensures valid BSS.
+      m_mem_bkdr_util[ChipMemSRAM].clear_mem();
       `MEM_BKDR_UTIL_FILE_OP(m_mem_bkdr_util[ChipMemSRAM], `SRAM_MEM_HIER)
+
+      // Zero-initialise the SRAM Capability tags, otherwise TL-UL FIFO assertions will fire;
+      // mem_bkdr_util does not handle the geometry of this memory.
+      cap_sram_clear = new(
+        .name ("cap_sram_clear"),
+        .path (`DV_STRINGIFY(`SRAM_CAP_MEM_HIER)),
+        .depth ($size(`SRAM_CAP_MEM_HIER)),
+        .n_bits ($bits(`SRAM_CAP_MEM_HIER)));
+      cap_sram_clear.clear_mem();
 
       m_mem_bkdr_util[ChipMemROM] = new(
         .name ("mem_bkdr_util[ChipMemROM]"),

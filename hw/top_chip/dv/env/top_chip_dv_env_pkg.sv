@@ -22,4 +22,6 @@ package top_chip_dv_env_pkg;
   `include "top_chip_dv_env_cfg.sv"
   `include "top_chip_dv_env.sv"
 
+  `include "mem_clear_util.sv"
+
 endpackage

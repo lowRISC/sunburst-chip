@@ -6,4 +6,5 @@
 `define MEM_ARRAY_SUB gen_generic.u_impl_generic.mem
 
 `define SRAM_MEM_HIER `SYSTEM_HIER.u_sram.u_ram.`MEM_ARRAY_SUB
+`define SRAM_CAP_MEM_HIER `SYSTEM_HIER.u_sram.u_cap_ram.`MEM_ARRAY_SUB
 `define ROM_MEM_HIER `SYSTEM_HIER.u_rom.u_rom.`MEM_ARRAY_SUB
