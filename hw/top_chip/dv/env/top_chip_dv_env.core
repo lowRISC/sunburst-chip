@@ -13,6 +13,7 @@ filesets:
       - lowrisc:dv:pins_if
       - lowrisc:dv:common_ifs
     files:
+      - mem_clear_util.sv: {is_include_file: true}
       - top_chip_dv_env_pkg.sv
       - top_chip_dv_env_cfg.sv: {is_include_file: true}
       - top_chip_dv_env.sv: {is_include_file: true}
