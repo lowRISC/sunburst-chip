@@ -5,9 +5,6 @@
 class top_chip_dv_base_test extends uvm_test;
   top_chip_dv_env env;
 
-  virtual clk_rst_if sys_clk_vif;
-  virtual pins_if#(NGpioPins) gpio_pins_vif;
-
   `uvm_component_utils(top_chip_dv_base_test)
   `uvm_component_new
 
@@ -20,14 +17,6 @@ class top_chip_dv_base_test extends uvm_test;
     env = top_chip_dv_env::type_id::create("env", this);
     env.cfg = top_chip_dv_env_cfg::type_id::create("cfg", this);
     env.cfg.get_mem_image_files_from_plusargs();
-
-    if (!uvm_config_db#(virtual clk_rst_if)::get(null, "", "sys_clk_if", sys_clk_vif)) begin
-      `uvm_fatal(`gfn, "Cannot get clk_if")
-    end
-
-    if (!uvm_config_db#(virtual pins_if#(NGpioPins))::get(null, "", "gpio_pins_vif", gpio_pins_vif)) begin
-      `uvm_fatal(`gfn, "Cannot get gpio_pins_vif")
-    end
   endfunction
 
   virtual function void connect_phase(uvm_phase phase);
@@ -35,28 +24,45 @@ class top_chip_dv_base_test extends uvm_test;
   endfunction
 
   virtual task run_phase(uvm_phase phase);
-    phase.raise_objection(this);
     env.load_memories();
-    wait_for_test_done();
+    phase.raise_objection(this);
+    run_test();
     phase.drop_objection(this);
   endtask
 
-  virtual task wait_for_test_done();
+  virtual task run_test();
+    string test_seq_s;
+
+    if(!$value$plusargs("UVM_TEST_SEQ=%0s", test_seq_s)) begin
+      `uvm_fatal(`gfn, "Sequence name was not provided via +UVM_TEST_SEQ, cannot run test")
+    end
+
     fork : isolation_work
       fork
         begin
-          // TODO: We likely want a better method for software to signal a test end (and other
-          // events) to the testbench. This is a temporary measure til that exists.
-          wait(gpio_pins_vif.pins == 32'hDEADBEEF);
-          `uvm_info(`gfn, "TEST PASSED! Completion signal seen from software", UVM_LOW);
+          run_seq(test_seq_s);
         end
         begin
-          repeat (env.cfg.sys_timeout_cycles) sys_clk_vif.wait_clks(1);
+          repeat (env.cfg.sys_timeout_cycles) env.ifs.sys_clk_vif.wait_clks(1);
           `uvm_fatal(`gfn, $sformatf("Reached system cycle timeout of %d", env.cfg.sys_timeout_cycles))
         end
       join_any
 
       disable fork;
     join
+  endtask
+
+  virtual task run_seq(string test_seq_s);
+    uvm_sequence test_seq = create_seq_by_name(test_seq_s);
+
+    // Setting the sequencer before the sequence is randomized is mandatory. We do this so that the
+    // sequence has access to the UVM environment's cfg handle via the p_sequencer handle within the
+    // randomization constraints.
+    test_seq.set_sequencer(env.virtual_sequencer);
+    `DV_CHECK_RANDOMIZE_FATAL(test_seq)
+
+    `uvm_info(`gfn, {"Starting test sequence ", test_seq_s}, UVM_MEDIUM)
+    test_seq.start(env.virtual_sequencer);
+    `uvm_info(`gfn, {"Finished test sequence ", test_seq_s}, UVM_MEDIUM)
   endtask
 endclass
