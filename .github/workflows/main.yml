@@ -1,0 +1,52 @@
+name: Sunburst chip tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  simulator:
+    name: Simulator
+    runs-on: ubuntu-latest
+    steps:
+    - name: Repository checkout
+      uses: actions/checkout@v4
+    - name: Python virtual environment setup
+      run: |
+        set -e
+        python3 -m venv ./sunburst-py-venv
+        source ./sunburst-py-venv/bin/activate
+        pip3 install -r ./python-requirements.txt
+    - name: Verilator build
+      run: |
+        set -e
+        sudo apt update
+        sudo apt install -y git help2man perl python3 \
+          make g++ libfl2 libfl-dev zlib1g zlib1g-dev \
+          autoconf flex bison
+        cd ~
+        git clone https://github.com/verilator/verilator
+        cd verilator
+        git checkout v5.026
+        mkdir install
+        autoconf
+        ./configure --prefix=$PWD/install
+        make -j `nproc`
+        make install
+    - name: Simulator build
+      run: |
+        set -e
+        sudo apt update
+        sudo apt install -y git python3 python3-venv \
+          build-essential libelf-dev libxml2-dev
+        source ./sunburst-py-venv/bin/activate
+        ls $HOME/verilator/install/bin
+        export PATH=$HOME/verilator/install/bin:$PATH
+        NUM_CORES=4
+        fusesoc --cores-root=. run \
+          --target=sim --tool=verilator --setup \
+          --build lowrisc:sunburst:top_chip_verilator \
+          --verilator_options="-j $NUM_CORES" \
+          --make_options="-j $NUM_CORES"
