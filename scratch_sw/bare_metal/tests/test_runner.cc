@@ -14,6 +14,7 @@
 #include "plic_tests.hh"
 #include "../common/uart-utils.hh"
 #include "../common/sunburst-devices.hh"
+#include "../common/platform-gpio.hh"
 #include <cheri.hh>
 // clang-format on
 #include <platform-uart.hh>
@@ -28,5 +29,16 @@ extern "C" void entry_point(void *rwRoot) {
 
   log.println("Starting test_runner");
   plic_tests(root, log);
-  finish_running(log, "All tests finished");
+  log.println("All tests finished");
+
+  // Wait for UART idle
+  while (!(uart0->status & 0x8));
+
+  CHERI::Capability<volatile OpenTitanGPIO> gpio = root.cast<volatile OpenTitanGPIO>();
+  gpio.address() = GPIO_ADDRESS;
+  gpio.bounds()  = GPIO_BOUNDS;
+
+  // Signal test end to UVM testbench
+  gpio->set_oe_direct(0xffffffff);
+  gpio->set_out_direct(0xDEADBEEF);
 }
