@@ -57,7 +57,7 @@
     {
       name: top_usbdev_smoke
       uvm_test_seq: top_chip_dv_base_vseq
-      run_opts: ["+ChipMemROM_image_file={proj_root}/scratch_sw/bare_metal/build/checks/usbdev_check.vmem"]
+      run_opts: ["+ChipMemSRAM_image_file={proj_root}/scratch_sw/bare_metal/build/checks/usbdev_check.vmem"]
     }
   ]
 
