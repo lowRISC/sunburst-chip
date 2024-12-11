@@ -45,7 +45,7 @@ fusesoc --cores-root=. run \
 *To enable instruction tracing add +define+RVFI to the verilator_options switch
 in the command above.*
 
-A test program can be built with scratch_sw/ (a suitable CHERIoT tool chain must
+A test program can be built with scratch_sw/ (a suitable CHERIoT toolchain must
 be available on your path or specified by `CHERIOT_LLVM_BIN`):
 
 ```sh
@@ -56,8 +56,9 @@ cmake --build scratch_sw/bare_metal/build
 
 To run the `chip_check` program this will build run:
 
-```
-./build/lowrisc_sunburst_top_chip_verilator_0/sim-verilator/Vtop_chip_verilator -E ./scratch_sw/bare_metal/build/checks/chip_check
+```sh
+build/lowrisc_sunburst_top_chip_verilator_0/sim-verilator/Vtop_chip_verilator \
+  -E ./scratch_sw/bare_metal/build/checks/chip_check
 ```
 
 You should see a repeated 'Hello from Sonata Chip!' in `uart0.log`.  The
