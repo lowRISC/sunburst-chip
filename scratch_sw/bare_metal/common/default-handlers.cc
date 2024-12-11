@@ -6,15 +6,16 @@
 #include <stdint.h>
 #include "asm.hh"
 
-extern "C" __attribute__((alias("exception_handler"))) __attribute__((weak)) void irq_software_handler(void);
+extern "C" __attribute__((alias("exception_handler"))) __attribute__((weak)) void irq_software_handler(void* rwRoot);
 
-extern "C" __attribute__((weak)) void irq_timer_handler(void) { return; }
+extern "C" __attribute__((weak)) void irq_timer_handler(void* rwRoot) { return; }
 
-extern "C" __attribute__((alias("exception_handler"))) __attribute__((weak)) void irq_external_handler(void);
+extern "C" __attribute__((alias("exception_handler"))) __attribute__((weak)) void irq_external_handler(void* rwRoot);
 
-extern "C" __attribute__((alias("exception_handler"))) __attribute__((weak)) void irq_internal_handler(void);
+extern "C" __attribute__((alias("exception_handler"))) __attribute__((weak)) void irq_internal_handler(void* rwRoot);
 
 extern "C" __attribute__((weak)) void exception_handler(void *rwRoot) { while (1); }
+
 
 enum ExceptionCode : uint32_t {
   MachineSoftwareInterrupt = 3,
@@ -30,13 +31,13 @@ extern "C" void __trap_vector(void *rwRoot) {
 
   switch (mcause & 0x1f) {
     case MachineSoftwareInterrupt:
-      irq_software_handler();
+      irq_software_handler(rwRoot);
       break;
     case MachineTimerInterrupt:
-      irq_timer_handler();
+      irq_timer_handler(rwRoot);
       break;
     case MachineExternalInterrupt:
-      irq_external_handler();
+      irq_external_handler(rwRoot);
       break;
     default:
       break;
