@@ -13,6 +13,12 @@ contains extra dependencies that aren't required.  You may wish to install the
 dependencies in a virtual environment to isolate them from the rest of your
 system.  Python 3.9 or higher is required.
 
+Some packages that you'll need to install:
+- libxml2-dev
+- libxslt-dev
+- Cargo, which you can install using [rustup](https://rustup.rs/)
+
+Python environment setup:
 ```sh
 python3 -m venv ./sunburst-py-venv
 source ./sunburst-py-venv/bin/activate
