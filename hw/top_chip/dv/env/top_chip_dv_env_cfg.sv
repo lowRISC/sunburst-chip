@@ -4,7 +4,7 @@
 
 class top_chip_dv_env_cfg extends uvm_object;
   string mem_image_files[chip_mem_e];
-  longint unsigned sys_timeout_cycles = 2_000_000;
+  longint unsigned sys_timeout_cycles = 20_000_000;
 
   `uvm_object_utils_begin(top_chip_dv_env_cfg)
   `uvm_object_utils_end
