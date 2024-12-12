@@ -13,7 +13,7 @@ contains extra dependencies that aren't required.  You may wish to install the
 dependencies in a virtual environment to isolate them from the rest of your
 system.  Python 3.9 or higher is required.
 
-Some packages that you'll need to install:
+Some packages that you'll need to install to set up the Python environment:
 - libxml2-dev
 - libxslt-dev
 - Cargo, which you can install using [rustup](https://rustup.rs/)
