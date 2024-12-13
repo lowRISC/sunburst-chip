@@ -1,0 +1,16 @@
+// Copyright lowRISC contributors.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+{
+    name: "lowrisc_sonata",
+    target_dir: "lowrisc_sonata",
+
+    upstream: {
+        url: "https://github.com/lowRISC/sonata-system",
+        rev: "main",
+    },
+
+    mapping: [
+        {from: "rtl/ip/rev_ctl", to: "rtl/ip/rev_ctl"},
+    ],
+}
