@@ -81,29 +81,6 @@
         size_byte: "0x00001000",
       }],
     },
-    {
-      name:  "pattgen",
-      type:  "device",
-      clock: "clk_peri_i",
-      reset: "rst_peri_ni",
-      xbar:  false,
-      pipeline: false
-      addr_range: [{
-        base_addr: "0x40500000",
-        size_byte: "0x00001000",
-      }],
-    },
-    { name:  "pwm",
-      type:  "device",
-      clock: "clk_peri_i",
-      reset: "rst_peri_ni",
-      xbar:  false,
-      pipeline: false
-      addr_range: [{
-        base_addr: "0x40600000",
-        size_byte: "0x00001000",
-      }],
-    },
     { name:  "spi_host0",
       type:  "device",
       clock: "clk_peri_i",
@@ -159,7 +136,29 @@
         size_byte: "0x00001000",
       }],
     },
-
+    {
+      name:  "pattgen",
+      type:  "device",
+      clock: "clk_peri_i",
+      reset: "rst_peri_ni",
+      xbar:  false,
+      pipeline: false
+      addr_range: [{
+        base_addr: "0x40500000",
+        size_byte: "0x00001000",
+      }],
+    },
+    { name:  "pwm",
+      type:  "device",
+      clock: "clk_peri_i",
+      reset: "rst_peri_ni",
+      xbar:  false,
+      pipeline: false
+      addr_range: [{
+        base_addr: "0x40600000",
+        size_byte: "0x00001000",
+      }],
+    },
   ],
   connections: {
     main: ["rv_timer", "aon_timer", "gpio" "i2c0", "i2c1", "pattgen", "pwm",
