@@ -16,6 +16,9 @@ tl_device_t xbar_devices[$] = '{
     '{"revocation_ram", '{
         '{32'h00300000, 32'h00301fff}
     }},
+    '{"rev_ctl", '{
+        '{32'h00340000, 32'h00340fff}
+    }},
     '{"rv_plic", '{
         '{32'h88000000, 32'h8bffffff}
     }},
@@ -33,6 +36,7 @@ tl_host_t xbar_hosts[$] = '{
         "sram",
         "rom",
         "revocation_ram",
+        "rev_ctl",
         "rv_plic",
         "peri"}}
 };

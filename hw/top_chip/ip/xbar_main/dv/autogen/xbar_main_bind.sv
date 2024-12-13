@@ -38,6 +38,12 @@ module xbar_main_bind;
     .h2d    (tl_revocation_ram_o),
     .d2h    (tl_revocation_ram_i)
   );
+  bind xbar_main tlul_assert #(.EndpointType("Host")) tlul_assert_device_rev_ctl (
+    .clk_i  (clk_sys_i),
+    .rst_ni (rst_sys_ni),
+    .h2d    (tl_rev_ctl_o),
+    .d2h    (tl_rev_ctl_i)
+  );
   bind xbar_main tlul_assert #(.EndpointType("Host")) tlul_assert_device_rv_plic (
     .clk_i  (clk_sys_i),
     .rst_ni (rst_sys_ni),

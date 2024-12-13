@@ -43,10 +43,6 @@ module xbar_peri (
   input  tlul_pkg::tl_d2h_t tl_i2c0_i,
   output tlul_pkg::tl_h2d_t tl_i2c1_o,
   input  tlul_pkg::tl_d2h_t tl_i2c1_i,
-  output tlul_pkg::tl_h2d_t tl_pattgen_o,
-  input  tlul_pkg::tl_d2h_t tl_pattgen_i,
-  output tlul_pkg::tl_h2d_t tl_pwm_o,
-  input  tlul_pkg::tl_d2h_t tl_pwm_i,
   output tlul_pkg::tl_h2d_t tl_spi_host0_o,
   input  tlul_pkg::tl_d2h_t tl_spi_host0_i,
   output tlul_pkg::tl_h2d_t tl_spi_host1_o,
@@ -57,6 +53,10 @@ module xbar_peri (
   input  tlul_pkg::tl_d2h_t tl_uart1_i,
   output tlul_pkg::tl_h2d_t tl_usbdev_o,
   input  tlul_pkg::tl_d2h_t tl_usbdev_i,
+  output tlul_pkg::tl_h2d_t tl_pattgen_o,
+  input  tlul_pkg::tl_d2h_t tl_pattgen_i,
+  output tlul_pkg::tl_h2d_t tl_pwm_o,
+  input  tlul_pkg::tl_d2h_t tl_pwm_i,
 
   input prim_mubi_pkg::mubi4_t scanmode_i
 );

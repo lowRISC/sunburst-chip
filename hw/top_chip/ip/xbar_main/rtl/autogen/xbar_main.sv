@@ -7,20 +7,21 @@
 //
 // Interconnect
 // rv_core_ibex.corei
-//   -> s1n_7
-//     -> sm1_8
-//       -> sram
+//   -> s1n_8
 //     -> sm1_9
+//       -> sram
+//     -> sm1_10
 //       -> rom
 // rv_core_ibex.cored
-//   -> s1n_10
-//     -> sm1_8
-//       -> sram
+//   -> s1n_11
 //     -> sm1_9
+//       -> sram
+//     -> sm1_10
 //       -> rom
 //     -> revocation_ram
+//     -> rev_ctl
 //     -> rv_plic
-//     -> asf_11
+//     -> asf_12
 //       -> peri
 
 module xbar_main (
@@ -42,6 +43,8 @@ module xbar_main (
   input  tlul_pkg::tl_d2h_t tl_sram_i,
   output tlul_pkg::tl_h2d_t tl_revocation_ram_o,
   input  tlul_pkg::tl_d2h_t tl_revocation_ram_i,
+  output tlul_pkg::tl_h2d_t tl_rev_ctl_o,
+  input  tlul_pkg::tl_d2h_t tl_rev_ctl_i,
   output tlul_pkg::tl_h2d_t tl_rv_plic_o,
   input  tlul_pkg::tl_d2h_t tl_rv_plic_i,
   output tlul_pkg::tl_h2d_t tl_peri_o,
@@ -58,22 +61,15 @@ module xbar_main (
   logic unused_scanmode;
   assign unused_scanmode = ^scanmode_i;
 
-  tl_h2d_t tl_s1n_7_us_h2d ;
-  tl_d2h_t tl_s1n_7_us_d2h ;
+  tl_h2d_t tl_s1n_8_us_h2d ;
+  tl_d2h_t tl_s1n_8_us_d2h ;
 
 
-  tl_h2d_t tl_s1n_7_ds_h2d [2];
-  tl_d2h_t tl_s1n_7_ds_d2h [2];
+  tl_h2d_t tl_s1n_8_ds_h2d [2];
+  tl_d2h_t tl_s1n_8_ds_d2h [2];
 
   // Create steering signal
-  logic [1:0] dev_sel_s1n_7;
-
-
-  tl_h2d_t tl_sm1_8_us_h2d [2];
-  tl_d2h_t tl_sm1_8_us_d2h [2];
-
-  tl_h2d_t tl_sm1_8_ds_h2d ;
-  tl_d2h_t tl_sm1_8_ds_d2h ;
+  logic [1:0] dev_sel_s1n_8;
 
 
   tl_h2d_t tl_sm1_9_us_h2d [2];
@@ -82,94 +78,108 @@ module xbar_main (
   tl_h2d_t tl_sm1_9_ds_h2d ;
   tl_d2h_t tl_sm1_9_ds_d2h ;
 
-  tl_h2d_t tl_s1n_10_us_h2d ;
-  tl_d2h_t tl_s1n_10_us_d2h ;
+
+  tl_h2d_t tl_sm1_10_us_h2d [2];
+  tl_d2h_t tl_sm1_10_us_d2h [2];
+
+  tl_h2d_t tl_sm1_10_ds_h2d ;
+  tl_d2h_t tl_sm1_10_ds_d2h ;
+
+  tl_h2d_t tl_s1n_11_us_h2d ;
+  tl_d2h_t tl_s1n_11_us_d2h ;
 
 
-  tl_h2d_t tl_s1n_10_ds_h2d [5];
-  tl_d2h_t tl_s1n_10_ds_d2h [5];
+  tl_h2d_t tl_s1n_11_ds_h2d [6];
+  tl_d2h_t tl_s1n_11_ds_d2h [6];
 
   // Create steering signal
-  logic [2:0] dev_sel_s1n_10;
+  logic [2:0] dev_sel_s1n_11;
 
-  tl_h2d_t tl_asf_11_us_h2d ;
-  tl_d2h_t tl_asf_11_us_d2h ;
-  tl_h2d_t tl_asf_11_ds_h2d ;
-  tl_d2h_t tl_asf_11_ds_d2h ;
+  tl_h2d_t tl_asf_12_us_h2d ;
+  tl_d2h_t tl_asf_12_us_d2h ;
+  tl_h2d_t tl_asf_12_ds_h2d ;
+  tl_d2h_t tl_asf_12_ds_d2h ;
 
 
 
-  assign tl_sm1_8_us_h2d[0] = tl_s1n_7_ds_h2d[0];
-  assign tl_s1n_7_ds_d2h[0] = tl_sm1_8_us_d2h[0];
+  assign tl_sm1_9_us_h2d[0] = tl_s1n_8_ds_h2d[0];
+  assign tl_s1n_8_ds_d2h[0] = tl_sm1_9_us_d2h[0];
 
-  assign tl_sm1_9_us_h2d[0] = tl_s1n_7_ds_h2d[1];
-  assign tl_s1n_7_ds_d2h[1] = tl_sm1_9_us_d2h[0];
+  assign tl_sm1_10_us_h2d[0] = tl_s1n_8_ds_h2d[1];
+  assign tl_s1n_8_ds_d2h[1] = tl_sm1_10_us_d2h[0];
 
-  assign tl_sm1_8_us_h2d[1] = tl_s1n_10_ds_h2d[0];
-  assign tl_s1n_10_ds_d2h[0] = tl_sm1_8_us_d2h[1];
+  assign tl_sm1_9_us_h2d[1] = tl_s1n_11_ds_h2d[0];
+  assign tl_s1n_11_ds_d2h[0] = tl_sm1_9_us_d2h[1];
 
-  assign tl_sm1_9_us_h2d[1] = tl_s1n_10_ds_h2d[1];
-  assign tl_s1n_10_ds_d2h[1] = tl_sm1_9_us_d2h[1];
+  assign tl_sm1_10_us_h2d[1] = tl_s1n_11_ds_h2d[1];
+  assign tl_s1n_11_ds_d2h[1] = tl_sm1_10_us_d2h[1];
 
-  assign tl_revocation_ram_o = tl_s1n_10_ds_h2d[2];
-  assign tl_s1n_10_ds_d2h[2] = tl_revocation_ram_i;
+  assign tl_revocation_ram_o = tl_s1n_11_ds_h2d[2];
+  assign tl_s1n_11_ds_d2h[2] = tl_revocation_ram_i;
 
-  assign tl_rv_plic_o = tl_s1n_10_ds_h2d[3];
-  assign tl_s1n_10_ds_d2h[3] = tl_rv_plic_i;
+  assign tl_rev_ctl_o = tl_s1n_11_ds_h2d[3];
+  assign tl_s1n_11_ds_d2h[3] = tl_rev_ctl_i;
 
-  assign tl_asf_11_us_h2d = tl_s1n_10_ds_h2d[4];
-  assign tl_s1n_10_ds_d2h[4] = tl_asf_11_us_d2h;
+  assign tl_rv_plic_o = tl_s1n_11_ds_h2d[4];
+  assign tl_s1n_11_ds_d2h[4] = tl_rv_plic_i;
 
-  assign tl_s1n_7_us_h2d = tl_rv_core_ibex__corei_i;
-  assign tl_rv_core_ibex__corei_o = tl_s1n_7_us_d2h;
+  assign tl_asf_12_us_h2d = tl_s1n_11_ds_h2d[5];
+  assign tl_s1n_11_ds_d2h[5] = tl_asf_12_us_d2h;
 
-  assign tl_sram_o = tl_sm1_8_ds_h2d;
-  assign tl_sm1_8_ds_d2h = tl_sram_i;
+  assign tl_s1n_8_us_h2d = tl_rv_core_ibex__corei_i;
+  assign tl_rv_core_ibex__corei_o = tl_s1n_8_us_d2h;
 
-  assign tl_rom_o = tl_sm1_9_ds_h2d;
-  assign tl_sm1_9_ds_d2h = tl_rom_i;
+  assign tl_sram_o = tl_sm1_9_ds_h2d;
+  assign tl_sm1_9_ds_d2h = tl_sram_i;
 
-  assign tl_s1n_10_us_h2d = tl_rv_core_ibex__cored_i;
-  assign tl_rv_core_ibex__cored_o = tl_s1n_10_us_d2h;
+  assign tl_rom_o = tl_sm1_10_ds_h2d;
+  assign tl_sm1_10_ds_d2h = tl_rom_i;
 
-  assign tl_peri_o = tl_asf_11_ds_h2d;
-  assign tl_asf_11_ds_d2h = tl_peri_i;
+  assign tl_s1n_11_us_h2d = tl_rv_core_ibex__cored_i;
+  assign tl_rv_core_ibex__cored_o = tl_s1n_11_us_d2h;
+
+  assign tl_peri_o = tl_asf_12_ds_h2d;
+  assign tl_asf_12_ds_d2h = tl_peri_i;
 
   always_comb begin
     // default steering to generate error response if address is not within the range
-    dev_sel_s1n_7 = 2'd2;
-    if ((tl_s1n_7_us_h2d.a_address &
+    dev_sel_s1n_8 = 2'd2;
+    if ((tl_s1n_8_us_h2d.a_address &
          ~(ADDR_MASK_SRAM)) == ADDR_SPACE_SRAM) begin
-      dev_sel_s1n_7 = 2'd0;
+      dev_sel_s1n_8 = 2'd0;
 
-    end else if ((tl_s1n_7_us_h2d.a_address &
+    end else if ((tl_s1n_8_us_h2d.a_address &
                   ~(ADDR_MASK_ROM)) == ADDR_SPACE_ROM) begin
-      dev_sel_s1n_7 = 2'd1;
+      dev_sel_s1n_8 = 2'd1;
 end
   end
 
   always_comb begin
     // default steering to generate error response if address is not within the range
-    dev_sel_s1n_10 = 3'd5;
-    if ((tl_s1n_10_us_h2d.a_address &
+    dev_sel_s1n_11 = 3'd6;
+    if ((tl_s1n_11_us_h2d.a_address &
          ~(ADDR_MASK_SRAM)) == ADDR_SPACE_SRAM) begin
-      dev_sel_s1n_10 = 3'd0;
+      dev_sel_s1n_11 = 3'd0;
 
-    end else if ((tl_s1n_10_us_h2d.a_address &
+    end else if ((tl_s1n_11_us_h2d.a_address &
                   ~(ADDR_MASK_ROM)) == ADDR_SPACE_ROM) begin
-      dev_sel_s1n_10 = 3'd1;
+      dev_sel_s1n_11 = 3'd1;
 
-    end else if ((tl_s1n_10_us_h2d.a_address &
+    end else if ((tl_s1n_11_us_h2d.a_address &
                   ~(ADDR_MASK_REVOCATION_RAM)) == ADDR_SPACE_REVOCATION_RAM) begin
-      dev_sel_s1n_10 = 3'd2;
+      dev_sel_s1n_11 = 3'd2;
 
-    end else if ((tl_s1n_10_us_h2d.a_address &
+    end else if ((tl_s1n_11_us_h2d.a_address &
+                  ~(ADDR_MASK_REV_CTL)) == ADDR_SPACE_REV_CTL) begin
+      dev_sel_s1n_11 = 3'd3;
+
+    end else if ((tl_s1n_11_us_h2d.a_address &
                   ~(ADDR_MASK_RV_PLIC)) == ADDR_SPACE_RV_PLIC) begin
-      dev_sel_s1n_10 = 3'd3;
+      dev_sel_s1n_11 = 3'd4;
 
-    end else if ((tl_s1n_10_us_h2d.a_address &
+    end else if ((tl_s1n_11_us_h2d.a_address &
                   ~(ADDR_MASK_PERI)) == ADDR_SPACE_PERI) begin
-      dev_sel_s1n_10 = 3'd4;
+      dev_sel_s1n_11 = 3'd5;
 end
   end
 
@@ -181,28 +191,14 @@ end
     .DReqDepth (8'h0),
     .DRspDepth (8'h0),
     .N         (2)
-  ) u_s1n_7 (
+  ) u_s1n_8 (
     .clk_i        (clk_sys_i),
     .rst_ni       (rst_sys_ni),
-    .tl_h_i       (tl_s1n_7_us_h2d),
-    .tl_h_o       (tl_s1n_7_us_d2h),
-    .tl_d_o       (tl_s1n_7_ds_h2d),
-    .tl_d_i       (tl_s1n_7_ds_d2h),
-    .dev_select_i (dev_sel_s1n_7)
-  );
-  tlul_socket_m1 #(
-    .HReqDepth (8'h0),
-    .HRspDepth (8'h0),
-    .DReqDepth (4'h0),
-    .DRspDepth (4'h0),
-    .M         (2)
-  ) u_sm1_8 (
-    .clk_i        (clk_sys_i),
-    .rst_ni       (rst_sys_ni),
-    .tl_h_i       (tl_sm1_8_us_h2d),
-    .tl_h_o       (tl_sm1_8_us_d2h),
-    .tl_d_o       (tl_sm1_8_ds_h2d),
-    .tl_d_i       (tl_sm1_8_ds_d2h)
+    .tl_h_i       (tl_s1n_8_us_h2d),
+    .tl_h_o       (tl_s1n_8_us_d2h),
+    .tl_d_o       (tl_s1n_8_ds_h2d),
+    .tl_d_i       (tl_s1n_8_ds_d2h),
+    .dev_select_i (dev_sel_s1n_8)
   );
   tlul_socket_m1 #(
     .HReqDepth (8'h0),
@@ -218,33 +214,47 @@ end
     .tl_d_o       (tl_sm1_9_ds_h2d),
     .tl_d_i       (tl_sm1_9_ds_d2h)
   );
+  tlul_socket_m1 #(
+    .HReqDepth (8'h0),
+    .HRspDepth (8'h0),
+    .DReqDepth (4'h0),
+    .DRspDepth (4'h0),
+    .M         (2)
+  ) u_sm1_10 (
+    .clk_i        (clk_sys_i),
+    .rst_ni       (rst_sys_ni),
+    .tl_h_i       (tl_sm1_10_us_h2d),
+    .tl_h_o       (tl_sm1_10_us_d2h),
+    .tl_d_o       (tl_sm1_10_ds_h2d),
+    .tl_d_i       (tl_sm1_10_ds_d2h)
+  );
   tlul_socket_1n #(
     .HReqDepth (4'h0),
     .HRspDepth (4'h0),
-    .DReqDepth (20'h0),
-    .DRspDepth (20'h0),
-    .N         (5)
-  ) u_s1n_10 (
+    .DReqDepth (24'h0),
+    .DRspDepth (24'h0),
+    .N         (6)
+  ) u_s1n_11 (
     .clk_i        (clk_sys_i),
     .rst_ni       (rst_sys_ni),
-    .tl_h_i       (tl_s1n_10_us_h2d),
-    .tl_h_o       (tl_s1n_10_us_d2h),
-    .tl_d_o       (tl_s1n_10_ds_h2d),
-    .tl_d_i       (tl_s1n_10_ds_d2h),
-    .dev_select_i (dev_sel_s1n_10)
+    .tl_h_i       (tl_s1n_11_us_h2d),
+    .tl_h_o       (tl_s1n_11_us_d2h),
+    .tl_d_o       (tl_s1n_11_ds_h2d),
+    .tl_d_i       (tl_s1n_11_ds_d2h),
+    .dev_select_i (dev_sel_s1n_11)
   );
   tlul_fifo_async #(
     .ReqDepth        (1),
     .RspDepth        (1)
-  ) u_asf_11 (
+  ) u_asf_12 (
     .clk_h_i      (clk_sys_i),
     .rst_h_ni     (rst_sys_ni),
     .clk_d_i      (clk_peri_i),
     .rst_d_ni     (rst_peri_ni),
-    .tl_h_i       (tl_asf_11_us_h2d),
-    .tl_h_o       (tl_asf_11_us_d2h),
-    .tl_d_o       (tl_asf_11_ds_h2d),
-    .tl_d_i       (tl_asf_11_ds_d2h)
+    .tl_h_i       (tl_asf_12_us_h2d),
+    .tl_h_o       (tl_asf_12_us_d2h),
+    .tl_d_o       (tl_asf_12_ds_h2d),
+    .tl_d_i       (tl_asf_12_ds_d2h)
   );
 
 endmodule
