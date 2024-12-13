@@ -1,7 +1,15 @@
+# Python virtual environment
 sunburst-py-venv/
+.venv/
+
+# Build directories
 build/
 scratch/
 
+# Xcelium output
+xrun.history
+
+# File extensions
 *.pyc
 *.log
 *.fst
