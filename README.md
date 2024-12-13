@@ -82,7 +82,12 @@ instruction trace.
 
 Add the `-t` switch to output a wave trace file in `sim.fst` which can be viewed
 with [gtkwave](https://gtkwave.sourceforge.net/). Note with wave tracing enabled
-the simulation is many times slower.
+the simulation is many times slower. You can use the provided save file to see
+the GPIO output and the PC of the processor:
+
+```sh
+gtkwave util/gpio_and_pc.gtkw
+```
 
 # Run Xcelium Simulation with dvsim
 
