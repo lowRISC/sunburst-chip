@@ -17,6 +17,9 @@ module core_ibex #(
   input  tlul_pkg::tl_h2d_t tl_revocation_ram_h2d_i,
   output tlul_pkg::tl_d2h_t tl_revocation_ram_d2h_o,
 
+  input  logic [127:0] hardware_revoker_control_reg_rdata,
+  output logic [63:0] hardware_revoker_control_reg_wdata,
+
   input  logic [31:0] boot_addr_i,
 
   input  logic        irq_software_i,
@@ -105,8 +108,8 @@ module core_ibex #(
     .tsmap_addr_o (tsmap_addr),
     .tsmap_rdata_i(tsmap_rdata),
 
-    .mmreg_corein_i   ('0),
-    .mmreg_coreout_o  (),
+    .mmreg_corein_i   (hardware_revoker_control_reg_rdata),
+    .mmreg_coreout_o  (hardware_revoker_control_reg_wdata),
     .cheri_fatal_err_o(),
 
     .irq_software_i(irq_software_i),

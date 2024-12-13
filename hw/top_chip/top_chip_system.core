@@ -17,6 +17,7 @@ filesets:
       - lowrisc:ip:pwm
       - lowrisc:ip:uart
       - lowrisc:ip:usbdev
+      - lowrisc:ip:rev_ctl
       - lowrisc:ip:xbar_main
       - lowrisc:ip:xbar_peri
       - lowrisc:sunburst:top_chip_system_pkg
