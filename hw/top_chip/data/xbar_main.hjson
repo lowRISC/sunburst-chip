@@ -65,6 +65,17 @@
         size_byte: "0x00002000",
       }],
     },
+    { name:  "rev_ctl", // Hardware revoker memory-mapped control register
+      type:  "device",
+      clock: "clk_sys_i",
+      reset: "rst_sys_ni",
+      xbar:  false,
+
+      addr_range: [{
+        base_addr: "0x00340000",
+        size_byte: "0x00001000",
+      }],
+    },
     { name:  "rv_plic", // RISC-V platform interrupt controller
       type:  "device",
       clock: "clk_sys_i",
@@ -72,6 +83,7 @@
       req_fifo_pass: true,
       rsp_fifo_pass: true,
       xbar:  false,
+
       addr_range: [{
         // This block is overaligned to 0x0800_0000 bytes since OpenTitan RV_PLIC block expects it.
         base_addr: "0x88000000",
@@ -96,6 +108,8 @@
   ],
   connections: {
     rv_core_ibex.corei: ["sram", "rom"],
-    rv_core_ibex.cored: ["sram", "rom", "revocation_ram", "rv_plic", "peri"]
+    rv_core_ibex.cored: ["sram", "rom",
+                         "revocation_ram", "rev_ctl",
+                         "rv_plic", "peri"]
   }
 }
