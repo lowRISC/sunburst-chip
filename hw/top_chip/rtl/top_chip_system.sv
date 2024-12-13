@@ -138,6 +138,11 @@ module top_chip_system #(
 
   top_chip_system_pkg::usbdev_intr_t usbdev_intr;
 
+  // Signals for hardware revoker
+  logic [127:0] hardware_revoker_control_reg_rdata;
+  logic [63:0]  hardware_revoker_control_reg_wdata;
+  logic         hardware_revoker_intr;
+
   // Interrupt signals from the PLIC to the CPU.
   logic       rv_plic_msip;
   logic       rv_plic_irq;
@@ -159,7 +164,9 @@ module top_chip_system #(
     |pattgen_intr,
     2'b0,
     |usbdev_intr,
-    3'b0
+    1'b0,
+    |hardware_revoker_intr,
+    1'b0
   };
 
   tlul_pkg::tl_h2d_t tl_rv_core_ibex__corei_h2d;
@@ -173,6 +180,8 @@ module top_chip_system #(
   tlul_pkg::tl_d2h_t tl_rom_d2h;
   tlul_pkg::tl_h2d_t tl_revocation_ram_h2d;
   tlul_pkg::tl_d2h_t tl_revocation_ram_d2h;
+  tlul_pkg::tl_h2d_t tl_rev_ctl_h2d;
+  tlul_pkg::tl_d2h_t tl_rev_ctl_d2h;
   tlul_pkg::tl_h2d_t tl_rv_plic_h2d;
   tlul_pkg::tl_d2h_t tl_rv_plic_d2h;
   tlul_pkg::tl_h2d_t tl_peri_h2d;
@@ -197,6 +206,8 @@ module top_chip_system #(
     .tl_rom_i           (tl_rom_d2h),
     .tl_revocation_ram_o(tl_revocation_ram_h2d),
     .tl_revocation_ram_i(tl_revocation_ram_d2h),
+    .tl_rev_ctl_o       (tl_rev_ctl_h2d),
+    .tl_rev_ctl_i       (tl_rev_ctl_d2h),
     .tl_rv_plic_o       (tl_rv_plic_h2d),
     .tl_rv_plic_i       (tl_rv_plic_d2h),
     .tl_peri_o          (tl_peri_h2d),
@@ -216,6 +227,9 @@ module top_chip_system #(
 
     .tl_revocation_ram_h2d_i(tl_revocation_ram_h2d),
     .tl_revocation_ram_d2h_o(tl_revocation_ram_d2h),
+
+    .hardware_revoker_control_reg_rdata(hardware_revoker_control_reg_rdata),
+    .hardware_revoker_control_reg_wdata(hardware_revoker_control_reg_wdata),
 
     // TODO: Changed by AL for PLIC bringup.
     // .boot_addr_i(tl_main_pkg::ADDR_SPACE_ROM),
@@ -252,6 +266,18 @@ module top_chip_system #(
     .tl_o(tl_rom_d2h),
 
     .rom_cfg_i
+  );
+
+  rev_ctl u_rev_ctl (
+    .clk_i         (clk_sys_i),
+    .rst_ni        (rst_sys_ni),
+
+    .core_to_ctl_i (hardware_revoker_control_reg_wdata),
+    .ctl_to_core_o (hardware_revoker_control_reg_rdata),
+    .rev_ctl_irq_o (hardware_revoker_intr),
+
+    .tl_i          (tl_rev_ctl_h2d),
+    .tl_o          (tl_rev_ctl_d2h)
   );
 
   tlul_pkg::tl_h2d_t tl_aon_timer_h2d;
