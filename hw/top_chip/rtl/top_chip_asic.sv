@@ -67,15 +67,19 @@ module top_chip_asic (
   inout IO61,
   inout IO62,
   inout IO63,
+  inout IO64,
+  inout IO65,
+  inout IO66,
+  inout IO67,
 
   // Dedicated Pads
   inout USB_P,
   inout USB_N
 );
-  localparam int NPads = 66;
+  localparam int NPads = 70;
 
-  localparam int PadUsbP = 64;
-  localparam int PadUsbN = 65;
+  localparam int PadUsbP = 68;
+  localparam int PadUsbN = 69;
 
   wire clk_sys, clk_peri, clk_usb, clk_aon;
   wire rst_sys_n, rst_peri_n, rst_usb_n, rst_aon_n;
@@ -358,6 +362,15 @@ module top_chip_asic (
     cio_usbdev_sense_i = pad_in[63];
     // no output driver required.
 
+    pad_out[64] = cio_pattgen_pda0_tx_o;
+    pad_oe[64]  = cio_pattgen_pda0_tx_en_o;
+    pad_out[65] = cio_pattgen_pcl0_tx_o;
+    pad_oe[65]  = cio_pattgen_pcl0_tx_en_o;
+    pad_out[66] = cio_pattgen_pda1_tx_o;
+    pad_oe[66]  = cio_pattgen_pda1_tx_en_o;
+    pad_out[67] = cio_pattgen_pcl1_tx_o;
+    pad_oe[67]  = cio_pattgen_pcl1_tx_en_o;
+
     // USB_P/N may require special treatment beyond the drive strength.
     pad_out[PadUsbP] = cio_usbdev_usb_dp_o;
     pad_oe[PadUsbP]  = cio_usbdev_usb_dp_en_o;
@@ -374,6 +387,10 @@ module top_chip_asic (
       USB_N,
       USB_P,
 
+      IO67,
+      IO66,
+      IO65,
+      IO64,
       IO63,
       IO62,
       IO61,

@@ -80,6 +80,10 @@ module top_chip_asic_tb;
   wire IO61;
   wire IO62;
   wire IO63;
+  wire IO64;
+  wire IO65;
+  wire IO66;
+  wire IO67;
 
   top_chip_asic u_dut(
     .IO0,
@@ -146,6 +150,10 @@ module top_chip_asic_tb;
     .IO61,
     .IO62,
     .IO63,
+    .IO64,
+    .IO65,
+    .IO66,
+    .IO67,
 
     .USB_P,
     .USB_N
