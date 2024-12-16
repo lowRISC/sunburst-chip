@@ -30,7 +30,11 @@ class top_chip_dv_env extends uvm_env;
     ifs = top_chip_dv_if_bundle::type_id::create("ifs", this);
 
     if (!uvm_config_db#(virtual clk_rst_if)::get(this, "", "sys_clk_if", ifs.sys_clk_vif)) begin
-      `uvm_fatal(`gfn, "Cannot get clk_if")
+      `uvm_fatal(`gfn, "Cannot get sys_clk_vif")
+    end
+
+    if (!uvm_config_db#(virtual clk_rst_if)::get(this, "", "peri_clk_if", ifs.peri_clk_if)) begin
+      `uvm_fatal(`gfn, "Cannot get peri_clk_if")
     end
 
     if (!uvm_config_db#(virtual pins_if#(NGpioPins))::get(null, "", "gpio_pins_vif", ifs.gpio_pins_vif)) begin

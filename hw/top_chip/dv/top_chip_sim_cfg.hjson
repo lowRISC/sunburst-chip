@@ -59,6 +59,11 @@
       uvm_test_seq: top_chip_dv_base_vseq
       run_opts: ["+ChipMemSRAM_image_file={proj_root}/scratch_sw/bare_metal/build/checks/usbdev_check.vmem"]
     }
+    {
+      name: top_pattgen_smoke
+      uvm_test_seq: top_chip_dv_pattgen_vseq
+      run_opts: ["+ChipMemSRAM_image_file={proj_root}/scratch_sw/bare_metal/build/checks/pattgen_check.vmem"]
+    }
   ]
 
   // List of regressions.

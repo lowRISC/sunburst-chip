@@ -1,5 +1,6 @@
 set(CHECKS
   chip_check.cc
+  pattgen_check.cc
   usbdev_check.cc
 )
 
