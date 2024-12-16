@@ -13,7 +13,8 @@
 #include <assert.h>
 
 #include <cheri.hh>
-#include <platform-gpio.hh>
+// #include <platform-gpio.hh>
+#include "platform-gpio.hh"
 #include <platform-uart.hh>
 #include <platform-i2c.hh>
 #include <platform-rgbctrl.hh>
@@ -24,7 +25,7 @@
 #include "platform-usbdev.hh"
 
 typedef CHERI::Capability<void> CapRoot;
-// typedef volatile SonataGpioBoard *GpioPtr;
+typedef volatile OpenTitanGPIO *GpioPtr;
 typedef volatile OpenTitanUart *UartPtr;
 typedef volatile OpenTitanUsbdev *UsbdevPtr;
 typedef volatile OpenTitanI2c *I2cPtr;
@@ -33,12 +34,12 @@ typedef volatile SunburstSpi *SpiPtr;
 typedef volatile OpenTitanUsbdev *UsbdevPtr;
 typedef PLIC::SunburstPlic *PlicPtr;
 
-/*[[maybe_unused]] static GpioPtr gpio_ptr(CapRoot root) {
-  CHERI::Capability<volatile SonataGpioBoard> gpio = root.cast<volatile SonataGpioBoard>();
+[[maybe_unused]] static GpioPtr gpio_ptr(CapRoot root) {
+  CHERI::Capability<volatile OpenTitanGPIO> gpio = root.cast<volatile OpenTitanGPIO>();
   gpio.address()                                   = GPIO_ADDRESS;
   gpio.bounds()                                    = GPIO_BOUNDS;
   return gpio;
-}*/
+}
 
 [[maybe_unused]] static UartPtr uart_ptr(CapRoot root, uint32_t idx = 0) {
   CHERI::Capability<volatile OpenTitanUart> uart = root.cast<volatile OpenTitanUart>();

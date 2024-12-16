@@ -11,8 +11,15 @@ struct SunburstPattgen
 	uint32_t interruptState;
 	uint32_t interruptEnable;
 	uint32_t interruptTest;
-
-  // ... other registers ...
+	uint32_t alertTest;
+	uint32_t ctrl;
+	uint32_t predividerCh0;
+	uint32_t predividerCh1;
+	uint32_t dataCh0_0;
+	uint32_t dataCh0_1;
+	uint32_t dataCh1_0;
+	uint32_t dataCh1_1;
+	uint32_t size;
 
   // Sunburst PattgenInterrupts
 	typedef enum [[clang::flag_enum]] : uint32_t
