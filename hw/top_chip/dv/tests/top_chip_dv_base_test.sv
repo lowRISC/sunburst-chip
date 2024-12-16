@@ -16,7 +16,7 @@ class top_chip_dv_base_test extends uvm_test;
 
     env = top_chip_dv_env::type_id::create("env", this);
     env.cfg = top_chip_dv_env_cfg::type_id::create("cfg", this);
-    env.cfg.get_mem_image_files_from_plusargs();
+    env.cfg.initialize();
   endfunction
 
   virtual function void connect_phase(uvm_phase phase);

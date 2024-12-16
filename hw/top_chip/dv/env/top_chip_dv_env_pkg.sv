@@ -6,6 +6,7 @@ package top_chip_dv_env_pkg;
   import uvm_pkg::*;
   import dv_utils_pkg::*;
   import mem_bkdr_util_pkg::*;
+  import pattgen_agent_pkg::*;
 
   // macro includes
   `include "uvm_macros.svh"

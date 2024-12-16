@@ -13,6 +13,9 @@ class top_chip_dv_env extends uvm_env;
 
   mem_bkdr_util mem_bkdr_util_h[chip_mem_e];
 
+  // Agents
+  pattgen_agent m_pattgen_agent;
+
   function void build_phase(uvm_phase phase);
     super.build_phase(phase);
 
@@ -34,6 +37,10 @@ class top_chip_dv_env extends uvm_env;
       `uvm_fatal(`gfn, "Cannot get gpio_pins_vif")
     end
 
+    // Instantiate pattgen agent
+    m_pattgen_agent = pattgen_agent::type_id::create("m_pattgen_agent", this);
+    uvm_config_db#(pattgen_agent_cfg)::set(this, "m_pattgen_agent*", "cfg", cfg.m_pattgen_agent_cfg);
+
     uvm_config_db#(top_chip_dv_env_cfg)::set(this, "", "cfg", cfg);
     uvm_config_db#(top_chip_dv_if_bundle)::set(this, "", "ifs", ifs);
 
@@ -44,6 +51,10 @@ class top_chip_dv_env extends uvm_env;
 
   function void connect_phase(uvm_phase phase);
     super.connect_phase(phase);
+    // Connect pattgen monitor output to the matching FIFO in the sequencer
+    for (int i = 0; i < NUM_PATTGEN_CHANNELS; i++) begin
+      m_pattgen_agent.monitor.item_port[i].connect(virtual_sequencer.pattgen_rx_fifo[i].analysis_export);
+    end
   endfunction
 
   virtual task run_phase(uvm_phase phase);
