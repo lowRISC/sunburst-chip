@@ -6,11 +6,21 @@ class top_chip_dv_env_cfg extends uvm_object;
   string mem_image_files[chip_mem_e];
   longint unsigned sys_timeout_cycles = 20_000_000;
 
+  pattgen_agent_cfg m_pattgen_agent_cfg;
+
   `uvm_object_utils_begin(top_chip_dv_env_cfg)
   `uvm_object_utils_end
 
   function new (string name="");
     super.new(name);
+  endfunction
+
+  virtual function void initialize();
+    get_mem_image_files_from_plusargs();
+
+    // create pattgen agent config obj
+    m_pattgen_agent_cfg = pattgen_agent_cfg::type_id::create("m_pattgen_agent_cfg");
+    m_pattgen_agent_cfg.if_mode = Device;
   endfunction
 
   function void get_mem_image_files_from_plusargs();

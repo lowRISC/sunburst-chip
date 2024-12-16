@@ -11,6 +11,7 @@ module top_chip_asic_tb;
   import top_chip_dv_test_pkg::*;
   import top_chip_dv_env_pkg::*;
   import mem_bkdr_util_pkg::mem_bkdr_util;
+  import pattgen_agent_pkg::*;
 
   // Dedicated pins.
   wire USB_P;
@@ -199,6 +200,12 @@ module top_chip_asic_tb;
     IO0
   });
 
+  pattgen_if#(NUM_PATTGEN_CHANNELS) pattgen_if();
+  assign pattgen_if.clk_i  = peri_clk_if.clk; // u_dut.u_top_chip_system.u_pattgen.clk_i
+  assign pattgen_if.rst_ni = peri_clk_if.rst_n; // u_dut.u_top_chip_system.u_pattgen.rst_ni
+  assign pattgen_if.pda_tx = {IO66, IO64};
+  assign pattgen_if.pcl_tx = {IO67, IO65};
+
   if (`PRIM_DEFAULT_IMPL == prim_pkg::ImplGeneric) begin : gen_generic
     initial begin
       chip_mem_e    mem;
@@ -258,6 +265,7 @@ module top_chip_asic_tb;
     uvm_config_db#(virtual clk_rst_if)::set(null, "*", "aon_clk_if", aon_clk_if);
 
     uvm_config_db#(virtual pins_if#(NGpioPins))::set(null, "*", "gpio_pins_vif", gpio_pins_if);
+    uvm_config_db#(virtual pattgen_if)::set(null, "*.env.m_pattgen_agent*", "vif", pattgen_if);
 
     run_test();
   end
