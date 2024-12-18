@@ -8,7 +8,7 @@ removed.
 
 ## bare_metal/
 This is derived from sw/cheri in the sonata-system repository contains 'checks'
-which are small programs for initial testing and bring-up
+which are small programs for initial testing and bring-up.
 
 CMake is used as the build system, to build binaries run (from the repository
 root):

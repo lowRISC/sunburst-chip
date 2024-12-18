@@ -49,7 +49,7 @@ A test program can be built with scratch_sw/ (a suitable CHERIoT toolchain must
 be available on your path or specified by `CHERIOT_LLVM_BIN`):
 
 ```sh
-# CHERIOT_LLVM_BIN=/path/to/cheriot-llvm/bin
+# export CHERIOT_LLVM_BIN=/path/to/cheriot-llvm/bin
 cmake -B scratch_sw/bare_metal/build -S scratch_sw/bare_metal
 cmake --build scratch_sw/bare_metal/build
 ```
