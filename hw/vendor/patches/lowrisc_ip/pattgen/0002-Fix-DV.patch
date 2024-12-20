@@ -1,0 +1,74 @@
+diff --git a/dv/env/pattgen_env_cfg.sv b/dv/env/pattgen_env_cfg.sv
+index c38e77c..187ae34 100644
+--- a/dv/env/pattgen_env_cfg.sv
++++ b/dv/env/pattgen_env_cfg.sv
+@@ -19,7 +19,6 @@ class pattgen_env_cfg extends cip_base_env_cfg #(.RAL_T(pattgen_reg_block));
+   `uvm_object_new
+ 
+   virtual function void initialize(bit [TL_AW-1:0] csr_base_addr = '1);
+-    list_of_alerts = pattgen_env_pkg::LIST_OF_ALERTS;
+     super.initialize(csr_base_addr);
+ 
+     // create pattgen_agent_cfg
+diff --git a/dv/env/pattgen_env_pkg.sv b/dv/env/pattgen_env_pkg.sv
+index 04bd02a..5fed03f 100644
+--- a/dv/env/pattgen_env_pkg.sv
++++ b/dv/env/pattgen_env_pkg.sv
+@@ -39,9 +39,6 @@ package pattgen_env_pkg;
+     Disable     = 1'b0
+   } channel_status_e;
+ 
+-  // alerts
+-  parameter uint NUM_ALERTS = 1;
+-  parameter string LIST_OF_ALERTS[] = {"fatal_fault"};
+   //Due to simulation time limits, the range of constraints
+   // is selected to be within such time limits
+   parameter uint DataMax = 32'hffffffff;
+diff --git a/dv/pattgen_sim_cfg.hjson b/dv/pattgen_sim_cfg.hjson
+index f2bbed1..c19b2c5 100644
+--- a/dv/pattgen_sim_cfg.hjson
++++ b/dv/pattgen_sim_cfg.hjson
+@@ -25,14 +25,13 @@
+ 
+   // Import additional common sim cfg files.
+   import_cfgs: [// Project wide common sim cfg file
+-                "{proj_root}/hw/dv/tools/dvsim/common_sim_cfg.hjson",
++                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/common_sim_cfg.hjson",
+                 // Common CIP test lists
+-                "{proj_root}/hw/dv/tools/dvsim/tests/csr_tests.hjson",
+-                "{proj_root}/hw/dv/tools/dvsim/tests/alert_test.hjson",
+-                "{proj_root}/hw/dv/tools/dvsim/tests/intr_test.hjson",
+-                "{proj_root}/hw/dv/tools/dvsim/tests/stress_tests.hjson",
+-                "{proj_root}/hw/dv/tools/dvsim/tests/sec_cm_tests.hjson",
+-                "{proj_root}/hw/dv/tools/dvsim/tests/tl_access_tests.hjson"]
++                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/csr_tests.hjson",
++                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/intr_test.hjson",
++                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/stress_tests.hjson",
++                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/sec_cm_tests.hjson",
++                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/tl_access_tests.hjson"]
+ 
+   // Default iterations for all tests - each test entry can override this.
+   reseed: 50
+diff --git a/dv/tb.sv b/dv/tb.sv
+index f2477b1..2c5605e 100644
+--- a/dv/tb.sv
++++ b/dv/tb.sv
+@@ -30,8 +30,6 @@ module tb;
+   pattgen_if #(NUM_PATTGEN_CHANNELS) pattgen_if();
+   tl_if tl_if(.clk(clk), .rst_n(rst_n));
+ 
+-  `DV_ALERT_IF_CONNECT()
+-
+   // dut
+   pattgen dut (
+     .clk_i                (clk           ),
+@@ -40,9 +38,6 @@ module tb;
+     .tl_i                 (tl_if.h2d     ),
+     .tl_o                 (tl_if.d2h     ),
+ 
+-    .alert_rx_i           (alert_rx      ),
+-    .alert_tx_o           (alert_tx      ),
+-
+     .cio_pda0_tx_o        (pda_tx_o[0]   ),
+     .cio_pcl0_tx_o        (pcl_tx_o[0]   ),
+     .cio_pda1_tx_o        (pda_tx_o[1]   ),
