@@ -39,9 +39,6 @@ package pattgen_env_pkg;
     Disable     = 1'b0
   } channel_status_e;
 
-  // alerts
-  parameter uint NUM_ALERTS = 1;
-  parameter string LIST_OF_ALERTS[] = {"fatal_fault"};
   //Due to simulation time limits, the range of constraints
   // is selected to be within such time limits
   parameter uint DataMax = 32'hffffffff;
