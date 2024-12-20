@@ -1,4 +1,8 @@
-# Dependencies
+# Sunburst chip
+
+An open silicon microcontroller chip based around CHERIoT Ibex.
+
+## Dependencies
 
 [FuseSoC](https://github.com/olofk/fusesoc) is used to handle hardware related
 build tasks.  It can build Verilator simulations directly and is used by the
@@ -29,7 +33,7 @@ It is strongly recommended you build Verilator from source as packaged versions
 are often very out of date. Verilator v5.026 was used when writing this README.
 Instructions to do this can be found in the [Verilator documentation](https://verilator.org/guide/latest/install.html).
 
-# Run Verilator Simulation
+## Run Verilator simulation
 
 To build a Verilator simulation run:
 
@@ -89,7 +93,7 @@ the GPIO output and the PC of the processor:
 gtkwave util/gpio_and_pc.gtkw
 ```
 
-# Run Xcelium Simulation with dvsim
+## Run Xcelium simulation with dvsim
 
 For now dvsim does not orchestrate any software build.  To run the example smoke
 test you must have built the `chip_check` program, see the Verilator
@@ -113,7 +117,7 @@ the artifacts from the test run. These are:
  - `run.log`: The log from the simulation run
  - `waves.shm`: The wave trace (only present when DVsim is run with `-w shm`)
 
-# Run block level DV
+## Run block level DV
 
 Block level DV for all of the IP blocks from OpenTitan can be run directly from
 this repository, using the dvsim tool. Below are the dvsim commands to run the
