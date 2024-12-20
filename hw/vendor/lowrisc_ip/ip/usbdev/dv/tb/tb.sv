@@ -97,7 +97,6 @@ module tb;
   // of its configurable input/output modes.
   usb20_block_if usb20_block_if(.clk_i(host_clk), .rst_ni(host_rst_n),
                                 .usb_vbus(usb_vbus), .usb_p(usb_p), .usb_n(usb_n));
-  `DV_ALERT_IF_CONNECT(usb_clk, usb_rst_n)
 
   // External differential receiver; USBDEV supports an external differential receiver
   // with USB protocol-compliant robustness against jitter and slew, to produce a clean
@@ -123,9 +122,6 @@ module tb;
 
     .tl_i                 (tl_if.h2d  ),
     .tl_o                 (tl_if.d2h  ),
-
-    .alert_rx_i           (alert_rx   ),
-    .alert_tx_o           (alert_tx   ),
 
     // USB Interface
     .cio_usb_dp_i           (usb_p),
