@@ -147,4 +147,6 @@ command options.
 ./hw/vendor/lowrisc_ip/util/dvsim/dvsim.py ./hw/vendor/lowrisc_ip/ip/spi_host/dv/spi_host_sim_cfg.hjson -i smoke --tool xcelium
 # Run uart smoke regression
 ./hw/vendor/lowrisc_ip/util/dvsim/dvsim.py ./hw/vendor/lowrisc_ip/ip/uart/dv/uart_sim_cfg.hjson -i smoke --tool xcelium
+# Run usbdev smoke regression
+./hw/vendor/lowrisc_ip/util/dvsim/dvsim.py ./hw/vendor/lowrisc_ip/ip/usbdev/dv/usbdev_sim_cfg.hjson -i smoke --tool xcelium
 ```
