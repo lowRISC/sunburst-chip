@@ -139,7 +139,8 @@ command options.
 # Run pattgen smoke regression
 ./hw/vendor/lowrisc_ip/util/dvsim/dvsim.py ./hw/vendor/lowrisc_ip/ip/pattgen/dv/pattgen_sim_cfg.hjson -i smoke --tool xcelium
 # Run pwm smoke regression
-./hw/vendor/lowrisc_ip/util/dvsim/dvsim.py ./hw/vendor/lowrisc_ip/ip/pwm/dv/pwm_sim_cfg.hjson -i smoke --tool xcelium
+# Note: pwm is awaiting an updated DV environment.
+# ./hw/vendor/lowrisc_ip/util/dvsim/dvsim.py ./hw/vendor/lowrisc_ip/ip/pwm/dv/pwm_sim_cfg.hjson -i smoke --tool xcelium
 # Run rv_timer smoke regression
 ./hw/vendor/lowrisc_ip/util/dvsim/dvsim.py ./hw/vendor/lowrisc_ip/ip/rv_timer/dv/rv_timer_sim_cfg.hjson -i smoke --tool xcelium
 # Run spi_host smoke regression
