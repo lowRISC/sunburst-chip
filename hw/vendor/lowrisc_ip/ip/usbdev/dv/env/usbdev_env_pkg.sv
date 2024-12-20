@@ -32,10 +32,6 @@ package usbdev_env_pkg;
   parameter uint AvSetupFIFODepth = 4;
   parameter uint RxFIFODepth      = 8;
 
-  // alerts
-  parameter uint NUM_ALERTS = 1;
-  parameter string LIST_OF_ALERTS[] = {"fatal_fault"};
-
   // types
   typedef enum {
     IntrPktReceived = 0,
