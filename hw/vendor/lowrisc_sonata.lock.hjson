@@ -9,6 +9,6 @@
   upstream:
   {
     url: https://github.com/lowRISC/sonata-system
-    rev: 736837cda6de2d7b6dbbe86a513d18d2eb4155e2
+    rev: cc78ef286b5c797176ec3342d9d0b4e4e7077ee8
   }
 }
