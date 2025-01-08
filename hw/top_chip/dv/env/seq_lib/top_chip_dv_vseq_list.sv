@@ -5,3 +5,5 @@
 `include "top_chip_dv_base_vseq.sv"
 `include "top_chip_dv_example_vseq.sv"
 `include "top_chip_dv_pattgen_vseq.sv"
+`include "top_chip_dv_uart_base_vseq.sv"
+`include "top_chip_dv_uart_tx_rx_vseq.sv"

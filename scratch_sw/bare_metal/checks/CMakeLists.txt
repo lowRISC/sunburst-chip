@@ -1,6 +1,8 @@
 set(CHECKS
   chip_check.cc
   pattgen_check.cc
+  uart_smoke_check.cc
+  uart_tx_rx_check.cc
   usbdev_check.cc
 )
 
