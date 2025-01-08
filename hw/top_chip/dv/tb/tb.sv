@@ -200,11 +200,22 @@ module top_chip_asic_tb;
     IO0
   });
 
+  // Create and connect pattgen agent interface
   pattgen_if#(NUM_PATTGEN_CHANNELS) pattgen_if();
   assign pattgen_if.clk_i  = peri_clk_if.clk; // u_dut.u_top_chip_system.u_pattgen.clk_i
   assign pattgen_if.rst_ni = peri_clk_if.rst_n; // u_dut.u_top_chip_system.u_pattgen.rst_ni
   assign pattgen_if.pda_tx = {IO66, IO64};
   assign pattgen_if.pcl_tx = {IO67, IO65};
+
+  // Create and connect uart agent interfaces. Mux UART0 as it is shared with a DPI model,
+  // using the vif enable signal that can be poked by the virtual sequence.
+  // Might as well leave UART1 connected all the time.
+  uart_if uart_if[NUarts]();
+  logic uart0_rx_dpi;
+  assign IO59 = uart_if[0].enable ? uart_if[0].uart_rx : uart0_rx_dpi;
+  assign uart_if[0].uart_tx = uart_if[0].enable ? IO60 : 1'bz;
+  assign IO61 = uart_if[1].uart_rx;
+  assign uart_if[1].uart_tx = IO62;
 
   if (`PRIM_DEFAULT_IMPL == prim_pkg::ImplGeneric) begin : gen_generic
     initial begin
@@ -264,11 +275,18 @@ module top_chip_asic_tb;
     uvm_config_db#(virtual clk_rst_if)::set(null, "*", "usb_clk_if", usb_clk_if);
     uvm_config_db#(virtual clk_rst_if)::set(null, "*", "aon_clk_if", aon_clk_if);
 
+    // Feed certain I/O signals to matching agents for vseq-specific driving/checking
     uvm_config_db#(virtual pins_if#(NGpioPins))::set(null, "*", "gpio_pins_vif", gpio_pins_if);
     uvm_config_db#(virtual pattgen_if)::set(null, "*.env.m_pattgen_agent*", "vif", pattgen_if);
 
     run_test();
   end
+
+  for (genvar i = 0; i < NUarts; i++) begin : gen_uart_if_set
+    initial begin
+      uvm_config_db#(virtual uart_if)::set(null, $sformatf("*.env.m_uart_agent%0d*", i), "vif", uart_if[i]);
+    end
+  end : gen_uart_if_set
 
   uartdpi #(
     .BAUD(UartDpiBaud),
@@ -277,8 +295,8 @@ module top_chip_asic_tb;
     .clk_i(u_dut.clk_peri),
     .rst_ni(u_dut.rst_peri_n),
     .active(1'b1),
-    .tx_o(IO59),
-    .rx_i(IO60)
+    .tx_o(uart0_rx_dpi),
+    .rx_i(!uart_if[0].enable ? IO60 : 1'bz)
   );
 
   // The USB DPI model (simulated host controller) has its own clock and reset signal,

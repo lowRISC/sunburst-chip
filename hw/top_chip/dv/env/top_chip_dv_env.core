@@ -11,6 +11,7 @@ filesets:
       - lowrisc:dv:dv_utils
       - lowrisc:dv:mem_bkdr_util
       - lowrisc:dv:pattgen_agent
+      - lowrisc:dv:uart_agent
       - lowrisc:dv:pins_if
       - lowrisc:dv:common_ifs
     files:

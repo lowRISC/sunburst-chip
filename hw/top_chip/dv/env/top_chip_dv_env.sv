@@ -15,6 +15,7 @@ class top_chip_dv_env extends uvm_env;
 
   // Agents
   pattgen_agent m_pattgen_agent;
+  uart_agent    m_uart_agents[NUarts];
 
   function void build_phase(uvm_phase phase);
     super.build_phase(phase);
@@ -45,6 +46,12 @@ class top_chip_dv_env extends uvm_env;
     m_pattgen_agent = pattgen_agent::type_id::create("m_pattgen_agent", this);
     uvm_config_db#(pattgen_agent_cfg)::set(this, "m_pattgen_agent*", "cfg", cfg.m_pattgen_agent_cfg);
 
+    // Instantiate uart agents
+    foreach (m_uart_agents[i]) begin
+      m_uart_agents[i] = uart_agent::type_id::create($sformatf("m_uart_agent%0d", i), this);
+      uvm_config_db#(uart_agent_cfg)::set(this, $sformatf("m_uart_agent%0d*", i), "cfg", cfg.m_uart_agent_cfgs[i]);
+    end
+
     uvm_config_db#(top_chip_dv_env_cfg)::set(this, "", "cfg", cfg);
     uvm_config_db#(top_chip_dv_if_bundle)::set(this, "", "ifs", ifs);
 
@@ -55,9 +62,19 @@ class top_chip_dv_env extends uvm_env;
 
   function void connect_phase(uvm_phase phase);
     super.connect_phase(phase);
-    // Connect pattgen monitor output to the matching FIFO in the sequencer
+    // Track specific agent sequencers in the virtual sequencer.
+    // Allows virtual sequences to use the agents to drive RX items.
+    foreach (m_uart_agents[i]) begin
+      virtual_sequencer.uart_sequencer_hs[i] = m_uart_agents[i].sequencer;
+    end
+
+    // Connect monitor outputs to matching FIFOs in the virtual sequencer.
+    // Allows virtual sequences to check TX items.
     for (int i = 0; i < NUM_PATTGEN_CHANNELS; i++) begin
       m_pattgen_agent.monitor.item_port[i].connect(virtual_sequencer.pattgen_rx_fifo[i].analysis_export);
+    end
+    foreach (m_uart_agents[i]) begin
+      m_uart_agents[i].monitor.tx_analysis_port.connect(virtual_sequencer.uart_tx_fifos[i].analysis_export);
     end
   endfunction
 
