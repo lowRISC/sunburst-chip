@@ -55,14 +55,25 @@
     }
 
     {
-      name: top_usbdev_smoke
-      uvm_test_seq: top_chip_dv_base_vseq
-      run_opts: ["+ChipMemSRAM_image_file={proj_root}/scratch_sw/bare_metal/build/checks/usbdev_check.vmem"]
-    }
-    {
       name: top_pattgen_smoke
       uvm_test_seq: top_chip_dv_pattgen_vseq
       run_opts: ["+ChipMemSRAM_image_file={proj_root}/scratch_sw/bare_metal/build/checks/pattgen_check.vmem"]
+    }
+    {
+      name: top_uart_smoke
+      uvm_test_seq: top_chip_dv_base_vseq
+      run_opts: ["+ChipMemSRAM_image_file={proj_root}/scratch_sw/bare_metal/build/checks/uart_smoke_check.vmem"]
+    }
+    {
+      name: top_uart_tx_rx
+      uvm_test_seq: top_chip_dv_uart_tx_rx_vseq
+      run_opts: ["+ChipMemSRAM_image_file={proj_root}/scratch_sw/bare_metal/build/checks/uart_tx_rx_check.vmem",
+                 "+uart_idx=0"]
+    }
+    {
+      name: top_usbdev_smoke
+      uvm_test_seq: top_chip_dv_base_vseq
+      run_opts: ["+ChipMemSRAM_image_file={proj_root}/scratch_sw/bare_metal/build/checks/usbdev_check.vmem"]
     }
   ]
 
