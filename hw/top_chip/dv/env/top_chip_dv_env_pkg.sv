@@ -7,6 +7,7 @@ package top_chip_dv_env_pkg;
   import dv_utils_pkg::*;
   import mem_bkdr_util_pkg::*;
   import pattgen_agent_pkg::*;
+  import uart_agent_pkg::*;
 
   // macro includes
   `include "uvm_macros.svh"
@@ -18,6 +19,7 @@ package top_chip_dv_env_pkg;
   } chip_mem_e;
 
   localparam int unsigned NGpioPins = 32;
+  localparam int unsigned NUarts = 2;
   localparam int unsigned UartDpiBaud = 921_600;
 
   `include "top_chip_dv_env_cfg.sv"

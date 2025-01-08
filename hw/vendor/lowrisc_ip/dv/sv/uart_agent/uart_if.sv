@@ -13,6 +13,9 @@ interface uart_if #(realtime UartDefaultClkPeriod = 104166.667ns) ();
   bit   uart_rx_clk = 1'b1;
   int   uart_rx_clk_pulses = 0;
 
+  // Enable flag for the testbench to use to control any muxing
+  bit enable = 0;
+
   // UART TX from the DUT when signaled over muxed IOs can experience glitches in the same
   // time-step (a simulation artifact). Delaying by 1ps eliminates them.
   wire uart_tx_int;
