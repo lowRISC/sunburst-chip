@@ -11,7 +11,9 @@ module top_chip_asic_tb;
   import top_chip_dv_test_pkg::*;
   import top_chip_dv_env_pkg::*;
   import mem_bkdr_util_pkg::mem_bkdr_util;
-  import pattgen_agent_pkg::*;
+  import pattgen_agent_pkg::NUM_PATTGEN_CHANNELS;
+
+  // ------ Signals ------
 
   // Dedicated pins.
   wire USB_P;
@@ -85,6 +87,8 @@ module top_chip_asic_tb;
   wire IO65;
   wire IO66;
   wire IO67;
+
+  // ------ DUT ------
 
   top_chip_asic u_dut(
     .IO0,
@@ -160,6 +164,8 @@ module top_chip_asic_tb;
     .USB_N
   );
 
+  // ------ DV Interfaces ------
+
   clk_rst_if sys_clk_if(.clk(u_dut.clk_sys), .rst_n(u_dut.rst_sys_n));
   clk_rst_if peri_clk_if(.clk(u_dut.clk_peri), .rst_n(u_dut.rst_peri_n));
   clk_rst_if usb_clk_if(.clk(u_dut.clk_usb), .rst_n(u_dut.rst_usb_n));
@@ -216,6 +222,8 @@ module top_chip_asic_tb;
   assign uart_if[0].uart_tx = uart_if[0].enable ? IO60 : 1'bz;
   assign IO61 = uart_if[1].uart_rx;
   assign uart_if[1].uart_tx = IO62;
+
+  // ------ Memory ------
 
   if (`PRIM_DEFAULT_IMPL == prim_pkg::ImplGeneric) begin : gen_generic
     initial begin
@@ -290,6 +298,8 @@ module top_chip_asic_tb;
     .*
   );
 
+  // ------ Initialisation ------
+
   initial begin
     // Set base of SW DV special write locations
     `SIM_SRAM_IF.start_addr = SW_DV_START_ADDR;
@@ -327,6 +337,8 @@ module top_chip_asic_tb;
       uvm_config_db#(virtual uart_if)::set(null, $sformatf("*.env.m_uart_agent%0d*", i), "vif", uart_if[i]);
     end
   end : gen_uart_if_set
+
+  // ------ DPI Models ------
 
   uartdpi #(
     .BAUD(UartDpiBaud),
