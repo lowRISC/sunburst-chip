@@ -10,12 +10,10 @@
 #include "sw/device/lib/base/mmio.h"
 #include "sw/device/lib/base/status.h"
 #include "sw/device/lib/dif/dif_rv_plic.h"
-#include "sw/device/lib/dif/dif_spi_device.h"
 #include "sw/device/lib/dif/dif_uart.h"
 #include "sw/device/lib/runtime/ibex.h"
 #include "sw/device/lib/runtime/irq.h"
 #include "sw/device/lib/runtime/print.h"
-#include "sw/device/lib/testing/spi_device_testutils.h"
 #include "sw/device/lib/testing/test_framework/check.h"
 #include "sw/device/lib/testing/test_framework/ottf_isrs.h"
 #include "sw/device/lib/testing/test_framework/ottf_test_config.h"
@@ -30,10 +28,6 @@
  */
 enum {
   /**
-   * SPI device console configuration parameters.
-   */
-  kSpiDeviceRxCommitWait = 63,  // clock cycles
-  /**
    * Flow control parameters.
    */
   kFlowControlLowWatermark = 4,   // bytes
@@ -46,7 +40,6 @@ enum {
 };
 
 // Potential DIF handles for OTTF console communication.
-static dif_spi_device_handle_t ottf_console_spi_device;
 static dif_uart_t ottf_console_uart;
 
 // The `flow_control_state` and `flow_control_irqs` variables are shared between
@@ -56,8 +49,6 @@ static volatile uint32_t flow_control_irqs;
 
 void *ottf_console_get(void) {
   switch (kOttfTestConfig.console.type) {
-    case kOttfConsoleSpiDevice:
-      return &ottf_console_spi_device;
     default:
       return &ottf_console_uart;
   }
@@ -76,9 +67,6 @@ void ottf_console_init(void) {
       }
 
       ottf_console_configure_uart(base_addr);
-      break;
-    case (kOttfConsoleSpiDevice):
-      ottf_console_configure_spi_device(base_addr);
       break;
     default:
       CHECK(false, "unsupported OTTF console interface.");
@@ -109,101 +97,10 @@ void ottf_console_configure_uart(uintptr_t base_addr) {
   }
 }
 
-void ottf_console_configure_spi_device(uintptr_t base_addr) {
-  CHECK_DIF_OK(dif_spi_device_init_handle(mmio_region_from_addr(base_addr),
-                                          &ottf_console_spi_device));
-  CHECK_DIF_OK(dif_spi_device_configure(
-      &ottf_console_spi_device,
-      (dif_spi_device_config_t){
-          .tx_order = kDifSpiDeviceBitOrderMsbToLsb,
-          .rx_order = kDifSpiDeviceBitOrderMsbToLsb,
-          .device_mode = kDifSpiDeviceModeFlashEmulation,
-      }));
-  dif_spi_device_flash_command_t read_commands[] = {
-      {
-          // Slot 0: ReadStatus1
-          .opcode = kSpiDeviceFlashOpReadStatus1,
-          .address_type = kDifSpiDeviceFlashAddrDisabled,
-          .dummy_cycles = 0,
-          .payload_io_type = kDifSpiDevicePayloadIoSingle,
-          .payload_dir_to_host = true,
-      },
-      {
-          // Slot 1: ReadStatus2
-          .opcode = kSpiDeviceFlashOpReadStatus2,
-          .address_type = kDifSpiDeviceFlashAddrDisabled,
-          .dummy_cycles = 0,
-          .payload_io_type = kDifSpiDevicePayloadIoSingle,
-          .payload_dir_to_host = true,
-      },
-      {
-          // Slot 2: ReadStatus3
-          .opcode = kSpiDeviceFlashOpReadStatus3,
-          .address_type = kDifSpiDeviceFlashAddrDisabled,
-          .dummy_cycles = 0,
-          .payload_io_type = kDifSpiDevicePayloadIoSingle,
-          .payload_dir_to_host = true,
-      },
-      {
-          // Slot 3: ReadJedecID
-          .opcode = kSpiDeviceFlashOpReadJedec,
-          .address_type = kDifSpiDeviceFlashAddrDisabled,
-          .dummy_cycles = 0,
-          .payload_io_type = kDifSpiDevicePayloadIoSingle,
-          .payload_dir_to_host = true,
-      },
-      {
-          // Slot 4: ReadSfdp
-          .opcode = kSpiDeviceFlashOpReadSfdp,
-          .address_type = kDifSpiDeviceFlashAddr3Byte,
-          .dummy_cycles = 8,
-          .payload_io_type = kDifSpiDevicePayloadIoSingle,
-          .payload_dir_to_host = true,
-      },
-      {
-          // Slot 5: ReadNormal
-          .opcode = kSpiDeviceFlashOpReadNormal,
-          .address_type = kDifSpiDeviceFlashAddr3Byte,
-          .dummy_cycles = 0,
-          .payload_io_type = kDifSpiDevicePayloadIoSingle,
-          .payload_dir_to_host = true,
-      },
-  };
-  for (size_t i = 0; i < ARRAYSIZE(read_commands); ++i) {
-    uint8_t slot = (uint8_t)i + kSpiDeviceReadCommandSlotBase;
-    CHECK_DIF_OK(dif_spi_device_set_flash_command_slot(
-        &ottf_console_spi_device, slot, kDifToggleEnabled, read_commands[i]));
-  }
-  dif_spi_device_flash_command_t write_commands[] = {
-      {
-          // Slot 11: PageProgram
-          .opcode = kSpiDeviceFlashOpPageProgram,
-          .address_type = kDifSpiDeviceFlashAddrCfg,
-          .payload_io_type = kDifSpiDevicePayloadIoSingle,
-          .payload_dir_to_host = false,
-          .upload = true,
-          .set_busy_status = true,
-      },
-  };
-  for (size_t i = 0; i < ARRAYSIZE(write_commands); ++i) {
-    uint8_t slot = (uint8_t)i + kSpiDeviceWriteCommandSlotBase;
-    CHECK_DIF_OK(dif_spi_device_set_flash_command_slot(
-        &ottf_console_spi_device, slot, kDifToggleEnabled, write_commands[i]));
-  }
-
-  base_spi_device_stdout(&ottf_console_spi_device);
-}
-
 static uint32_t get_flow_control_watermark_plic_id(void) {
   switch (kOttfTestConfig.console.base_addr) {
-#if !OT_IS_ENGLISH_BREAKFAST
     case TOP_EARLGREY_UART1_BASE_ADDR:
       return kTopEarlgreyPlicIrqIdUart1RxWatermark;
-    case TOP_EARLGREY_UART2_BASE_ADDR:
-      return kTopEarlgreyPlicIrqIdUart2RxWatermark;
-    case TOP_EARLGREY_UART3_BASE_ADDR:
-      return kTopEarlgreyPlicIrqIdUart3RxWatermark;
-#endif
     case TOP_EARLGREY_UART0_BASE_ADDR:
     default:
       return kTopEarlgreyPlicIrqIdUart0RxWatermark;
@@ -296,31 +193,3 @@ status_t ottf_console_flow_control(const dif_uart_t *uart,
 }
 
 uint32_t ottf_console_get_flow_control_irqs(void) { return flow_control_irqs; }
-
-static bool spi_tx_last_data_chunk(upload_info_t *info) {
-  const static size_t kSpiTxTerminateMagicAddress = 0x100;
-  return info->address == kSpiTxTerminateMagicAddress;
-}
-
-size_t ottf_console_spi_device_read(size_t buf_size, uint8_t *const buf) {
-  size_t received_data_len = 0;
-  upload_info_t info;
-  memset(&info, 0, sizeof(upload_info_t));
-  while (!spi_tx_last_data_chunk(&info)) {
-    CHECK_STATUS_OK(
-        spi_device_testutils_wait_for_upload(&ottf_console_spi_device, &info));
-    if (received_data_len < buf_size) {
-      size_t remaining_buf_size = buf_size - received_data_len;
-      size_t bytes_to_copy = remaining_buf_size < info.data_len
-                                 ? remaining_buf_size
-                                 : info.data_len;
-      memcpy(buf + received_data_len, info.data, bytes_to_copy);
-    }
-
-    received_data_len += info.data_len;
-    CHECK_DIF_OK(dif_spi_device_set_flash_status_registers(
-        &ottf_console_spi_device, 0x00));
-  }
-
-  return received_data_len;
-}

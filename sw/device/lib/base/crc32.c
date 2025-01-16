@@ -9,7 +9,10 @@
 #include "sw/device/lib/base/macros.h"
 #include "sw/device/lib/base/memory.h"
 
-#ifdef OT_PLATFORM_RV32
+// TODO: Presently the CHERIoT-llvm toolchain seems not to support the `.option` directives,
+// and does not recognised crc32.b/w although the Sunburst chip hardware has been configured to
+// enable that extension. Fall back to portable code.
+#if CHERIOT_ZBR
 OT_WARN_UNUSED_RESULT
 static uint32_t crc32_internal_add8(uint32_t ctx, uint8_t byte) {
   ctx ^= byte;

@@ -7,28 +7,24 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include "external/freertos/include/FreeRTOS.h"
-#include "external/freertos/include/queue.h"
-#include "external/freertos/include/task.h"
 #include "sw/device/lib/arch/device.h"
 #include "sw/device/lib/base/macros.h"
 #include "sw/device/lib/base/mmio.h"
 #include "sw/device/lib/dif/dif_base.h"
-#include "sw/device/lib/dif/dif_rstmgr.h"
 #include "sw/device/lib/dif/dif_rv_core_ibex.h"
 #include "sw/device/lib/dif/dif_uart.h"
 #include "sw/device/lib/runtime/hart.h"
 #include "sw/device/lib/runtime/log.h"
 #include "sw/device/lib/testing/rand_testutils.h"
-#include "sw/device/lib/testing/test_framework/FreeRTOSConfig.h"
 #include "sw/device/lib/testing/test_framework/check.h"
 #include "sw/device/lib/testing/test_framework/coverage.h"
 #include "sw/device/lib/testing/test_framework/ottf_console.h"
 #include "sw/device/lib/testing/test_framework/ottf_test_config.h"
 #include "sw/device/lib/testing/test_framework/status.h"
-#include "sw/device/silicon_creator/lib/manifest_def.h"
+//#include "sw/device/silicon_creator/lib/manifest_def.h"
+#define manufacturer_pre_test_hook() true
+#define manufacturer_post_test_hook() true
 
-// TODO: make this toplevel agnostic.
 #include "hw/top_earlgrey/sw/autogen/top_earlgrey.h"
 
 #define MODULE_ID MAKE_MODULE_ID('o', 't', 'm')
@@ -38,47 +34,8 @@
 OT_ASSERT_MEMBER_OFFSET(ottf_test_config_t, enable_concurrency, 0);
 OT_ASSERT_MEMBER_SIZE(ottf_test_config_t, enable_concurrency, 1);
 
-// Pointer to the current FreeRTOS Task Control Block, which should be non-NULL
-// when OTTF concurrency is enabled, and test code is executed within FreeRTOS
-// tasks.
-extern void *pxCurrentTCB;
-
 // A global random number generator testutil handle.
 rand_testutils_rng_t rand_testutils_rng_ctx;
-
-// The OTTF overrides the default machine ecall exception handler to implement
-// FreeRTOS context switching, required for supporting cooperative scheduling.
-void ottf_machine_ecall_handler(uint32_t *exc_info) {
-  if (pxCurrentTCB != NULL) {
-    // If the pointer to the current TCB is not NULL, we are operating in
-    // concurrency mode. In this case, our default behavior is to assume a
-    // context switch has been requested.
-    vTaskSwitchContext();
-    return;
-  }
-  LOG_ERROR(
-      "OTTF currently only supports use of machine-mode ecall for FreeRTOS "
-      "context switching.");
-}
-
-bool ottf_task_create(TaskFunction_t task_function, const char *task_name,
-                      configSTACK_DEPTH_TYPE task_stack_depth,
-                      uint32_t task_priority) {
-  return xTaskCreate(/*pvTaskCode=*/task_function, /*pcName=*/task_name,
-                     /*usStackDepth=*/task_stack_depth, /*pvParameters=*/NULL,
-                     /*uxPriority=*/tskIDLE_PRIORITY + 1 + task_priority,
-                     /*pxCreatedTask=*/NULL) == pdPASS
-             ? true
-             : false;
-}
-
-void ottf_task_yield(void) { taskYIELD(); }
-
-void ottf_task_delete_self(void) { vTaskDelete(/*xTask=*/NULL); }
-
-char *ottf_task_get_self_name(void) {
-  return pcTaskGetName(/*xTaskToQuery=*/NULL);
-}
 
 /* Array holding the report statuses.
  *
@@ -151,14 +108,6 @@ static void test_wrapper(void *task_parameters) {
 void _ottf_main(void) {
   test_status_set(kTestStatusInTest);
 
-  // Clear reset reason register.
-  dif_rstmgr_t rstmgr;
-  CHECK_DIF_OK(dif_rstmgr_init(
-      mmio_region_from_addr(TOP_EARLGREY_RSTMGR_AON_BASE_ADDR), &rstmgr));
-  if (kOttfTestConfig.clear_reset_reason) {
-    CHECK_DIF_OK(dif_rstmgr_reset_info_clear(&rstmgr));
-  }
-
   // Initialize the console to enable logging for non-DV simulation platforms.
   if (kDeviceType != kDeviceSimDV) {
     ottf_console_init();
@@ -176,16 +125,9 @@ void _ottf_main(void) {
   rand_testutils_rng_ctx = rand_testutils_init(&rv_core_ibex);
 
   // Run the test.
-  if (kOttfTestConfig.enable_concurrency) {
-    // Run `test_main()` in a FreeRTOS task, allowing other FreeRTOS tasks to
-    // be spawned, if requested in the main test task. Note, we spawn the main
-    // test task at a priority level of 0.
-    ottf_task_create(test_wrapper, "test_main", /*task_stack_depth=*/1024, 0);
-    vTaskStartScheduler();
-  } else {
-    // Otherwise, launch `test_main()` on bare-metal.
-    test_wrapper(NULL);
-  }
+  CHECK(!kOttfTestConfig.enable_concurrency);
+  // Launch `test_main()` on bare-metal.
+  test_wrapper(NULL);
 
   // Unreachable.
   CHECK(false);
