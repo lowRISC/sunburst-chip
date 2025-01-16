@@ -8,12 +8,12 @@
 #include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <string.h>
 
 #include "sw/device/lib/base/bitfield.h"
 #include "sw/device/lib/base/macros.h"
+#include "sw/device/lib/base/memory.h"
 #include "sw/device/lib/dif/dif_base.h"
-#include "sw/device/silicon_creator/lib/error.h"
+//#include "sw/device/silicon_creator/lib/error.h"
 
 #define USING_INTERNAL_STATUS
 #include "sw/device/lib/base/internal/status.h"
@@ -138,9 +138,11 @@ enum ot_status_create_record_magic {
 // clang-format off
   #define INTO_STATUS(expr_) _Generic((expr_),                                   \
            status_t: (expr_),                                                   \
-        rom_error_t: ROM_ERROR_INTO_STATUS(expr_),                              \
        dif_result_t: DIF_RESULT_INTO_STATUS(expr_))
 // clang-format on
+
+// Dropped:
+//        rom_error_t: ROM_ERROR_INTO_STATUS(expr_),                              \
 
 /**
  * Report an error status.
