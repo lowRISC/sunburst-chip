@@ -8,7 +8,8 @@
 #include "sw/device/lib/arch/device.h"
 
 #include "hw/top_earlgrey/sw/autogen/top_earlgrey.h"
-#include "rv_core_ibex_regs.h"
+// TODO: Decide what functionality we require in the core_ibex wrapper.
+//#include "rv_core_ibex_regs.h"
 #include "uart_regs.h"
 
 /**
