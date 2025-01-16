@@ -14,7 +14,7 @@
 #include "sw/device/lib/testing/test_framework/ottf_main.h"
 #include "sw/device/lib/testing/test_framework/ottf_utils.h"
 
-#include "hw/top_earlgrey/sw/autogen/top_earlgrey.h"
+#include "hw/top_chip/sw/autogen/top_chip.h"
 #include "pattgen_regs.h"  // Generated.
 
 /**
@@ -79,26 +79,26 @@ typedef enum {
 /* Backdoor variable for real device */
 uint8_t test_cmd = kTestCmdWait;
 
-static const uint32_t kPlicTarget = kTopEarlgreyPlicTargetIbex0;
+static const uint32_t kPlicTarget = kTopChipPlicTargetIbex0;
 static const uint8_t kPattOuts = 4;
 
 static const dif_pinmux_index_t kPinmuxOutsel[] = {
-    kTopEarlgreyPinmuxOutselPattgenPda0Tx, /**< = 49: Peripheral Output 46 */
-    kTopEarlgreyPinmuxOutselPattgenPcl0Tx, /**< = 50: Peripheral Output 47 */
-    kTopEarlgreyPinmuxOutselPattgenPda1Tx, /**< = 51: Peripheral Output 48 */
-    kTopEarlgreyPinmuxOutselPattgenPcl1Tx, /**< = 52: Peripheral Output 49 */
+    kTopChipPinmuxOutselPattgenPda0Tx, /**< = 49: Peripheral Output 46 */
+    kTopChipPinmuxOutselPattgenPcl0Tx, /**< = 50: Peripheral Output 47 */
+    kTopChipPinmuxOutselPattgenPda1Tx, /**< = 51: Peripheral Output 48 */
+    kTopChipPinmuxOutselPattgenPcl1Tx, /**< = 52: Peripheral Output 49 */
 };
 static const dif_pinmux_index_t kPinmuxMioOutDV[] = {
-    kTopEarlgreyPinmuxMioOutIob9,   // pda0_tx
-    kTopEarlgreyPinmuxMioOutIob10,  // pcl0_tx
-    kTopEarlgreyPinmuxMioOutIob11,  // pda1_tx
-    kTopEarlgreyPinmuxMioOutIob12,  // pcl1_tx
+    kTopChipPinmuxMioOutIob9,   // pda0_tx
+    kTopChipPinmuxMioOutIob10,  // pcl0_tx
+    kTopChipPinmuxMioOutIob11,  // pda1_tx
+    kTopChipPinmuxMioOutIob12,  // pcl1_tx
 };
 static const dif_pinmux_index_t kPinmuxMioOutReal[] = {
-    kTopEarlgreyPinmuxMioOutIor10,  // pda0_tx
-    kTopEarlgreyPinmuxMioOutIor11,  // pcl0_tx
-    kTopEarlgreyPinmuxMioOutIor12,  // pda1_tx
-    kTopEarlgreyPinmuxMioOutIor13,  // pcl1_tx
+    kTopChipPinmuxMioOutIor10,  // pda0_tx
+    kTopChipPinmuxMioOutIor11,  // pcl0_tx
+    kTopChipPinmuxMioOutIor12,  // pda1_tx
+    kTopChipPinmuxMioOutIor13,  // pcl1_tx
 };
 
 static dif_rv_plic_t plic;
@@ -113,9 +113,9 @@ void ottf_external_isr(uint32_t *exc_info) {
 
   CHECK_DIF_OK(dif_rv_plic_irq_claim(&plic, kPlicTarget, &irq_id));
   // Handle OTTF interrupt.
-  top_earlgrey_plic_peripheral_t peripheral = (top_earlgrey_plic_peripheral_t)
-      top_earlgrey_plic_interrupt_for_peripheral[irq_id];
-  if (peripheral == kTopEarlgreyPlicPeripheralUart0 &&
+  top_chip_plic_peripheral_t peripheral = (top_chip_plic_peripheral_t)
+      top_chip_plic_interrupt_for_peripheral[irq_id];
+  if (peripheral == kTopChipPlicPeripheralUart0 &&
       ottf_console_flow_control_isr(exc_info)) {
     return;
   }
@@ -124,7 +124,7 @@ void ottf_external_isr(uint32_t *exc_info) {
 
   bool is_pending;
   switch (irq_id) {
-    case kTopEarlgreyPlicIrqIdPattgenDoneCh0:
+    case kTopChipPlicIrqIdPattgenDoneCh0:
       LOG_INFO("Channel 0");
       channel_fired |= 1 << 0;
       // Check the expected interrupt is triggered.
@@ -134,7 +134,7 @@ void ottf_external_isr(uint32_t *exc_info) {
       CHECK_DIF_OK(
           dif_pattgen_irq_acknowledge(&pattgen, kDifPattgenIrqDoneCh0));
       break;
-    case kTopEarlgreyPlicIrqIdPattgenDoneCh1:
+    case kTopChipPlicIrqIdPattgenDoneCh1:
       channel_fired |= 1 << 1;
       LOG_INFO("Channel 1");
       // Check the expected interrupt is triggered.
@@ -164,21 +164,21 @@ bool test_main(void) {
   irq_external_ctrl(true);
 
   CHECK_DIF_OK(dif_pattgen_init(
-      mmio_region_from_addr(TOP_EARLGREY_PATTGEN_BASE_ADDR), &pattgen));
+      mmio_region_from_addr(TOP_CHIP_PATTGEN_BASE_ADDR), &pattgen));
   CHECK_DIF_OK(dif_pattgen_channel_set_enabled(&pattgen, kDifPattgenChannel0,
                                                kDifToggleDisabled));
   CHECK_DIF_OK(dif_pattgen_channel_set_enabled(&pattgen, kDifPattgenChannel1,
                                                kDifToggleDisabled));
   CHECK_DIF_OK(dif_rv_plic_init(
-      mmio_region_from_addr(TOP_EARLGREY_RV_PLIC_BASE_ADDR), &plic));
+      mmio_region_from_addr(TOP_CHIP_RV_PLIC_BASE_ADDR), &plic));
   rv_plic_testutils_irq_range_enable(&plic, kPlicTarget,
-                                     kTopEarlgreyPlicIrqIdPattgenDoneCh0,
-                                     kTopEarlgreyPlicIrqIdPattgenDoneCh1);
+                                     kTopChipPlicIrqIdPattgenDoneCh0,
+                                     kTopChipPlicIrqIdPattgenDoneCh1);
 
   // Initialize pinmux
   // Assign PattgenOutput to IOB9..12
   CHECK_DIF_OK(dif_pinmux_init(
-      mmio_region_from_addr(TOP_EARLGREY_PINMUX_AON_BASE_ADDR), &pinmux));
+      mmio_region_from_addr(TOP_CHIP_PINMUX_AON_BASE_ADDR), &pinmux));
 
   LOG_INFO("pinmux_init begin");
   const dif_pinmux_index_t *kPinmuxMioOut =

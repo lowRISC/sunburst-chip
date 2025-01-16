@@ -25,7 +25,7 @@
 #define manufacturer_pre_test_hook() true
 #define manufacturer_post_test_hook() true
 
-#include "hw/top_earlgrey/sw/autogen/top_earlgrey.h"
+#include "hw/top_chip/sw/autogen/top_chip.h"
 
 #define MODULE_ID MAKE_MODULE_ID('o', 't', 'm')
 
@@ -120,7 +120,7 @@ void _ottf_main(void) {
   // tests with a source of entropy for randomizing test behaviors.
   dif_rv_core_ibex_t rv_core_ibex;
   CHECK_DIF_OK(dif_rv_core_ibex_init(
-      mmio_region_from_addr(TOP_EARLGREY_RV_CORE_IBEX_CFG_BASE_ADDR),
+      mmio_region_from_addr(TOP_CHIP_RV_CORE_IBEX_CFG_BASE_ADDR),
       &rv_core_ibex));
   rand_testutils_rng_ctx = rand_testutils_init(&rv_core_ibex);
 

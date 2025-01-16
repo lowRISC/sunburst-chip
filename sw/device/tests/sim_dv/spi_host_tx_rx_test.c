@@ -15,7 +15,7 @@
 #include "sw/device/lib/testing/test_framework/ottf_main.h"
 #include "sw/device/lib/testing/test_framework/status.h"
 
-#include "hw/top_earlgrey/sw/autogen/top_earlgrey.h"
+#include "hw/top_chip/sw/autogen/top_chip.h"
 
 OTTF_DEFINE_TEST_CONFIG();
 
@@ -33,22 +33,22 @@ static volatile const uint8_t kSPIHostIdx = 0x0;
 static dif_spi_host_t spi_host;
 static dif_pinmux_t pinmux;
 
-static const top_earlgrey_direct_pads_t spi_host0_direct_pads[6] = {
-    kTopEarlgreyDirectPadsSpiHost0Sck,   // sck
-    kTopEarlgreyDirectPadsSpiHost0Csb,   // csb
-    kTopEarlgreyDirectPadsSpiHost0Sd3,   // sio[3]
-    kTopEarlgreyDirectPadsSpiHost0Sd2,   // sio[2]
-    kTopEarlgreyDirectPadsSpiHost0Sd1,   // sio[1]
-    kTopEarlgreyDirectPadsSpiHost0Sd0};  // sio[0]
+static const top_chip_direct_pads_t spi_host0_direct_pads[6] = {
+    kTopChipDirectPadsSpiHost0Sck,   // sck
+    kTopChipDirectPadsSpiHost0Csb,   // csb
+    kTopChipDirectPadsSpiHost0Sd3,   // sio[3]
+    kTopChipDirectPadsSpiHost0Sd2,   // sio[2]
+    kTopChipDirectPadsSpiHost0Sd1,   // sio[1]
+    kTopChipDirectPadsSpiHost0Sd0};  // sio[0]
 
 // pinmap defined in chip_if.sv (spi_device1_if)
-static const top_earlgrey_muxed_pads_t spi_host1_muxed_pads[6] = {
-    kTopEarlgreyMuxedPadsIob0,  // sck
-    kTopEarlgreyMuxedPadsIob1,  // csb
-    kTopEarlgreyMuxedPadsIob6,  // sio[3]
-    kTopEarlgreyMuxedPadsIob5,  // sio[2]
-    kTopEarlgreyMuxedPadsIob4,  // sio[1]
-    kTopEarlgreyMuxedPadsIob3,  // sio[0]
+static const top_chip_muxed_pads_t spi_host1_muxed_pads[6] = {
+    kTopChipMuxedPadsIob0,  // sck
+    kTopChipMuxedPadsIob1,  // csb
+    kTopChipMuxedPadsIob6,  // sio[3]
+    kTopChipMuxedPadsIob5,  // sio[2]
+    kTopChipMuxedPadsIob4,  // sio[1]
+    kTopChipMuxedPadsIob3,  // sio[0]
 };
 
 // For spi_host1
@@ -56,18 +56,18 @@ static const top_earlgrey_muxed_pads_t spi_host1_muxed_pads[6] = {
 // csb       output
 // sio[0:3]  bidir (input+output)
 
-/** To setup the pinmux using the enum's in top_earlgrey.h ...
+/** To setup the pinmux using the enum's in top_chip.h ...
  *
  *                                             - Choose corresponding pad/periph
  * from...
  *
  * dif_result_t dif_pinmux_output_select(...,
- *   dif_pinmux_index_t mio_pad_output,        | top_earlgrey_pinmux_mio_out_t
- *   dif_pinmux_index_t outsel)                | top_earlgrey_pinmux_outsel_t
+ *   dif_pinmux_index_t mio_pad_output,        | top_chip_pinmux_mio_out_t
+ *   dif_pinmux_index_t outsel)                | top_chip_pinmux_outsel_t
  * dif_result_t dif_pinmux_input_select(...,
  *   dif_pinmux_index_t peripheral_input,      |
- * top_earlgrey_pinmux_peripheral_in_t dif_pinmux_index_t insel) |
- * top_earlgrey_pinmux_insel_t
+ * top_chip_pinmux_peripheral_in_t dif_pinmux_index_t insel) |
+ * top_chip_pinmux_insel_t
  *
  */
 
@@ -79,48 +79,48 @@ typedef struct pinmux_select {
 static const pinmux_select_t pinmux_out_config[] = {
     // spi_host1
     {
-        .pad = kTopEarlgreyPinmuxMioOutIob0,
-        .peripheral = kTopEarlgreyPinmuxOutselSpiHost1Sck,  // SCK
+        .pad = kTopChipPinmuxMioOutIob0,
+        .peripheral = kTopChipPinmuxOutselSpiHost1Sck,  // SCK
     },
     {
-        .pad = kTopEarlgreyPinmuxMioOutIob1,
-        .peripheral = kTopEarlgreyPinmuxOutselSpiHost1Csb,  // CSB
+        .pad = kTopChipPinmuxMioOutIob1,
+        .peripheral = kTopChipPinmuxOutselSpiHost1Csb,  // CSB
     },
     {
-        .pad = kTopEarlgreyPinmuxMioOutIob3,
-        .peripheral = kTopEarlgreyPinmuxOutselSpiHost1Sd0,  // sio[0]
+        .pad = kTopChipPinmuxMioOutIob3,
+        .peripheral = kTopChipPinmuxOutselSpiHost1Sd0,  // sio[0]
     },
     {
-        .pad = kTopEarlgreyPinmuxMioOutIob4,
-        .peripheral = kTopEarlgreyPinmuxOutselSpiHost1Sd1,  // sio[1]
+        .pad = kTopChipPinmuxMioOutIob4,
+        .peripheral = kTopChipPinmuxOutselSpiHost1Sd1,  // sio[1]
     },
     {
-        .pad = kTopEarlgreyPinmuxMioOutIob5,
-        .peripheral = kTopEarlgreyPinmuxOutselSpiHost1Sd2,  // sio[2]
+        .pad = kTopChipPinmuxMioOutIob5,
+        .peripheral = kTopChipPinmuxOutselSpiHost1Sd2,  // sio[2]
     },
     {
-        .pad = kTopEarlgreyPinmuxMioOutIob6,
-        .peripheral = kTopEarlgreyPinmuxOutselSpiHost1Sd3,  // sio[3]
+        .pad = kTopChipPinmuxMioOutIob6,
+        .peripheral = kTopChipPinmuxOutselSpiHost1Sd3,  // sio[3]
     },
 };
 
 static const pinmux_select_t pinmux_in_config[] = {
     // spi_host1
     {
-        .pad = kTopEarlgreyPinmuxInselIob3,
-        .peripheral = kTopEarlgreyPinmuxPeripheralInSpiHost1Sd0,  // sio[0]
+        .pad = kTopChipPinmuxInselIob3,
+        .peripheral = kTopChipPinmuxPeripheralInSpiHost1Sd0,  // sio[0]
     },
     {
-        .pad = kTopEarlgreyPinmuxInselIob4,
-        .peripheral = kTopEarlgreyPinmuxPeripheralInSpiHost1Sd1,  // sio[1]
+        .pad = kTopChipPinmuxInselIob4,
+        .peripheral = kTopChipPinmuxPeripheralInSpiHost1Sd1,  // sio[1]
     },
     {
-        .pad = kTopEarlgreyPinmuxInselIob5,
-        .peripheral = kTopEarlgreyPinmuxPeripheralInSpiHost1Sd2,  // sio[2]
+        .pad = kTopChipPinmuxInselIob5,
+        .peripheral = kTopChipPinmuxPeripheralInSpiHost1Sd2,  // sio[2]
     },
     {
-        .pad = kTopEarlgreyPinmuxInselIob6,
-        .peripheral = kTopEarlgreyPinmuxPeripheralInSpiHost1Sd3,  // sio[3]
+        .pad = kTopChipPinmuxInselIob6,
+        .peripheral = kTopChipPinmuxPeripheralInSpiHost1Sd3,  // sio[3]
     },
 };
 
@@ -198,7 +198,7 @@ void setup_pinmux_pads_spi_host1(void) {
 bool test_main(void) {
   // Initialize the pinmux.
   CHECK_DIF_OK(dif_pinmux_init(
-      mmio_region_from_addr(TOP_EARLGREY_PINMUX_AON_BASE_ADDR), &pinmux));
+      mmio_region_from_addr(TOP_CHIP_PINMUX_AON_BASE_ADDR), &pinmux));
   pinmux_testutils_init(&pinmux);
 
   // Setup pinmux if required, enable weak pull-up on relevant pads
@@ -211,12 +211,12 @@ bool test_main(void) {
   uint64_t clkHz;
   switch (kSPIHostIdx) {
     case 0: {
-      base_addr = TOP_EARLGREY_SPI_HOST0_BASE_ADDR;
+      base_addr = TOP_CHIP_SPI_HOST0_BASE_ADDR;
       clkHz = kClockFreqHiSpeedPeripheralHz;
       break;
     }
     case 1: {
-      base_addr = TOP_EARLGREY_SPI_HOST1_BASE_ADDR;
+      base_addr = TOP_CHIP_SPI_HOST1_BASE_ADDR;
       clkHz = kClockFreqPeripheralHz;
       break;
     }

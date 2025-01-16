@@ -18,7 +18,7 @@
 #include "sw/device/lib/testing/test_framework/status.h"
 #include "sw/device/lib/testing/uart_testutils.h"
 
-#include "hw/top_earlgrey/sw/autogen/top_earlgrey.h"
+#include "hw/top_chip/sw/autogen/top_chip.h"
 
 static dif_pinmux_t pinmux;
 static dif_rv_plic_t rv_plic;
@@ -108,13 +108,13 @@ static status_t configure_interrupts(void) {
                                    0x1));
 
   TRY(dif_rv_plic_irq_set_enabled(&rv_plic, uart_cfg.irq_rx_parity_err_id,
-                                  kTopEarlgreyPlicTargetIbex0,
+                                  kTopChipPlicTargetIbex0,
                                   kDifToggleEnabled));
   TRY(dif_rv_plic_irq_set_enabled(&rv_plic, uart_cfg.irq_rx_break_err_id,
-                                  kTopEarlgreyPlicTargetIbex0,
+                                  kTopChipPlicTargetIbex0,
                                   kDifToggleEnabled));
 
-  TRY(dif_rv_plic_target_set_threshold(&rv_plic, kTopEarlgreyPlicTargetIbex0,
+  TRY(dif_rv_plic_target_set_threshold(&rv_plic, kTopChipPlicTargetIbex0,
                                        0x0));
 
   // Enable the external IRQ at Ibex.
@@ -132,12 +132,12 @@ static status_t configure_interrupts(void) {
 void ottf_external_isr(uint32_t *exc_info) {
   // Claim the interrupt.
   dif_rv_plic_irq_id_t plic_irq_id;
-  CHECK_DIF_OK(dif_rv_plic_irq_claim(&rv_plic, kTopEarlgreyPlicTargetIbex0,
+  CHECK_DIF_OK(dif_rv_plic_irq_claim(&rv_plic, kTopChipPlicTargetIbex0,
                                      &plic_irq_id));
 
   // Check the interrupt fired on the correct UART.
-  top_earlgrey_plic_peripheral_t peripheral = (top_earlgrey_plic_peripheral_t)
-      top_earlgrey_plic_interrupt_for_peripheral[plic_irq_id];
+  top_chip_plic_peripheral_t peripheral = (top_chip_plic_peripheral_t)
+      top_chip_plic_interrupt_for_peripheral[plic_irq_id];
 
   // Handle interrupts for the console UART separately.
   if (peripheral != uart_cfg.peripheral_id) {
@@ -165,7 +165,7 @@ void ottf_external_isr(uint32_t *exc_info) {
 
   // Acknowledge interrupt.
   CHECK_DIF_OK(dif_uart_irq_acknowledge(&uart, uart_irq_id));
-  CHECK_DIF_OK(dif_rv_plic_irq_complete(&rv_plic, kTopEarlgreyPlicTargetIbex0,
+  CHECK_DIF_OK(dif_rv_plic_irq_complete(&rv_plic, kTopChipPlicTargetIbex0,
                                         plic_irq_id));
 }
 
@@ -245,9 +245,9 @@ OTTF_DEFINE_TEST_CONFIG(.enable_uart_flow_control = true);
 
 bool test_main(void) {
   mmio_region_t base_addr;
-  base_addr = mmio_region_from_addr(TOP_EARLGREY_PINMUX_AON_BASE_ADDR);
+  base_addr = mmio_region_from_addr(TOP_CHIP_PINMUX_AON_BASE_ADDR);
   CHECK_DIF_OK(dif_pinmux_init(base_addr, &pinmux));
-  base_addr = mmio_region_from_addr(TOP_EARLGREY_RV_PLIC_BASE_ADDR);
+  base_addr = mmio_region_from_addr(TOP_CHIP_RV_PLIC_BASE_ADDR);
   CHECK_DIF_OK(dif_rv_plic_init(base_addr, &rv_plic));
 
   // Wait for host to tell us which parity and UART to test.
@@ -258,7 +258,7 @@ bool test_main(void) {
   if (uart_idx == 0) {
     CHECK_STATUS_OK(
         uart_testutils_select_pinmux(&pinmux, 1, kUartPinmuxChannelConsole));
-    ottf_console_configure_uart(TOP_EARLGREY_UART1_BASE_ADDR);
+    ottf_console_configure_uart(TOP_CHIP_UART1_BASE_ADDR);
   }
 
   // Configure the UART under test.

@@ -7,7 +7,7 @@
 
 #include "sw/device/lib/arch/device.h"
 
-#include "hw/top_earlgrey/sw/autogen/top_earlgrey.h"
+#include "hw/top_chip/sw/autogen/top_chip.h"
 // TODO: Decide what functionality we require in the core_ibex wrapper.
 //#include "rv_core_ibex_regs.h"
 #include "uart_regs.h"
@@ -20,8 +20,7 @@
 const device_type_t kDeviceType = kDeviceSimVerilator;
 
 // Changes to the clock frequency or UART baud rate must also be reflected at
-// `hw/top_earlgrey/rtl/chip_earlgrey_verilator.sv` and
-// `test/systemtest/earlgrey/test_sim_verilator.py`.
+// `hw/top_chip/dv/verilator/top_chip_verilator.sv`.
 #define CPU_FREQ_HZ 500 * 1000
 const uint64_t kClockFreqCpuHz = CPU_FREQ_HZ;  // 500kHz
 
@@ -66,7 +65,7 @@ const uint32_t kAstCheckPollCpuCycles =
     CALCULATE_AST_CHECK_POLL_CPU_CYCLES(kClockFreqCpuHz);
 
 const uintptr_t kDeviceTestStatusAddress =
-    TOP_EARLGREY_RV_CORE_IBEX_CFG_BASE_ADDR +
+    TOP_CHIP_RV_CORE_IBEX_CFG_BASE_ADDR +
     RV_CORE_IBEX_DV_SIM_WINDOW_REG_OFFSET;
 
 const uintptr_t kDeviceLogBypassUartAddress = 0;

@@ -17,7 +17,7 @@
 #include "sw/device/lib/testing/pinmux_testutils.h"
 #include "sw/device/lib/testing/test_framework/check.h"
 
-#include "hw/top_earlgrey/sw/autogen/top_earlgrey.h"
+#include "hw/top_chip/sw/autogen/top_chip.h"
 #include "uart_regs.h"  // Generated.
 
 #define MODULE_ID MAKE_MODULE_ID('u', 't', 'u')
@@ -28,23 +28,23 @@
 static const pinmux_testutils_peripheral_pin_t kUartPinmuxPins[] = {
     // UART0.
     {
-        .peripheral_in = kTopEarlgreyPinmuxPeripheralInUart0Rx,
-        .outsel = kTopEarlgreyPinmuxOutselUart0Tx,
+        .peripheral_in = kTopChipPinmuxPeripheralInUart0Rx,
+        .outsel = kTopChipPinmuxOutselUart0Tx,
     },
     // UART1.
     {
-        .peripheral_in = kTopEarlgreyPinmuxPeripheralInUart1Rx,
-        .outsel = kTopEarlgreyPinmuxOutselUart1Tx,
+        .peripheral_in = kTopChipPinmuxPeripheralInUart1Rx,
+        .outsel = kTopChipPinmuxOutselUart1Tx,
     },
     // UART2.
     {
-        .peripheral_in = kTopEarlgreyPinmuxPeripheralInUart2Rx,
-        .outsel = kTopEarlgreyPinmuxOutselUart2Tx,
+        .peripheral_in = kTopChipPinmuxPeripheralInUart2Rx,
+        .outsel = kTopChipPinmuxOutselUart2Tx,
     },
     // UART3.
     {
-        .peripheral_in = kTopEarlgreyPinmuxPeripheralInUart3Rx,
-        .outsel = kTopEarlgreyPinmuxOutselUart3Tx,
+        .peripheral_in = kTopChipPinmuxPeripheralInUart3Rx,
+        .outsel = kTopChipPinmuxOutselUart3Tx,
     },
 };
 
@@ -55,12 +55,12 @@ static const pinmux_testutils_mio_pin_t
     kUartSynthPins[kUartPinmuxChannelCount] = {
         [kUartPinmuxChannelConsole] =
             {
-                .mio_out = kTopEarlgreyPinmuxMioOutIoc4,
-                .insel = kTopEarlgreyPinmuxInselIoc3,
+                .mio_out = kTopChipPinmuxMioOutIoc4,
+                .insel = kTopChipPinmuxInselIoc3,
             },
         [kUartPinmuxChannelDut] = {
-            .mio_out = kTopEarlgreyPinmuxMioOutIob5,
-            .insel = kTopEarlgreyPinmuxInselIob4,
+            .mio_out = kTopChipPinmuxMioOutIob5,
+            .insel = kTopChipPinmuxInselIob4,
         }};
 
 /**
@@ -71,77 +71,77 @@ static const pinmux_testutils_mio_pin_t
 static const pinmux_testutils_mio_pin_t kUartDvPins[4] = {
     // UART0.
     {
-        .mio_out = kTopEarlgreyPinmuxMioOutIoc4,
-        .insel = kTopEarlgreyPinmuxInselIoc3,
+        .mio_out = kTopChipPinmuxMioOutIoc4,
+        .insel = kTopChipPinmuxInselIoc3,
     },
     // UART1.
     {
-        .mio_out = kTopEarlgreyPinmuxMioOutIob5,
-        .insel = kTopEarlgreyPinmuxInselIob4,
+        .mio_out = kTopChipPinmuxMioOutIob5,
+        .insel = kTopChipPinmuxInselIob4,
     },
     // UART2.
     {
-        .mio_out = kTopEarlgreyPinmuxMioOutIoa5,
-        .insel = kTopEarlgreyPinmuxInselIoa4,
+        .mio_out = kTopChipPinmuxMioOutIoa5,
+        .insel = kTopChipPinmuxInselIoa4,
     },
     // UART3.
     {
-        .mio_out = kTopEarlgreyPinmuxMioOutIoa1,
-        .insel = kTopEarlgreyPinmuxInselIoa0,
+        .mio_out = kTopChipPinmuxMioOutIoa1,
+        .insel = kTopChipPinmuxInselIoa0,
     }};
 
 static const uart_cfg_params_t kUartCfgParams[4] = {
     (uart_cfg_params_t){
-        .base_addr = TOP_EARLGREY_UART0_BASE_ADDR,
-        .peripheral_id = kTopEarlgreyPlicPeripheralUart0,
-        .irq_tx_watermark_id = kTopEarlgreyPlicIrqIdUart0TxWatermark,
-        .irq_tx_empty_id = kTopEarlgreyPlicIrqIdUart0TxEmpty,
-        .irq_rx_watermark_id = kTopEarlgreyPlicIrqIdUart0RxWatermark,
-        .irq_tx_done_id = kTopEarlgreyPlicIrqIdUart0TxDone,
-        .irq_rx_overflow_id = kTopEarlgreyPlicIrqIdUart0RxOverflow,
-        .irq_rx_frame_err_id = kTopEarlgreyPlicIrqIdUart0RxFrameErr,
-        .irq_rx_break_err_id = kTopEarlgreyPlicIrqIdUart0RxBreakErr,
-        .irq_rx_timeout_id = kTopEarlgreyPlicIrqIdUart0RxTimeout,
-        .irq_rx_parity_err_id = kTopEarlgreyPlicIrqIdUart0RxParityErr,
+        .base_addr = TOP_CHIP_UART0_BASE_ADDR,
+        .peripheral_id = kTopChipPlicPeripheralUart0,
+        .irq_tx_watermark_id = kTopChipPlicIrqIdUart0TxWatermark,
+        .irq_tx_empty_id = kTopChipPlicIrqIdUart0TxEmpty,
+        .irq_rx_watermark_id = kTopChipPlicIrqIdUart0RxWatermark,
+        .irq_tx_done_id = kTopChipPlicIrqIdUart0TxDone,
+        .irq_rx_overflow_id = kTopChipPlicIrqIdUart0RxOverflow,
+        .irq_rx_frame_err_id = kTopChipPlicIrqIdUart0RxFrameErr,
+        .irq_rx_break_err_id = kTopChipPlicIrqIdUart0RxBreakErr,
+        .irq_rx_timeout_id = kTopChipPlicIrqIdUart0RxTimeout,
+        .irq_rx_parity_err_id = kTopChipPlicIrqIdUart0RxParityErr,
     },
     (uart_cfg_params_t){
-        .base_addr = TOP_EARLGREY_UART1_BASE_ADDR,
-        .peripheral_id = kTopEarlgreyPlicPeripheralUart1,
-        .irq_tx_watermark_id = kTopEarlgreyPlicIrqIdUart1TxWatermark,
-        .irq_tx_empty_id = kTopEarlgreyPlicIrqIdUart1TxEmpty,
-        .irq_rx_watermark_id = kTopEarlgreyPlicIrqIdUart1RxWatermark,
-        .irq_tx_done_id = kTopEarlgreyPlicIrqIdUart1TxDone,
-        .irq_rx_overflow_id = kTopEarlgreyPlicIrqIdUart1RxOverflow,
-        .irq_rx_frame_err_id = kTopEarlgreyPlicIrqIdUart1RxFrameErr,
-        .irq_rx_break_err_id = kTopEarlgreyPlicIrqIdUart1RxBreakErr,
-        .irq_rx_timeout_id = kTopEarlgreyPlicIrqIdUart1RxTimeout,
-        .irq_rx_parity_err_id = kTopEarlgreyPlicIrqIdUart1RxParityErr,
+        .base_addr = TOP_CHIP_UART1_BASE_ADDR,
+        .peripheral_id = kTopChipPlicPeripheralUart1,
+        .irq_tx_watermark_id = kTopChipPlicIrqIdUart1TxWatermark,
+        .irq_tx_empty_id = kTopChipPlicIrqIdUart1TxEmpty,
+        .irq_rx_watermark_id = kTopChipPlicIrqIdUart1RxWatermark,
+        .irq_tx_done_id = kTopChipPlicIrqIdUart1TxDone,
+        .irq_rx_overflow_id = kTopChipPlicIrqIdUart1RxOverflow,
+        .irq_rx_frame_err_id = kTopChipPlicIrqIdUart1RxFrameErr,
+        .irq_rx_break_err_id = kTopChipPlicIrqIdUart1RxBreakErr,
+        .irq_rx_timeout_id = kTopChipPlicIrqIdUart1RxTimeout,
+        .irq_rx_parity_err_id = kTopChipPlicIrqIdUart1RxParityErr,
     },
     (uart_cfg_params_t){
-        .base_addr = TOP_EARLGREY_UART2_BASE_ADDR,
-        .peripheral_id = kTopEarlgreyPlicPeripheralUart2,
-        .irq_tx_watermark_id = kTopEarlgreyPlicIrqIdUart2TxWatermark,
-        .irq_tx_empty_id = kTopEarlgreyPlicIrqIdUart2TxEmpty,
-        .irq_rx_watermark_id = kTopEarlgreyPlicIrqIdUart2RxWatermark,
-        .irq_tx_done_id = kTopEarlgreyPlicIrqIdUart2TxDone,
-        .irq_rx_overflow_id = kTopEarlgreyPlicIrqIdUart2RxOverflow,
-        .irq_rx_frame_err_id = kTopEarlgreyPlicIrqIdUart2RxFrameErr,
-        .irq_rx_break_err_id = kTopEarlgreyPlicIrqIdUart2RxBreakErr,
-        .irq_rx_timeout_id = kTopEarlgreyPlicIrqIdUart2RxTimeout,
-        .irq_rx_parity_err_id = kTopEarlgreyPlicIrqIdUart2RxParityErr,
+        .base_addr = TOP_CHIP_UART2_BASE_ADDR,
+        .peripheral_id = kTopChipPlicPeripheralUart2,
+        .irq_tx_watermark_id = kTopChipPlicIrqIdUart2TxWatermark,
+        .irq_tx_empty_id = kTopChipPlicIrqIdUart2TxEmpty,
+        .irq_rx_watermark_id = kTopChipPlicIrqIdUart2RxWatermark,
+        .irq_tx_done_id = kTopChipPlicIrqIdUart2TxDone,
+        .irq_rx_overflow_id = kTopChipPlicIrqIdUart2RxOverflow,
+        .irq_rx_frame_err_id = kTopChipPlicIrqIdUart2RxFrameErr,
+        .irq_rx_break_err_id = kTopChipPlicIrqIdUart2RxBreakErr,
+        .irq_rx_timeout_id = kTopChipPlicIrqIdUart2RxTimeout,
+        .irq_rx_parity_err_id = kTopChipPlicIrqIdUart2RxParityErr,
     },
     (uart_cfg_params_t){
-        .base_addr = TOP_EARLGREY_UART3_BASE_ADDR,
-        .peripheral_id = kTopEarlgreyPlicPeripheralUart3,
-        .irq_tx_watermark_id = kTopEarlgreyPlicIrqIdUart3TxWatermark,
-        .irq_tx_empty_id = kTopEarlgreyPlicIrqIdUart3TxEmpty,
-        .irq_rx_watermark_id = kTopEarlgreyPlicIrqIdUart3RxWatermark,
-        .irq_tx_done_id = kTopEarlgreyPlicIrqIdUart3TxDone,
-        .irq_rx_overflow_id = kTopEarlgreyPlicIrqIdUart3RxOverflow,
-        .irq_rx_frame_err_id = kTopEarlgreyPlicIrqIdUart3RxFrameErr,
-        .irq_rx_break_err_id = kTopEarlgreyPlicIrqIdUart3RxBreakErr,
-        .irq_rx_timeout_id = kTopEarlgreyPlicIrqIdUart3RxTimeout,
-        .irq_rx_parity_err_id = kTopEarlgreyPlicIrqIdUart3RxParityErr,
+        .base_addr = TOP_CHIP_UART3_BASE_ADDR,
+        .peripheral_id = kTopChipPlicPeripheralUart3,
+        .irq_tx_watermark_id = kTopChipPlicIrqIdUart3TxWatermark,
+        .irq_tx_empty_id = kTopChipPlicIrqIdUart3TxEmpty,
+        .irq_rx_watermark_id = kTopChipPlicIrqIdUart3RxWatermark,
+        .irq_tx_done_id = kTopChipPlicIrqIdUart3TxDone,
+        .irq_rx_overflow_id = kTopChipPlicIrqIdUart3RxOverflow,
+        .irq_rx_frame_err_id = kTopChipPlicIrqIdUart3RxFrameErr,
+        .irq_rx_break_err_id = kTopChipPlicIrqIdUart3RxBreakErr,
+        .irq_rx_timeout_id = kTopChipPlicIrqIdUart3RxTimeout,
+        .irq_rx_parity_err_id = kTopChipPlicIrqIdUart3RxParityErr,
     }};
 
 status_t uart_testutils_select_pinmux(const dif_pinmux_t *pinmux,
@@ -168,7 +168,7 @@ status_t uart_testutils_detach_pinmux(const dif_pinmux_t *pinmux,
   TRY_CHECK(uart_idx < ARRAYSIZE(kUartPinmuxPins), "Index out of bounds");
 
   TRY(dif_pinmux_input_select(pinmux, kUartPinmuxPins[uart_idx].peripheral_in,
-                              kTopEarlgreyPinmuxInselConstantZero));
+                              kTopChipPinmuxInselConstantZero));
 
   return OK_STATUS();
 }

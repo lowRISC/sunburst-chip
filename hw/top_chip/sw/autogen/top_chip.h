@@ -2,10 +2,8 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef OPENTITAN_HW_TOP_CHIP_SW_AUTOGEN_TOP_CHIP_H_
-#define OPENTITAN_HW_TOP_CHIP_SW_AUTOGEN_TOP_CHIP_H_
-
-// NOTE: Manually edited until there is a proper top-level hjson description.
+#ifndef OPENTITAN_HW_TOP_CHIP_SW_TOP_CHIP_H_
+#define OPENTITAN_HW_TOP_CHIP_SW_TOP_CHIP_H_
 
 /**
  * @file
@@ -28,7 +26,7 @@ extern "C" {
 #endif
 
 /**
- * Peripheral base address for uart0 in top earlgrey.
+ * Peripheral base address for uart0 in top chip.
  *
  * This should be used with #mmio_region_from_addr to access the memory-mapped
  * registers associated with the peripheral (usually via a DIF).
@@ -36,7 +34,7 @@ extern "C" {
 #define TOP_CHIP_UART0_BASE_ADDR 0x40300000u
 
 /**
- * Peripheral size for uart0 in top earlgrey.
+ * Peripheral size for uart0 in top chip.
  *
  * This is the size (in bytes) of the peripheral's reserved memory area. All
  * memory-mapped registers associated with this peripheral should have an
@@ -46,7 +44,7 @@ extern "C" {
 #define TOP_CHIP_UART0_SIZE_BYTES 0x40u
 
 /**
- * Peripheral base address for uart1 in top earlgrey.
+ * Peripheral base address for uart1 in top chip.
  *
  * This should be used with #mmio_region_from_addr to access the memory-mapped
  * registers associated with the peripheral (usually via a DIF).
@@ -54,7 +52,7 @@ extern "C" {
 #define TOP_CHIP_UART1_BASE_ADDR 0x40010000u
 
 /**
- * Peripheral size for uart1 in top earlgrey.
+ * Peripheral size for uart1 in top chip.
  *
  * This is the size (in bytes) of the peripheral's reserved memory area. All
  * memory-mapped registers associated with this peripheral should have an
@@ -64,43 +62,7 @@ extern "C" {
 #define TOP_CHIP_UART1_SIZE_BYTES 0x40u
 
 /**
- * Peripheral base address for uart2 in top earlgrey.
- *
- * This should be used with #mmio_region_from_addr to access the memory-mapped
- * registers associated with the peripheral (usually via a DIF).
- */
-#define TOP_CHIP_UART2_BASE_ADDR 0x40020000u
-
-/**
- * Peripheral size for uart2 in top earlgrey.
- *
- * This is the size (in bytes) of the peripheral's reserved memory area. All
- * memory-mapped registers associated with this peripheral should have an
- * address between #TOP_CHIP_UART2_BASE_ADDR and
- * `TOP_CHIP_UART2_BASE_ADDR + TOP_CHIP_UART2_SIZE_BYTES`.
- */
-#define TOP_CHIP_UART2_SIZE_BYTES 0x40u
-
-/**
- * Peripheral base address for uart3 in top earlgrey.
- *
- * This should be used with #mmio_region_from_addr to access the memory-mapped
- * registers associated with the peripheral (usually via a DIF).
- */
-#define TOP_CHIP_UART3_BASE_ADDR 0x40030000u
-
-/**
- * Peripheral size for uart3 in top earlgrey.
- *
- * This is the size (in bytes) of the peripheral's reserved memory area. All
- * memory-mapped registers associated with this peripheral should have an
- * address between #TOP_CHIP_UART3_BASE_ADDR and
- * `TOP_CHIP_UART3_BASE_ADDR + TOP_CHIP_UART3_SIZE_BYTES`.
- */
-#define TOP_CHIP_UART3_SIZE_BYTES 0x40u
-
-/**
- * Peripheral base address for gpio in top earlgrey.
+ * Peripheral base address for gpio in top chip.
  *
  * This should be used with #mmio_region_from_addr to access the memory-mapped
  * registers associated with the peripheral (usually via a DIF).
@@ -108,7 +70,7 @@ extern "C" {
 #define TOP_CHIP_GPIO_BASE_ADDR 0x40002000u
 
 /**
- * Peripheral size for gpio in top earlgrey.
+ * Peripheral size for gpio in top chip.
  *
  * This is the size (in bytes) of the peripheral's reserved memory area. All
  * memory-mapped registers associated with this peripheral should have an
@@ -118,25 +80,7 @@ extern "C" {
 #define TOP_CHIP_GPIO_SIZE_BYTES 0x40u
 
 /**
- * Peripheral base address for spi_device in top earlgrey.
- *
- * This should be used with #mmio_region_from_addr to access the memory-mapped
- * registers associated with the peripheral (usually via a DIF).
- */
-#define TOP_CHIP_SPI_DEVICE_BASE_ADDR 0x40050000u
-
-/**
- * Peripheral size for spi_device in top earlgrey.
- *
- * This is the size (in bytes) of the peripheral's reserved memory area. All
- * memory-mapped registers associated with this peripheral should have an
- * address between #TOP_CHIP_SPI_DEVICE_BASE_ADDR and
- * `TOP_CHIP_SPI_DEVICE_BASE_ADDR + TOP_CHIP_SPI_DEVICE_SIZE_BYTES`.
- */
-#define TOP_CHIP_SPI_DEVICE_SIZE_BYTES 0x2000u
-
-/**
- * Peripheral base address for i2c0 in top earlgrey.
+ * Peripheral base address for i2c0 in top chip.
  *
  * This should be used with #mmio_region_from_addr to access the memory-mapped
  * registers associated with the peripheral (usually via a DIF).
@@ -144,7 +88,7 @@ extern "C" {
 #define TOP_CHIP_I2C0_BASE_ADDR 0x40100000u
 
 /**
- * Peripheral size for i2c0 in top earlgrey.
+ * Peripheral size for i2c0 in top chip.
  *
  * This is the size (in bytes) of the peripheral's reserved memory area. All
  * memory-mapped registers associated with this peripheral should have an
@@ -154,7 +98,7 @@ extern "C" {
 #define TOP_CHIP_I2C0_SIZE_BYTES 0x80u
 
 /**
- * Peripheral base address for i2c1 in top earlgrey.
+ * Peripheral base address for i2c1 in top chip.
  *
  * This should be used with #mmio_region_from_addr to access the memory-mapped
  * registers associated with the peripheral (usually via a DIF).
@@ -162,7 +106,7 @@ extern "C" {
 #define TOP_CHIP_I2C1_BASE_ADDR 0x40101000u
 
 /**
- * Peripheral size for i2c1 in top earlgrey.
+ * Peripheral size for i2c1 in top chip.
  *
  * This is the size (in bytes) of the peripheral's reserved memory area. All
  * memory-mapped registers associated with this peripheral should have an
@@ -172,25 +116,7 @@ extern "C" {
 #define TOP_CHIP_I2C1_SIZE_BYTES 0x80u
 
 /**
- * Peripheral base address for i2c2 in top earlgrey.
- *
- * This should be used with #mmio_region_from_addr to access the memory-mapped
- * registers associated with the peripheral (usually via a DIF).
- */
-#define TOP_CHIP_I2C2_BASE_ADDR 0x400A0000u
-
-/**
- * Peripheral size for i2c2 in top earlgrey.
- *
- * This is the size (in bytes) of the peripheral's reserved memory area. All
- * memory-mapped registers associated with this peripheral should have an
- * address between #TOP_CHIP_I2C2_BASE_ADDR and
- * `TOP_CHIP_I2C2_BASE_ADDR + TOP_CHIP_I2C2_SIZE_BYTES`.
- */
-#define TOP_CHIP_I2C2_SIZE_BYTES 0x80u
-
-/**
- * Peripheral base address for pattgen in top earlgrey.
+ * Peripheral base address for pattgen in top chip.
  *
  * This should be used with #mmio_region_from_addr to access the memory-mapped
  * registers associated with the peripheral (usually via a DIF).
@@ -198,7 +124,7 @@ extern "C" {
 #define TOP_CHIP_PATTGEN_BASE_ADDR 0x40500000u
 
 /**
- * Peripheral size for pattgen in top earlgrey.
+ * Peripheral size for pattgen in top chip.
  *
  * This is the size (in bytes) of the peripheral's reserved memory area. All
  * memory-mapped registers associated with this peripheral should have an
@@ -208,15 +134,15 @@ extern "C" {
 #define TOP_CHIP_PATTGEN_SIZE_BYTES 0x40u
 
 /**
- * Peripheral base address for rv_timer in top earlgrey.
+ * Peripheral base address for rv_timer in top chip.
  *
  * This should be used with #mmio_region_from_addr to access the memory-mapped
  * registers associated with the peripheral (usually via a DIF).
  */
-#define TOP_CHIP_RV_TIMER_BASE_ADDR 0x40100000u
+#define TOP_CHIP_RV_TIMER_BASE_ADDR 0x40001000u
 
 /**
- * Peripheral size for rv_timer in top earlgrey.
+ * Peripheral size for rv_timer in top chip.
  *
  * This is the size (in bytes) of the peripheral's reserved memory area. All
  * memory-mapped registers associated with this peripheral should have an
@@ -226,79 +152,7 @@ extern "C" {
 #define TOP_CHIP_RV_TIMER_SIZE_BYTES 0x200u
 
 /**
- * Peripheral base address for core device on otp_ctrl in top earlgrey.
- *
- * This should be used with #mmio_region_from_addr to access the memory-mapped
- * registers associated with the peripheral (usually via a DIF).
- */
-#define TOP_CHIP_OTP_CTRL_CORE_BASE_ADDR 0x40130000u
-
-/**
- * Peripheral size for core device on otp_ctrl in top earlgrey.
- *
- * This is the size (in bytes) of the peripheral's reserved memory area. All
- * memory-mapped registers associated with this peripheral should have an
- * address between #TOP_CHIP_OTP_CTRL_CORE_BASE_ADDR and
- * `TOP_CHIP_OTP_CTRL_CORE_BASE_ADDR + TOP_CHIP_OTP_CTRL_CORE_SIZE_BYTES`.
- */
-#define TOP_CHIP_OTP_CTRL_CORE_SIZE_BYTES 0x1000u
-
-/**
- * Peripheral base address for prim device on otp_ctrl in top earlgrey.
- *
- * This should be used with #mmio_region_from_addr to access the memory-mapped
- * registers associated with the peripheral (usually via a DIF).
- */
-#define TOP_CHIP_OTP_CTRL_PRIM_BASE_ADDR 0x40138000u
-
-/**
- * Peripheral size for prim device on otp_ctrl in top earlgrey.
- *
- * This is the size (in bytes) of the peripheral's reserved memory area. All
- * memory-mapped registers associated with this peripheral should have an
- * address between #TOP_CHIP_OTP_CTRL_PRIM_BASE_ADDR and
- * `TOP_CHIP_OTP_CTRL_PRIM_BASE_ADDR + TOP_CHIP_OTP_CTRL_PRIM_SIZE_BYTES`.
- */
-#define TOP_CHIP_OTP_CTRL_PRIM_SIZE_BYTES 0x20u
-
-/**
- * Peripheral base address for lc_ctrl in top earlgrey.
- *
- * This should be used with #mmio_region_from_addr to access the memory-mapped
- * registers associated with the peripheral (usually via a DIF).
- */
-#define TOP_CHIP_LC_CTRL_BASE_ADDR 0x40140000u
-
-/**
- * Peripheral size for lc_ctrl in top earlgrey.
- *
- * This is the size (in bytes) of the peripheral's reserved memory area. All
- * memory-mapped registers associated with this peripheral should have an
- * address between #TOP_CHIP_LC_CTRL_BASE_ADDR and
- * `TOP_CHIP_LC_CTRL_BASE_ADDR + TOP_CHIP_LC_CTRL_SIZE_BYTES`.
- */
-#define TOP_CHIP_LC_CTRL_SIZE_BYTES 0x100u
-
-/**
- * Peripheral base address for alert_handler in top earlgrey.
- *
- * This should be used with #mmio_region_from_addr to access the memory-mapped
- * registers associated with the peripheral (usually via a DIF).
- */
-#define TOP_CHIP_ALERT_HANDLER_BASE_ADDR 0x40150000u
-
-/**
- * Peripheral size for alert_handler in top earlgrey.
- *
- * This is the size (in bytes) of the peripheral's reserved memory area. All
- * memory-mapped registers associated with this peripheral should have an
- * address between #TOP_CHIP_ALERT_HANDLER_BASE_ADDR and
- * `TOP_CHIP_ALERT_HANDLER_BASE_ADDR + TOP_CHIP_ALERT_HANDLER_SIZE_BYTES`.
- */
-#define TOP_CHIP_ALERT_HANDLER_SIZE_BYTES 0x800u
-
-/**
- * Peripheral base address for spi_host0 in top earlgrey.
+ * Peripheral base address for spi_host0 in top chip.
  *
  * This should be used with #mmio_region_from_addr to access the memory-mapped
  * registers associated with the peripheral (usually via a DIF).
@@ -306,7 +160,7 @@ extern "C" {
 #define TOP_CHIP_SPI_HOST0_BASE_ADDR 0x40200000u
 
 /**
- * Peripheral size for spi_host0 in top earlgrey.
+ * Peripheral size for spi_host0 in top chip.
  *
  * This is the size (in bytes) of the peripheral's reserved memory area. All
  * memory-mapped registers associated with this peripheral should have an
@@ -316,7 +170,7 @@ extern "C" {
 #define TOP_CHIP_SPI_HOST0_SIZE_BYTES 0x40u
 
 /**
- * Peripheral base address for spi_host1 in top earlgrey.
+ * Peripheral base address for spi_host1 in top chip.
  *
  * This should be used with #mmio_region_from_addr to access the memory-mapped
  * registers associated with the peripheral (usually via a DIF).
@@ -324,7 +178,7 @@ extern "C" {
 #define TOP_CHIP_SPI_HOST1_BASE_ADDR 0x40201000u
 
 /**
- * Peripheral size for spi_host1 in top earlgrey.
+ * Peripheral size for spi_host1 in top chip.
  *
  * This is the size (in bytes) of the peripheral's reserved memory area. All
  * memory-mapped registers associated with this peripheral should have an
@@ -334,7 +188,7 @@ extern "C" {
 #define TOP_CHIP_SPI_HOST1_SIZE_BYTES 0x40u
 
 /**
- * Peripheral base address for usbdev in top earlgrey.
+ * Peripheral base address for usbdev in top chip.
  *
  * This should be used with #mmio_region_from_addr to access the memory-mapped
  * registers associated with the peripheral (usually via a DIF).
@@ -342,7 +196,7 @@ extern "C" {
 #define TOP_CHIP_USBDEV_BASE_ADDR 0x40400000u
 
 /**
- * Peripheral size for usbdev in top earlgrey.
+ * Peripheral size for usbdev in top chip.
  *
  * This is the size (in bytes) of the peripheral's reserved memory area. All
  * memory-mapped registers associated with this peripheral should have an
@@ -352,7 +206,7 @@ extern "C" {
 #define TOP_CHIP_USBDEV_SIZE_BYTES 0x1000u
 
 /**
- * Peripheral base address for pwrmgr_aon in top earlgrey.
+ * Peripheral base address for pwrmgr_aon in top chip.
  *
  * This should be used with #mmio_region_from_addr to access the memory-mapped
  * registers associated with the peripheral (usually via a DIF).
@@ -360,7 +214,7 @@ extern "C" {
 #define TOP_CHIP_PWRMGR_AON_BASE_ADDR 0x40400000u
 
 /**
- * Peripheral size for pwrmgr_aon in top earlgrey.
+ * Peripheral size for pwrmgr_aon in top chip.
  *
  * This is the size (in bytes) of the peripheral's reserved memory area. All
  * memory-mapped registers associated with this peripheral should have an
@@ -370,7 +224,7 @@ extern "C" {
 #define TOP_CHIP_PWRMGR_AON_SIZE_BYTES 0x80u
 
 /**
- * Peripheral base address for rstmgr_aon in top earlgrey.
+ * Peripheral base address for rstmgr_aon in top chip.
  *
  * This should be used with #mmio_region_from_addr to access the memory-mapped
  * registers associated with the peripheral (usually via a DIF).
@@ -378,7 +232,7 @@ extern "C" {
 #define TOP_CHIP_RSTMGR_AON_BASE_ADDR 0x40410000u
 
 /**
- * Peripheral size for rstmgr_aon in top earlgrey.
+ * Peripheral size for rstmgr_aon in top chip.
  *
  * This is the size (in bytes) of the peripheral's reserved memory area. All
  * memory-mapped registers associated with this peripheral should have an
@@ -388,7 +242,7 @@ extern "C" {
 #define TOP_CHIP_RSTMGR_AON_SIZE_BYTES 0x80u
 
 /**
- * Peripheral base address for clkmgr_aon in top earlgrey.
+ * Peripheral base address for clkmgr_aon in top chip.
  *
  * This should be used with #mmio_region_from_addr to access the memory-mapped
  * registers associated with the peripheral (usually via a DIF).
@@ -396,7 +250,7 @@ extern "C" {
 #define TOP_CHIP_CLKMGR_AON_BASE_ADDR 0x40420000u
 
 /**
- * Peripheral size for clkmgr_aon in top earlgrey.
+ * Peripheral size for clkmgr_aon in top chip.
  *
  * This is the size (in bytes) of the peripheral's reserved memory area. All
  * memory-mapped registers associated with this peripheral should have an
@@ -406,7 +260,7 @@ extern "C" {
 #define TOP_CHIP_CLKMGR_AON_SIZE_BYTES 0x80u
 
 /**
- * Peripheral base address for sysrst_ctrl_aon in top earlgrey.
+ * Peripheral base address for sysrst_ctrl_aon in top chip.
  *
  * This should be used with #mmio_region_from_addr to access the memory-mapped
  * registers associated with the peripheral (usually via a DIF).
@@ -414,7 +268,7 @@ extern "C" {
 #define TOP_CHIP_SYSRST_CTRL_AON_BASE_ADDR 0x40430000u
 
 /**
- * Peripheral size for sysrst_ctrl_aon in top earlgrey.
+ * Peripheral size for sysrst_ctrl_aon in top chip.
  *
  * This is the size (in bytes) of the peripheral's reserved memory area. All
  * memory-mapped registers associated with this peripheral should have an
@@ -424,25 +278,7 @@ extern "C" {
 #define TOP_CHIP_SYSRST_CTRL_AON_SIZE_BYTES 0x100u
 
 /**
- * Peripheral base address for adc_ctrl_aon in top earlgrey.
- *
- * This should be used with #mmio_region_from_addr to access the memory-mapped
- * registers associated with the peripheral (usually via a DIF).
- */
-#define TOP_CHIP_ADC_CTRL_AON_BASE_ADDR 0x40440000u
-
-/**
- * Peripheral size for adc_ctrl_aon in top earlgrey.
- *
- * This is the size (in bytes) of the peripheral's reserved memory area. All
- * memory-mapped registers associated with this peripheral should have an
- * address between #TOP_CHIP_ADC_CTRL_AON_BASE_ADDR and
- * `TOP_CHIP_ADC_CTRL_AON_BASE_ADDR + TOP_CHIP_ADC_CTRL_AON_SIZE_BYTES`.
- */
-#define TOP_CHIP_ADC_CTRL_AON_SIZE_BYTES 0x80u
-
-/**
- * Peripheral base address for pwm_aon in top earlgrey.
+ * Peripheral base address for pwm_aon in top chip.
  *
  * This should be used with #mmio_region_from_addr to access the memory-mapped
  * registers associated with the peripheral (usually via a DIF).
@@ -450,7 +286,7 @@ extern "C" {
 #define TOP_CHIP_PWM_AON_BASE_ADDR 0x40600000u
 
 /**
- * Peripheral size for pwm_aon in top earlgrey.
+ * Peripheral size for pwm_aon in top chip.
  *
  * This is the size (in bytes) of the peripheral's reserved memory area. All
  * memory-mapped registers associated with this peripheral should have an
@@ -460,7 +296,7 @@ extern "C" {
 #define TOP_CHIP_PWM_AON_SIZE_BYTES 0x80u
 
 /**
- * Peripheral base address for pinmux_aon in top earlgrey.
+ * Peripheral base address for pinmux_aon in top chip.
  *
  * This should be used with #mmio_region_from_addr to access the memory-mapped
  * registers associated with the peripheral (usually via a DIF).
@@ -468,7 +304,7 @@ extern "C" {
 #define TOP_CHIP_PINMUX_AON_BASE_ADDR 0x40460000u
 
 /**
- * Peripheral size for pinmux_aon in top earlgrey.
+ * Peripheral size for pinmux_aon in top chip.
  *
  * This is the size (in bytes) of the peripheral's reserved memory area. All
  * memory-mapped registers associated with this peripheral should have an
@@ -478,15 +314,15 @@ extern "C" {
 #define TOP_CHIP_PINMUX_AON_SIZE_BYTES 0x1000u
 
 /**
- * Peripheral base address for aon_timer_aon in top earlgrey.
+ * Peripheral base address for aon_timer_aon in top chip.
  *
  * This should be used with #mmio_region_from_addr to access the memory-mapped
  * registers associated with the peripheral (usually via a DIF).
  */
-#define TOP_CHIP_AON_TIMER_AON_BASE_ADDR 0x40470000u
+#define TOP_CHIP_AON_TIMER_AON_BASE_ADDR 0x40000000u
 
 /**
- * Peripheral size for aon_timer_aon in top earlgrey.
+ * Peripheral size for aon_timer_aon in top chip.
  *
  * This is the size (in bytes) of the peripheral's reserved memory area. All
  * memory-mapped registers associated with this peripheral should have an
@@ -496,43 +332,7 @@ extern "C" {
 #define TOP_CHIP_AON_TIMER_AON_SIZE_BYTES 0x40u
 
 /**
- * Peripheral base address for ast in top earlgrey.
- *
- * This should be used with #mmio_region_from_addr to access the memory-mapped
- * registers associated with the peripheral (usually via a DIF).
- */
-#define TOP_CHIP_AST_BASE_ADDR 0x40480000u
-
-/**
- * Peripheral size for ast in top earlgrey.
- *
- * This is the size (in bytes) of the peripheral's reserved memory area. All
- * memory-mapped registers associated with this peripheral should have an
- * address between #TOP_CHIP_AST_BASE_ADDR and
- * `TOP_CHIP_AST_BASE_ADDR + TOP_CHIP_AST_SIZE_BYTES`.
- */
-#define TOP_CHIP_AST_SIZE_BYTES 0x400u
-
-/**
- * Peripheral base address for sensor_ctrl_aon in top earlgrey.
- *
- * This should be used with #mmio_region_from_addr to access the memory-mapped
- * registers associated with the peripheral (usually via a DIF).
- */
-#define TOP_CHIP_SENSOR_CTRL_AON_BASE_ADDR 0x40490000u
-
-/**
- * Peripheral size for sensor_ctrl_aon in top earlgrey.
- *
- * This is the size (in bytes) of the peripheral's reserved memory area. All
- * memory-mapped registers associated with this peripheral should have an
- * address between #TOP_CHIP_SENSOR_CTRL_AON_BASE_ADDR and
- * `TOP_CHIP_SENSOR_CTRL_AON_BASE_ADDR + TOP_CHIP_SENSOR_CTRL_AON_SIZE_BYTES`.
- */
-#define TOP_CHIP_SENSOR_CTRL_AON_SIZE_BYTES 0x80u
-
-/**
- * Peripheral base address for regs device on sram_ctrl_ret_aon in top earlgrey.
+ * Peripheral base address for regs device on sram_ctrl_ret_aon in top chip.
  *
  * This should be used with #mmio_region_from_addr to access the memory-mapped
  * registers associated with the peripheral (usually via a DIF).
@@ -540,7 +340,7 @@ extern "C" {
 #define TOP_CHIP_SRAM_CTRL_RET_AON_REGS_BASE_ADDR 0x40500000u
 
 /**
- * Peripheral size for regs device on sram_ctrl_ret_aon in top earlgrey.
+ * Peripheral size for regs device on sram_ctrl_ret_aon in top chip.
  *
  * This is the size (in bytes) of the peripheral's reserved memory area. All
  * memory-mapped registers associated with this peripheral should have an
@@ -550,7 +350,7 @@ extern "C" {
 #define TOP_CHIP_SRAM_CTRL_RET_AON_REGS_SIZE_BYTES 0x40u
 
 /**
- * Peripheral base address for ram device on sram_ctrl_ret_aon in top earlgrey.
+ * Peripheral base address for ram device on sram_ctrl_ret_aon in top chip.
  *
  * This should be used with #mmio_region_from_addr to access the memory-mapped
  * registers associated with the peripheral (usually via a DIF).
@@ -558,7 +358,7 @@ extern "C" {
 #define TOP_CHIP_SRAM_CTRL_RET_AON_RAM_BASE_ADDR 0x40600000u
 
 /**
- * Peripheral size for ram device on sram_ctrl_ret_aon in top earlgrey.
+ * Peripheral size for ram device on sram_ctrl_ret_aon in top chip.
  *
  * This is the size (in bytes) of the peripheral's reserved memory area. All
  * memory-mapped registers associated with this peripheral should have an
@@ -568,61 +368,7 @@ extern "C" {
 #define TOP_CHIP_SRAM_CTRL_RET_AON_RAM_SIZE_BYTES 0x1000u
 
 /**
- * Peripheral base address for core device on flash_ctrl in top earlgrey.
- *
- * This should be used with #mmio_region_from_addr to access the memory-mapped
- * registers associated with the peripheral (usually via a DIF).
- */
-#define TOP_CHIP_FLASH_CTRL_CORE_BASE_ADDR 0x41000000u
-
-/**
- * Peripheral size for core device on flash_ctrl in top earlgrey.
- *
- * This is the size (in bytes) of the peripheral's reserved memory area. All
- * memory-mapped registers associated with this peripheral should have an
- * address between #TOP_CHIP_FLASH_CTRL_CORE_BASE_ADDR and
- * `TOP_CHIP_FLASH_CTRL_CORE_BASE_ADDR + TOP_CHIP_FLASH_CTRL_CORE_SIZE_BYTES`.
- */
-#define TOP_CHIP_FLASH_CTRL_CORE_SIZE_BYTES 0x200u
-
-/**
- * Peripheral base address for prim device on flash_ctrl in top earlgrey.
- *
- * This should be used with #mmio_region_from_addr to access the memory-mapped
- * registers associated with the peripheral (usually via a DIF).
- */
-#define TOP_CHIP_FLASH_CTRL_PRIM_BASE_ADDR 0x41008000u
-
-/**
- * Peripheral size for prim device on flash_ctrl in top earlgrey.
- *
- * This is the size (in bytes) of the peripheral's reserved memory area. All
- * memory-mapped registers associated with this peripheral should have an
- * address between #TOP_CHIP_FLASH_CTRL_PRIM_BASE_ADDR and
- * `TOP_CHIP_FLASH_CTRL_PRIM_BASE_ADDR + TOP_CHIP_FLASH_CTRL_PRIM_SIZE_BYTES`.
- */
-#define TOP_CHIP_FLASH_CTRL_PRIM_SIZE_BYTES 0x80u
-
-/**
- * Peripheral base address for mem device on flash_ctrl in top earlgrey.
- *
- * This should be used with #mmio_region_from_addr to access the memory-mapped
- * registers associated with the peripheral (usually via a DIF).
- */
-#define TOP_CHIP_FLASH_CTRL_MEM_BASE_ADDR 0x20000000u
-
-/**
- * Peripheral size for mem device on flash_ctrl in top earlgrey.
- *
- * This is the size (in bytes) of the peripheral's reserved memory area. All
- * memory-mapped registers associated with this peripheral should have an
- * address between #TOP_CHIP_FLASH_CTRL_MEM_BASE_ADDR and
- * `TOP_CHIP_FLASH_CTRL_MEM_BASE_ADDR + TOP_CHIP_FLASH_CTRL_MEM_SIZE_BYTES`.
- */
-#define TOP_CHIP_FLASH_CTRL_MEM_SIZE_BYTES 0x100000u
-
-/**
- * Peripheral base address for regs device on rv_dm in top earlgrey.
+ * Peripheral base address for regs device on rv_dm in top chip.
  *
  * This should be used with #mmio_region_from_addr to access the memory-mapped
  * registers associated with the peripheral (usually via a DIF).
@@ -630,7 +376,7 @@ extern "C" {
 #define TOP_CHIP_RV_DM_REGS_BASE_ADDR 0x41200000u
 
 /**
- * Peripheral size for regs device on rv_dm in top earlgrey.
+ * Peripheral size for regs device on rv_dm in top chip.
  *
  * This is the size (in bytes) of the peripheral's reserved memory area. All
  * memory-mapped registers associated with this peripheral should have an
@@ -640,7 +386,7 @@ extern "C" {
 #define TOP_CHIP_RV_DM_REGS_SIZE_BYTES 0x10u
 
 /**
- * Peripheral base address for mem device on rv_dm in top earlgrey.
+ * Peripheral base address for mem device on rv_dm in top chip.
  *
  * This should be used with #mmio_region_from_addr to access the memory-mapped
  * registers associated with the peripheral (usually via a DIF).
@@ -648,7 +394,7 @@ extern "C" {
 #define TOP_CHIP_RV_DM_MEM_BASE_ADDR 0x10000u
 
 /**
- * Peripheral size for mem device on rv_dm in top earlgrey.
+ * Peripheral size for mem device on rv_dm in top chip.
  *
  * This is the size (in bytes) of the peripheral's reserved memory area. All
  * memory-mapped registers associated with this peripheral should have an
@@ -658,7 +404,7 @@ extern "C" {
 #define TOP_CHIP_RV_DM_MEM_SIZE_BYTES 0x1000u
 
 /**
- * Peripheral base address for rv_plic in top earlgrey.
+ * Peripheral base address for rv_plic in top chip.
  *
  * This should be used with #mmio_region_from_addr to access the memory-mapped
  * registers associated with the peripheral (usually via a DIF).
@@ -666,7 +412,7 @@ extern "C" {
 #define TOP_CHIP_RV_PLIC_BASE_ADDR 0x88000000u
 
 /**
- * Peripheral size for rv_plic in top earlgrey.
+ * Peripheral size for rv_plic in top chip.
  *
  * This is the size (in bytes) of the peripheral's reserved memory area. All
  * memory-mapped registers associated with this peripheral should have an
@@ -676,187 +422,7 @@ extern "C" {
 #define TOP_CHIP_RV_PLIC_SIZE_BYTES 0x8000000u
 
 /**
- * Peripheral base address for aes in top earlgrey.
- *
- * This should be used with #mmio_region_from_addr to access the memory-mapped
- * registers associated with the peripheral (usually via a DIF).
- */
-#define TOP_CHIP_AES_BASE_ADDR 0x41100000u
-
-/**
- * Peripheral size for aes in top earlgrey.
- *
- * This is the size (in bytes) of the peripheral's reserved memory area. All
- * memory-mapped registers associated with this peripheral should have an
- * address between #TOP_CHIP_AES_BASE_ADDR and
- * `TOP_CHIP_AES_BASE_ADDR + TOP_CHIP_AES_SIZE_BYTES`.
- */
-#define TOP_CHIP_AES_SIZE_BYTES 0x100u
-
-/**
- * Peripheral base address for hmac in top earlgrey.
- *
- * This should be used with #mmio_region_from_addr to access the memory-mapped
- * registers associated with the peripheral (usually via a DIF).
- */
-#define TOP_CHIP_HMAC_BASE_ADDR 0x41110000u
-
-/**
- * Peripheral size for hmac in top earlgrey.
- *
- * This is the size (in bytes) of the peripheral's reserved memory area. All
- * memory-mapped registers associated with this peripheral should have an
- * address between #TOP_CHIP_HMAC_BASE_ADDR and
- * `TOP_CHIP_HMAC_BASE_ADDR + TOP_CHIP_HMAC_SIZE_BYTES`.
- */
-#define TOP_CHIP_HMAC_SIZE_BYTES 0x2000u
-
-/**
- * Peripheral base address for kmac in top earlgrey.
- *
- * This should be used with #mmio_region_from_addr to access the memory-mapped
- * registers associated with the peripheral (usually via a DIF).
- */
-#define TOP_CHIP_KMAC_BASE_ADDR 0x41120000u
-
-/**
- * Peripheral size for kmac in top earlgrey.
- *
- * This is the size (in bytes) of the peripheral's reserved memory area. All
- * memory-mapped registers associated with this peripheral should have an
- * address between #TOP_CHIP_KMAC_BASE_ADDR and
- * `TOP_CHIP_KMAC_BASE_ADDR + TOP_CHIP_KMAC_SIZE_BYTES`.
- */
-#define TOP_CHIP_KMAC_SIZE_BYTES 0x1000u
-
-/**
- * Peripheral base address for otbn in top earlgrey.
- *
- * This should be used with #mmio_region_from_addr to access the memory-mapped
- * registers associated with the peripheral (usually via a DIF).
- */
-#define TOP_CHIP_OTBN_BASE_ADDR 0x41130000u
-
-/**
- * Peripheral size for otbn in top earlgrey.
- *
- * This is the size (in bytes) of the peripheral's reserved memory area. All
- * memory-mapped registers associated with this peripheral should have an
- * address between #TOP_CHIP_OTBN_BASE_ADDR and
- * `TOP_CHIP_OTBN_BASE_ADDR + TOP_CHIP_OTBN_SIZE_BYTES`.
- */
-#define TOP_CHIP_OTBN_SIZE_BYTES 0x10000u
-
-/**
- * Peripheral base address for keymgr in top earlgrey.
- *
- * This should be used with #mmio_region_from_addr to access the memory-mapped
- * registers associated with the peripheral (usually via a DIF).
- */
-#define TOP_CHIP_KEYMGR_BASE_ADDR 0x41140000u
-
-/**
- * Peripheral size for keymgr in top earlgrey.
- *
- * This is the size (in bytes) of the peripheral's reserved memory area. All
- * memory-mapped registers associated with this peripheral should have an
- * address between #TOP_CHIP_KEYMGR_BASE_ADDR and
- * `TOP_CHIP_KEYMGR_BASE_ADDR + TOP_CHIP_KEYMGR_SIZE_BYTES`.
- */
-#define TOP_CHIP_KEYMGR_SIZE_BYTES 0x100u
-
-/**
- * Peripheral base address for csrng in top earlgrey.
- *
- * This should be used with #mmio_region_from_addr to access the memory-mapped
- * registers associated with the peripheral (usually via a DIF).
- */
-#define TOP_CHIP_CSRNG_BASE_ADDR 0x41150000u
-
-/**
- * Peripheral size for csrng in top earlgrey.
- *
- * This is the size (in bytes) of the peripheral's reserved memory area. All
- * memory-mapped registers associated with this peripheral should have an
- * address between #TOP_CHIP_CSRNG_BASE_ADDR and
- * `TOP_CHIP_CSRNG_BASE_ADDR + TOP_CHIP_CSRNG_SIZE_BYTES`.
- */
-#define TOP_CHIP_CSRNG_SIZE_BYTES 0x80u
-
-/**
- * Peripheral base address for entropy_src in top earlgrey.
- *
- * This should be used with #mmio_region_from_addr to access the memory-mapped
- * registers associated with the peripheral (usually via a DIF).
- */
-#define TOP_CHIP_ENTROPY_SRC_BASE_ADDR 0x41160000u
-
-/**
- * Peripheral size for entropy_src in top earlgrey.
- *
- * This is the size (in bytes) of the peripheral's reserved memory area. All
- * memory-mapped registers associated with this peripheral should have an
- * address between #TOP_CHIP_ENTROPY_SRC_BASE_ADDR and
- * `TOP_CHIP_ENTROPY_SRC_BASE_ADDR + TOP_CHIP_ENTROPY_SRC_SIZE_BYTES`.
- */
-#define TOP_CHIP_ENTROPY_SRC_SIZE_BYTES 0x100u
-
-/**
- * Peripheral base address for edn0 in top earlgrey.
- *
- * This should be used with #mmio_region_from_addr to access the memory-mapped
- * registers associated with the peripheral (usually via a DIF).
- */
-#define TOP_CHIP_EDN0_BASE_ADDR 0x41170000u
-
-/**
- * Peripheral size for edn0 in top earlgrey.
- *
- * This is the size (in bytes) of the peripheral's reserved memory area. All
- * memory-mapped registers associated with this peripheral should have an
- * address between #TOP_CHIP_EDN0_BASE_ADDR and
- * `TOP_CHIP_EDN0_BASE_ADDR + TOP_CHIP_EDN0_SIZE_BYTES`.
- */
-#define TOP_CHIP_EDN0_SIZE_BYTES 0x80u
-
-/**
- * Peripheral base address for edn1 in top earlgrey.
- *
- * This should be used with #mmio_region_from_addr to access the memory-mapped
- * registers associated with the peripheral (usually via a DIF).
- */
-#define TOP_CHIP_EDN1_BASE_ADDR 0x41180000u
-
-/**
- * Peripheral size for edn1 in top earlgrey.
- *
- * This is the size (in bytes) of the peripheral's reserved memory area. All
- * memory-mapped registers associated with this peripheral should have an
- * address between #TOP_CHIP_EDN1_BASE_ADDR and
- * `TOP_CHIP_EDN1_BASE_ADDR + TOP_CHIP_EDN1_SIZE_BYTES`.
- */
-#define TOP_CHIP_EDN1_SIZE_BYTES 0x80u
-
-/**
- * Peripheral base address for regs device on sram_ctrl_main in top earlgrey.
- *
- * This should be used with #mmio_region_from_addr to access the memory-mapped
- * registers associated with the peripheral (usually via a DIF).
- */
-#define TOP_CHIP_SRAM_CTRL_MAIN_REGS_BASE_ADDR 0x411C0000u
-
-/**
- * Peripheral size for regs device on sram_ctrl_main in top earlgrey.
- *
- * This is the size (in bytes) of the peripheral's reserved memory area. All
- * memory-mapped registers associated with this peripheral should have an
- * address between #TOP_CHIP_SRAM_CTRL_MAIN_REGS_BASE_ADDR and
- * `TOP_CHIP_SRAM_CTRL_MAIN_REGS_BASE_ADDR + TOP_CHIP_SRAM_CTRL_MAIN_REGS_SIZE_BYTES`.
- */
-#define TOP_CHIP_SRAM_CTRL_MAIN_REGS_SIZE_BYTES 0x40u
-
-/**
- * Peripheral base address for ram device on sram_ctrl_main in top earlgrey.
+ * Peripheral base address for ram device on sram_ctrl_main in top chip.
  *
  * This should be used with #mmio_region_from_addr to access the memory-mapped
  * registers associated with the peripheral (usually via a DIF).
@@ -864,7 +430,7 @@ extern "C" {
 #define TOP_CHIP_SRAM_CTRL_MAIN_RAM_BASE_ADDR 0x200000u
 
 /**
- * Peripheral size for ram device on sram_ctrl_main in top earlgrey.
+ * Peripheral size for ram device on sram_ctrl_main in top chip.
  *
  * This is the size (in bytes) of the peripheral's reserved memory area. All
  * memory-mapped registers associated with this peripheral should have an
@@ -874,25 +440,7 @@ extern "C" {
 #define TOP_CHIP_SRAM_CTRL_MAIN_RAM_SIZE_BYTES 0x80000u
 
 /**
- * Peripheral base address for regs device on rom_ctrl in top earlgrey.
- *
- * This should be used with #mmio_region_from_addr to access the memory-mapped
- * registers associated with the peripheral (usually via a DIF).
- */
-#define TOP_CHIP_ROM_CTRL_REGS_BASE_ADDR 0x411E0000u
-
-/**
- * Peripheral size for regs device on rom_ctrl in top earlgrey.
- *
- * This is the size (in bytes) of the peripheral's reserved memory area. All
- * memory-mapped registers associated with this peripheral should have an
- * address between #TOP_CHIP_ROM_CTRL_REGS_BASE_ADDR and
- * `TOP_CHIP_ROM_CTRL_REGS_BASE_ADDR + TOP_CHIP_ROM_CTRL_REGS_SIZE_BYTES`.
- */
-#define TOP_CHIP_ROM_CTRL_REGS_SIZE_BYTES 0x80u
-
-/**
- * Peripheral base address for rom device on rom_ctrl in top earlgrey.
+ * Peripheral base address for rom device on rom_ctrl in top chip.
  *
  * This should be used with #mmio_region_from_addr to access the memory-mapped
  * registers associated with the peripheral (usually via a DIF).
@@ -900,7 +448,7 @@ extern "C" {
 #define TOP_CHIP_ROM_CTRL_ROM_BASE_ADDR 0x100000u
 
 /**
- * Peripheral size for rom device on rom_ctrl in top earlgrey.
+ * Peripheral size for rom device on rom_ctrl in top chip.
  *
  * This is the size (in bytes) of the peripheral's reserved memory area. All
  * memory-mapped registers associated with this peripheral should have an
@@ -910,7 +458,7 @@ extern "C" {
 #define TOP_CHIP_ROM_CTRL_ROM_SIZE_BYTES 0x1000u
 
 /**
- * Peripheral base address for cfg device on rv_core_ibex in top earlgrey.
+ * Peripheral base address for cfg device on rv_core_ibex in top chip.
  *
  * This should be used with #mmio_region_from_addr to access the memory-mapped
  * registers associated with the peripheral (usually via a DIF).
@@ -918,7 +466,7 @@ extern "C" {
 #define TOP_CHIP_RV_CORE_IBEX_CFG_BASE_ADDR 0x411F0000u
 
 /**
- * Peripheral size for cfg device on rv_core_ibex in top earlgrey.
+ * Peripheral size for cfg device on rv_core_ibex in top chip.
  *
  * This is the size (in bytes) of the peripheral's reserved memory area. All
  * memory-mapped registers associated with this peripheral should have an
@@ -929,45 +477,14 @@ extern "C" {
 
 
 /**
- * Memory base address for ram_ret_aon in top earlgrey.
+ * Memory base address for ram_ret_aon in top chip.
  */
 #define TOP_CHIP_RAM_RET_AON_BASE_ADDR 0x40600000u
 
 /**
- * Memory size for ram_ret_aon in top earlgrey.
+ * Memory size for ram_ret_aon in top chip.
  */
 #define TOP_CHIP_RAM_RET_AON_SIZE_BYTES 0x1000u
-
-/**
- * Memory base address for eflash in top earlgrey.
- */
-#define TOP_CHIP_EFLASH_BASE_ADDR 0x20000000u
-
-/**
- * Memory size for eflash in top earlgrey.
- */
-#define TOP_CHIP_EFLASH_SIZE_BYTES 0x100000u
-
-/**
- * Memory base address for ram_main in top earlgrey.
- */
-#define TOP_CHIP_RAM_MAIN_BASE_ADDR 0x10000000u
-
-/**
- * Memory size for ram_main in top earlgrey.
- */
-#define TOP_CHIP_RAM_MAIN_SIZE_BYTES 0x20000u
-
-/**
- * Memory base address for rom in top earlgrey.
- */
-#define TOP_CHIP_ROM_BASE_ADDR 0x8000u
-
-/**
- * Memory size for rom in top earlgrey.
- */
-#define TOP_CHIP_ROM_SIZE_BYTES 0x8000u
-
 
 /**
  * PLIC Interrupt Source Peripheral.
@@ -999,192 +516,84 @@ typedef enum top_chip_plic_peripheral {
  */
 typedef enum top_chip_plic_irq_id {
   kTopChipPlicIrqIdNone = 0, /**< No Interrupt */
-  kTopChipPlicIrqIdUart0TxWatermark = 1, /**< uart0_tx_watermark */
-  kTopChipPlicIrqIdUart0RxWatermark = 2, /**< uart0_rx_watermark */
-  kTopChipPlicIrqIdUart0TxDone = 3, /**< uart0_tx_done */
-  kTopChipPlicIrqIdUart0RxOverflow = 4, /**< uart0_rx_overflow */
-  kTopChipPlicIrqIdUart0RxFrameErr = 5, /**< uart0_rx_frame_err */
-  kTopChipPlicIrqIdUart0RxBreakErr = 6, /**< uart0_rx_break_err */
-  kTopChipPlicIrqIdUart0RxTimeout = 7, /**< uart0_rx_timeout */
-  kTopChipPlicIrqIdUart0RxParityErr = 8, /**< uart0_rx_parity_err */
-  kTopChipPlicIrqIdUart0TxEmpty = 9, /**< uart0_tx_empty */
-  kTopChipPlicIrqIdUart1TxWatermark = 10, /**< uart1_tx_watermark */
-  kTopChipPlicIrqIdUart1RxWatermark = 11, /**< uart1_rx_watermark */
-  kTopChipPlicIrqIdUart1TxDone = 12, /**< uart1_tx_done */
-  kTopChipPlicIrqIdUart1RxOverflow = 13, /**< uart1_rx_overflow */
-  kTopChipPlicIrqIdUart1RxFrameErr = 14, /**< uart1_rx_frame_err */
-  kTopChipPlicIrqIdUart1RxBreakErr = 15, /**< uart1_rx_break_err */
-  kTopChipPlicIrqIdUart1RxTimeout = 16, /**< uart1_rx_timeout */
-  kTopChipPlicIrqIdUart1RxParityErr = 17, /**< uart1_rx_parity_err */
-  kTopChipPlicIrqIdUart1TxEmpty = 18, /**< uart1_tx_empty */
-  kTopChipPlicIrqIdUart2TxWatermark = 19, /**< uart2_tx_watermark */
-  kTopChipPlicIrqIdUart2RxWatermark = 20, /**< uart2_rx_watermark */
-  kTopChipPlicIrqIdUart2TxDone = 21, /**< uart2_tx_done */
-  kTopChipPlicIrqIdUart2RxOverflow = 22, /**< uart2_rx_overflow */
-  kTopChipPlicIrqIdUart2RxFrameErr = 23, /**< uart2_rx_frame_err */
-  kTopChipPlicIrqIdUart2RxBreakErr = 24, /**< uart2_rx_break_err */
-  kTopChipPlicIrqIdUart2RxTimeout = 25, /**< uart2_rx_timeout */
-  kTopChipPlicIrqIdUart2RxParityErr = 26, /**< uart2_rx_parity_err */
-  kTopChipPlicIrqIdUart2TxEmpty = 27, /**< uart2_tx_empty */
-  kTopChipPlicIrqIdUart3TxWatermark = 28, /**< uart3_tx_watermark */
-  kTopChipPlicIrqIdUart3RxWatermark = 29, /**< uart3_rx_watermark */
-  kTopChipPlicIrqIdUart3TxDone = 30, /**< uart3_tx_done */
-  kTopChipPlicIrqIdUart3RxOverflow = 31, /**< uart3_rx_overflow */
-  kTopChipPlicIrqIdUart3RxFrameErr = 32, /**< uart3_rx_frame_err */
-  kTopChipPlicIrqIdUart3RxBreakErr = 33, /**< uart3_rx_break_err */
-  kTopChipPlicIrqIdUart3RxTimeout = 34, /**< uart3_rx_timeout */
-  kTopChipPlicIrqIdUart3RxParityErr = 35, /**< uart3_rx_parity_err */
-  kTopChipPlicIrqIdUart3TxEmpty = 36, /**< uart3_tx_empty */
-  kTopChipPlicIrqIdGpioGpio0 = 37, /**< gpio_gpio 0 */
-  kTopChipPlicIrqIdGpioGpio1 = 38, /**< gpio_gpio 1 */
-  kTopChipPlicIrqIdGpioGpio2 = 39, /**< gpio_gpio 2 */
-  kTopChipPlicIrqIdGpioGpio3 = 40, /**< gpio_gpio 3 */
-  kTopChipPlicIrqIdGpioGpio4 = 41, /**< gpio_gpio 4 */
-  kTopChipPlicIrqIdGpioGpio5 = 42, /**< gpio_gpio 5 */
-  kTopChipPlicIrqIdGpioGpio6 = 43, /**< gpio_gpio 6 */
-  kTopChipPlicIrqIdGpioGpio7 = 44, /**< gpio_gpio 7 */
-  kTopChipPlicIrqIdGpioGpio8 = 45, /**< gpio_gpio 8 */
-  kTopChipPlicIrqIdGpioGpio9 = 46, /**< gpio_gpio 9 */
-  kTopChipPlicIrqIdGpioGpio10 = 47, /**< gpio_gpio 10 */
-  kTopChipPlicIrqIdGpioGpio11 = 48, /**< gpio_gpio 11 */
-  kTopChipPlicIrqIdGpioGpio12 = 49, /**< gpio_gpio 12 */
-  kTopChipPlicIrqIdGpioGpio13 = 50, /**< gpio_gpio 13 */
-  kTopChipPlicIrqIdGpioGpio14 = 51, /**< gpio_gpio 14 */
-  kTopChipPlicIrqIdGpioGpio15 = 52, /**< gpio_gpio 15 */
-  kTopChipPlicIrqIdGpioGpio16 = 53, /**< gpio_gpio 16 */
-  kTopChipPlicIrqIdGpioGpio17 = 54, /**< gpio_gpio 17 */
-  kTopChipPlicIrqIdGpioGpio18 = 55, /**< gpio_gpio 18 */
-  kTopChipPlicIrqIdGpioGpio19 = 56, /**< gpio_gpio 19 */
-  kTopChipPlicIrqIdGpioGpio20 = 57, /**< gpio_gpio 20 */
-  kTopChipPlicIrqIdGpioGpio21 = 58, /**< gpio_gpio 21 */
-  kTopChipPlicIrqIdGpioGpio22 = 59, /**< gpio_gpio 22 */
-  kTopChipPlicIrqIdGpioGpio23 = 60, /**< gpio_gpio 23 */
-  kTopChipPlicIrqIdGpioGpio24 = 61, /**< gpio_gpio 24 */
-  kTopChipPlicIrqIdGpioGpio25 = 62, /**< gpio_gpio 25 */
-  kTopChipPlicIrqIdGpioGpio26 = 63, /**< gpio_gpio 26 */
-  kTopChipPlicIrqIdGpioGpio27 = 64, /**< gpio_gpio 27 */
-  kTopChipPlicIrqIdGpioGpio28 = 65, /**< gpio_gpio 28 */
-  kTopChipPlicIrqIdGpioGpio29 = 66, /**< gpio_gpio 29 */
-  kTopChipPlicIrqIdGpioGpio30 = 67, /**< gpio_gpio 30 */
-  kTopChipPlicIrqIdGpioGpio31 = 68, /**< gpio_gpio 31 */
-  kTopChipPlicIrqIdSpiDeviceUploadCmdfifoNotEmpty = 69, /**< spi_device_upload_cmdfifo_not_empty */
-  kTopChipPlicIrqIdSpiDeviceUploadPayloadNotEmpty = 70, /**< spi_device_upload_payload_not_empty */
-  kTopChipPlicIrqIdSpiDeviceUploadPayloadOverflow = 71, /**< spi_device_upload_payload_overflow */
-  kTopChipPlicIrqIdSpiDeviceReadbufWatermark = 72, /**< spi_device_readbuf_watermark */
-  kTopChipPlicIrqIdSpiDeviceReadbufFlip = 73, /**< spi_device_readbuf_flip */
-  kTopChipPlicIrqIdSpiDeviceTpmHeaderNotEmpty = 74, /**< spi_device_tpm_header_not_empty */
-  kTopChipPlicIrqIdSpiDeviceTpmRdfifoCmdEnd = 75, /**< spi_device_tpm_rdfifo_cmd_end */
-  kTopChipPlicIrqIdSpiDeviceTpmRdfifoDrop = 76, /**< spi_device_tpm_rdfifo_drop */
-  kTopChipPlicIrqIdI2c0FmtThreshold = 77, /**< i2c0_fmt_threshold */
-  kTopChipPlicIrqIdI2c0RxThreshold = 78, /**< i2c0_rx_threshold */
-  kTopChipPlicIrqIdI2c0AcqThreshold = 79, /**< i2c0_acq_threshold */
-  kTopChipPlicIrqIdI2c0RxOverflow = 80, /**< i2c0_rx_overflow */
-  kTopChipPlicIrqIdI2c0ControllerHalt = 81, /**< i2c0_controller_halt */
-  kTopChipPlicIrqIdI2c0SclInterference = 82, /**< i2c0_scl_interference */
-  kTopChipPlicIrqIdI2c0SdaInterference = 83, /**< i2c0_sda_interference */
-  kTopChipPlicIrqIdI2c0StretchTimeout = 84, /**< i2c0_stretch_timeout */
-  kTopChipPlicIrqIdI2c0SdaUnstable = 85, /**< i2c0_sda_unstable */
-  kTopChipPlicIrqIdI2c0CmdComplete = 86, /**< i2c0_cmd_complete */
-  kTopChipPlicIrqIdI2c0TxStretch = 87, /**< i2c0_tx_stretch */
-  kTopChipPlicIrqIdI2c0TxThreshold = 88, /**< i2c0_tx_threshold */
-  kTopChipPlicIrqIdI2c0AcqStretch = 89, /**< i2c0_acq_stretch */
-  kTopChipPlicIrqIdI2c0UnexpStop = 90, /**< i2c0_unexp_stop */
-  kTopChipPlicIrqIdI2c0HostTimeout = 91, /**< i2c0_host_timeout */
-  kTopChipPlicIrqIdI2c1FmtThreshold = 92, /**< i2c1_fmt_threshold */
-  kTopChipPlicIrqIdI2c1RxThreshold = 93, /**< i2c1_rx_threshold */
-  kTopChipPlicIrqIdI2c1AcqThreshold = 94, /**< i2c1_acq_threshold */
-  kTopChipPlicIrqIdI2c1RxOverflow = 95, /**< i2c1_rx_overflow */
-  kTopChipPlicIrqIdI2c1ControllerHalt = 96, /**< i2c1_controller_halt */
-  kTopChipPlicIrqIdI2c1SclInterference = 97, /**< i2c1_scl_interference */
-  kTopChipPlicIrqIdI2c1SdaInterference = 98, /**< i2c1_sda_interference */
-  kTopChipPlicIrqIdI2c1StretchTimeout = 99, /**< i2c1_stretch_timeout */
-  kTopChipPlicIrqIdI2c1SdaUnstable = 100, /**< i2c1_sda_unstable */
-  kTopChipPlicIrqIdI2c1CmdComplete = 101, /**< i2c1_cmd_complete */
-  kTopChipPlicIrqIdI2c1TxStretch = 102, /**< i2c1_tx_stretch */
-  kTopChipPlicIrqIdI2c1TxThreshold = 103, /**< i2c1_tx_threshold */
-  kTopChipPlicIrqIdI2c1AcqStretch = 104, /**< i2c1_acq_stretch */
-  kTopChipPlicIrqIdI2c1UnexpStop = 105, /**< i2c1_unexp_stop */
-  kTopChipPlicIrqIdI2c1HostTimeout = 106, /**< i2c1_host_timeout */
-  kTopChipPlicIrqIdI2c2FmtThreshold = 107, /**< i2c2_fmt_threshold */
-  kTopChipPlicIrqIdI2c2RxThreshold = 108, /**< i2c2_rx_threshold */
-  kTopChipPlicIrqIdI2c2AcqThreshold = 109, /**< i2c2_acq_threshold */
-  kTopChipPlicIrqIdI2c2RxOverflow = 110, /**< i2c2_rx_overflow */
-  kTopChipPlicIrqIdI2c2ControllerHalt = 111, /**< i2c2_controller_halt */
-  kTopChipPlicIrqIdI2c2SclInterference = 112, /**< i2c2_scl_interference */
-  kTopChipPlicIrqIdI2c2SdaInterference = 113, /**< i2c2_sda_interference */
-  kTopChipPlicIrqIdI2c2StretchTimeout = 114, /**< i2c2_stretch_timeout */
-  kTopChipPlicIrqIdI2c2SdaUnstable = 115, /**< i2c2_sda_unstable */
-  kTopChipPlicIrqIdI2c2CmdComplete = 116, /**< i2c2_cmd_complete */
-  kTopChipPlicIrqIdI2c2TxStretch = 117, /**< i2c2_tx_stretch */
-  kTopChipPlicIrqIdI2c2TxThreshold = 118, /**< i2c2_tx_threshold */
-  kTopChipPlicIrqIdI2c2AcqStretch = 119, /**< i2c2_acq_stretch */
-  kTopChipPlicIrqIdI2c2UnexpStop = 120, /**< i2c2_unexp_stop */
-  kTopChipPlicIrqIdI2c2HostTimeout = 121, /**< i2c2_host_timeout */
-  kTopChipPlicIrqIdPattgenDoneCh0 = 122, /**< pattgen_done_ch0 */
-  kTopChipPlicIrqIdPattgenDoneCh1 = 123, /**< pattgen_done_ch1 */
-  kTopChipPlicIrqIdRvTimerTimerExpiredHart0Timer0 = 124, /**< rv_timer_timer_expired_hart0_timer0 */
-  kTopChipPlicIrqIdOtpCtrlOtpOperationDone = 125, /**< otp_ctrl_otp_operation_done */
-  kTopChipPlicIrqIdOtpCtrlOtpError = 126, /**< otp_ctrl_otp_error */
-  kTopChipPlicIrqIdAlertHandlerClassa = 127, /**< alert_handler_classa */
-  kTopChipPlicIrqIdAlertHandlerClassb = 128, /**< alert_handler_classb */
-  kTopChipPlicIrqIdAlertHandlerClassc = 129, /**< alert_handler_classc */
-  kTopChipPlicIrqIdAlertHandlerClassd = 130, /**< alert_handler_classd */
-  kTopChipPlicIrqIdSpiHost0Error = 131, /**< spi_host0_error */
-  kTopChipPlicIrqIdSpiHost0SpiEvent = 132, /**< spi_host0_spi_event */
-  kTopChipPlicIrqIdSpiHost1Error = 133, /**< spi_host1_error */
-  kTopChipPlicIrqIdSpiHost1SpiEvent = 134, /**< spi_host1_spi_event */
-  kTopChipPlicIrqIdUsbdevPktReceived = 135, /**< usbdev_pkt_received */
-  kTopChipPlicIrqIdUsbdevPktSent = 136, /**< usbdev_pkt_sent */
-  kTopChipPlicIrqIdUsbdevDisconnected = 137, /**< usbdev_disconnected */
-  kTopChipPlicIrqIdUsbdevHostLost = 138, /**< usbdev_host_lost */
-  kTopChipPlicIrqIdUsbdevLinkReset = 139, /**< usbdev_link_reset */
-  kTopChipPlicIrqIdUsbdevLinkSuspend = 140, /**< usbdev_link_suspend */
-  kTopChipPlicIrqIdUsbdevLinkResume = 141, /**< usbdev_link_resume */
-  kTopChipPlicIrqIdUsbdevAvOutEmpty = 142, /**< usbdev_av_out_empty */
-  kTopChipPlicIrqIdUsbdevRxFull = 143, /**< usbdev_rx_full */
-  kTopChipPlicIrqIdUsbdevAvOverflow = 144, /**< usbdev_av_overflow */
-  kTopChipPlicIrqIdUsbdevLinkInErr = 145, /**< usbdev_link_in_err */
-  kTopChipPlicIrqIdUsbdevRxCrcErr = 146, /**< usbdev_rx_crc_err */
-  kTopChipPlicIrqIdUsbdevRxPidErr = 147, /**< usbdev_rx_pid_err */
-  kTopChipPlicIrqIdUsbdevRxBitstuffErr = 148, /**< usbdev_rx_bitstuff_err */
-  kTopChipPlicIrqIdUsbdevFrame = 149, /**< usbdev_frame */
-  kTopChipPlicIrqIdUsbdevPowered = 150, /**< usbdev_powered */
-  kTopChipPlicIrqIdUsbdevLinkOutErr = 151, /**< usbdev_link_out_err */
-  kTopChipPlicIrqIdUsbdevAvSetupEmpty = 152, /**< usbdev_av_setup_empty */
-  kTopChipPlicIrqIdPwrmgrAonWakeup = 153, /**< pwrmgr_aon_wakeup */
-  kTopChipPlicIrqIdSysrstCtrlAonEventDetected = 154, /**< sysrst_ctrl_aon_event_detected */
-  kTopChipPlicIrqIdAdcCtrlAonMatchPending = 155, /**< adc_ctrl_aon_match_pending */
-  kTopChipPlicIrqIdAonTimerAonWkupTimerExpired = 156, /**< aon_timer_aon_wkup_timer_expired */
-  kTopChipPlicIrqIdAonTimerAonWdogTimerBark = 157, /**< aon_timer_aon_wdog_timer_bark */
-  kTopChipPlicIrqIdSensorCtrlAonIoStatusChange = 158, /**< sensor_ctrl_aon_io_status_change */
-  kTopChipPlicIrqIdSensorCtrlAonInitStatusChange = 159, /**< sensor_ctrl_aon_init_status_change */
-  kTopChipPlicIrqIdFlashCtrlProgEmpty = 160, /**< flash_ctrl_prog_empty */
-  kTopChipPlicIrqIdFlashCtrlProgLvl = 161, /**< flash_ctrl_prog_lvl */
-  kTopChipPlicIrqIdFlashCtrlRdFull = 162, /**< flash_ctrl_rd_full */
-  kTopChipPlicIrqIdFlashCtrlRdLvl = 163, /**< flash_ctrl_rd_lvl */
-  kTopChipPlicIrqIdFlashCtrlOpDone = 164, /**< flash_ctrl_op_done */
-  kTopChipPlicIrqIdFlashCtrlCorrErr = 165, /**< flash_ctrl_corr_err */
-  kTopChipPlicIrqIdHmacHmacDone = 166, /**< hmac_hmac_done */
-  kTopChipPlicIrqIdHmacFifoEmpty = 167, /**< hmac_fifo_empty */
-  kTopChipPlicIrqIdHmacHmacErr = 168, /**< hmac_hmac_err */
-  kTopChipPlicIrqIdKmacKmacDone = 169, /**< kmac_kmac_done */
-  kTopChipPlicIrqIdKmacFifoEmpty = 170, /**< kmac_fifo_empty */
-  kTopChipPlicIrqIdKmacKmacErr = 171, /**< kmac_kmac_err */
-  kTopChipPlicIrqIdOtbnDone = 172, /**< otbn_done */
-  kTopChipPlicIrqIdKeymgrOpDone = 173, /**< keymgr_op_done */
-  kTopChipPlicIrqIdCsrngCsCmdReqDone = 174, /**< csrng_cs_cmd_req_done */
-  kTopChipPlicIrqIdCsrngCsEntropyReq = 175, /**< csrng_cs_entropy_req */
-  kTopChipPlicIrqIdCsrngCsHwInstExc = 176, /**< csrng_cs_hw_inst_exc */
-  kTopChipPlicIrqIdCsrngCsFatalErr = 177, /**< csrng_cs_fatal_err */
-  kTopChipPlicIrqIdEntropySrcEsEntropyValid = 178, /**< entropy_src_es_entropy_valid */
-  kTopChipPlicIrqIdEntropySrcEsHealthTestFailed = 179, /**< entropy_src_es_health_test_failed */
-  kTopChipPlicIrqIdEntropySrcEsObserveFifoReady = 180, /**< entropy_src_es_observe_fifo_ready */
-  kTopChipPlicIrqIdEntropySrcEsFatalErr = 181, /**< entropy_src_es_fatal_err */
-  kTopChipPlicIrqIdEdn0EdnCmdReqDone = 182, /**< edn0_edn_cmd_req_done */
-  kTopChipPlicIrqIdEdn0EdnFatalErr = 183, /**< edn0_edn_fatal_err */
-  kTopChipPlicIrqIdEdn1EdnCmdReqDone = 184, /**< edn1_edn_cmd_req_done */
-  kTopChipPlicIrqIdEdn1EdnFatalErr = 185, /**< edn1_edn_fatal_err */
-  kTopChipPlicIrqIdLast = 185, /**< \internal The Last Valid Interrupt ID. */
+  kTopChipPlicIrqHwRevoker = 1,
+  kTopChipPlicIrqIdUsbdev = 3, /**< Usb Device */
+  kTopChipPlicIrqIdPattgen = 6, /**< Pattern generator */
+  kTopChipPlicIrqIdAonTimer = 7, /**< AON Timer */
+  kTopChipPlicIrqIdUart0 = 8, /**< Uart0 */
+  kTopChipPlicIrqIdUart1 = 9, /**< Uart1 */
+  kTopChipPlicIrqIdI2c0 = 16, /**< I2c 0 */
+  kTopChipPlicIrqIdI2c1 = 17, /**< I2c 1 */
+  kTopChipPlicIrqIdSpiHost0 = 24, /**< Spi Controller 0 */
+  kTopChipPlicIrqIdSpiHost1 = 25, /**< Spi Controller 1 */
+  kTopChipPlicIrqIdGpio = 28, /**< Gpio */
+
+  kTopChipPlicIrqIdPattgenDoneCh0 = kTopChipPlicIrqIdPattgen, /**< pattgen_done_ch0 */
+  kTopChipPlicIrqIdPattgenDoneCh1 = kTopChipPlicIrqIdPattgen, /**< pattgen_done_ch1 */
+
+  kTopChipPlicIrqIdAonTimerAonWkupTimerExpired = kTopChipPlicIrqIdAonTimer, /**< aon_timer_aon_wkup_timer_expired */
+  kTopChipPlicIrqIdAonTimerAonWdogTimerBark = kTopChipPlicIrqIdAonTimer,
+
+  kTopChipPlicIrqIdUart0TxWatermark = kTopChipPlicIrqIdUart0, /**< uart0_tx_watermark */
+  kTopChipPlicIrqIdUart0RxWatermark = kTopChipPlicIrqIdUart0, /**< uart0_rx_watermark */
+  kTopChipPlicIrqIdUart0TxDone = kTopChipPlicIrqIdUart0, /**< uart0_tx_done */
+  kTopChipPlicIrqIdUart0RxOverflow = kTopChipPlicIrqIdUart0, /**< uart0_rx_overflow */
+  kTopChipPlicIrqIdUart0RxFrameErr = kTopChipPlicIrqIdUart0, /**< uart0_rx_frame_err */
+  kTopChipPlicIrqIdUart0RxBreakErr = kTopChipPlicIrqIdUart0, /**< uart0_rx_break_err */
+  kTopChipPlicIrqIdUart0RxTimeout = kTopChipPlicIrqIdUart0, /**< uart0_rx_timeout */
+  kTopChipPlicIrqIdUart0RxParityErr = kTopChipPlicIrqIdUart0, /**< uart0_rx_parity_err */
+  kTopChipPlicIrqIdUart0TxEmpty = kTopChipPlicIrqIdUart0, /**< uart0_tx_empty */
+
+  kTopChipPlicIrqIdUart1TxWatermark = kTopChipPlicIrqIdUart1, /**< uart1_tx_watermark */
+  kTopChipPlicIrqIdUart1RxWatermark = kTopChipPlicIrqIdUart1, /**< uart1_rx_watermark */
+  kTopChipPlicIrqIdUart1TxDone = kTopChipPlicIrqIdUart1, /**< uart1_tx_done */
+  kTopChipPlicIrqIdUart1RxOverflow = kTopChipPlicIrqIdUart1, /**< uart1_rx_overflow */
+  kTopChipPlicIrqIdUart1RxFrameErr = kTopChipPlicIrqIdUart1, /**< uart1_rx_frame_err */
+  kTopChipPlicIrqIdUart1RxBreakErr = kTopChipPlicIrqIdUart1, /**< uart1_rx_break_err */
+  kTopChipPlicIrqIdUart1RxTimeout = kTopChipPlicIrqIdUart1, /**< uart1_rx_timeout */
+  kTopChipPlicIrqIdUart1RxParityErr = kTopChipPlicIrqIdUart1, /**< uart1_rx_parity_err */
+  kTopChipPlicIrqIdUart1TxEmpty = kTopChipPlicIrqIdUart1, /**< uart1_tx_empty */
+
+  kTopChipPlicIrqIdI2c0FmtThreshold = kTopChipPlicIrqIdI2c0, /**< i2c0_fmt_threshold */
+  kTopChipPlicIrqIdI2c0RxThreshold = kTopChipPlicIrqIdI2c0, /**< i2c0_rx_threshold */
+  kTopChipPlicIrqIdI2c0AcqThreshold = kTopChipPlicIrqIdI2c0, /**< i2c0_acq_threshold */
+  kTopChipPlicIrqIdI2c0RxOverflow = kTopChipPlicIrqIdI2c0, /**< i2c0_rx_overflow */
+  kTopChipPlicIrqIdI2c0ControllerHalt = kTopChipPlicIrqIdI2c0, /**< i2c0_controller_halt */
+  kTopChipPlicIrqIdI2c0SclInterference = kTopChipPlicIrqIdI2c0, /**< i2c0_scl_interference */
+  kTopChipPlicIrqIdI2c0SdaInterference = kTopChipPlicIrqIdI2c0, /**< i2c0_sda_interference */
+  kTopChipPlicIrqIdI2c0StretchTimeout = kTopChipPlicIrqIdI2c0, /**< i2c0_stretch_timeout */
+  kTopChipPlicIrqIdI2c0SdaUnstable = kTopChipPlicIrqIdI2c0, /**< i2c0_sda_unstable */
+  kTopChipPlicIrqIdI2c0CmdComplete = kTopChipPlicIrqIdI2c0, /**< i2c0_cmd_complete */
+  kTopChipPlicIrqIdI2c0TxStretch = kTopChipPlicIrqIdI2c0, /**< i2c0_tx_stretch */
+  kTopChipPlicIrqIdI2c0TxThreshold = kTopChipPlicIrqIdI2c0, /**< i2c0_tx_threshold */
+  kTopChipPlicIrqIdI2c0AcqStretch = kTopChipPlicIrqIdI2c0, /**< i2c0_acq_stretch */
+  kTopChipPlicIrqIdI2c0UnexpStop = kTopChipPlicIrqIdI2c0, /**< i2c0_unexp_stop */
+  kTopChipPlicIrqIdI2c0HostTimeout = kTopChipPlicIrqIdI2c0, /**< i2c0_host_timeout */
+
+  kTopChipPlicIrqIdI2c1FmtThreshold = kTopChipPlicIrqIdI2c1, /**< i2c1_fmt_threshold */
+  kTopChipPlicIrqIdI2c1RxThreshold = kTopChipPlicIrqIdI2c1, /**< i2c1_rx_threshold */
+  kTopChipPlicIrqIdI2c1AcqThreshold = kTopChipPlicIrqIdI2c1, /**< i2c1_acq_threshold */
+  kTopChipPlicIrqIdI2c1RxOverflow = kTopChipPlicIrqIdI2c1, /**< i2c1_rx_overflow */
+  kTopChipPlicIrqIdI2c1ControllerHalt = kTopChipPlicIrqIdI2c1, /**< i2c1_controller_halt */
+  kTopChipPlicIrqIdI2c1SclInterference = kTopChipPlicIrqIdI2c1, /**< i2c1_scl_interference */
+  kTopChipPlicIrqIdI2c1SdaInterference = kTopChipPlicIrqIdI2c1, /**< i2c1_sda_interference */
+  kTopChipPlicIrqIdI2c1StretchTimeout = kTopChipPlicIrqIdI2c1, /**< i2c1_stretch_timeout */
+  kTopChipPlicIrqIdI2c1SdaUnstable = kTopChipPlicIrqIdI2c1, /**< i2c1_sda_unstable */
+  kTopChipPlicIrqIdI2c1CmdComplete = kTopChipPlicIrqIdI2c1, /**< i2c1_cmd_complete */
+  kTopChipPlicIrqIdI2c1TxStretch = kTopChipPlicIrqIdI2c1, /**< i2c1_tx_stretch */
+  kTopChipPlicIrqIdI2c1TxThreshold = kTopChipPlicIrqIdI2c1, /**< i2c1_tx_threshold */
+  kTopChipPlicIrqIdI2c1AcqStretch = kTopChipPlicIrqIdI2c1, /**< i2c1_acq_stretch */
+  kTopChipPlicIrqIdI2c1UnexpStop = kTopChipPlicIrqIdI2c1, /**< i2c1_unexp_stop */
+  kTopChipPlicIrqIdI2c1HostTimeout = kTopChipPlicIrqIdI2c1, /**< i2c1_host_timeout */
+
+  kTopChipPlicIrqIdSpiHost0Error = kTopChipPlicIrqIdSpiHost0, /**< spi_host0_error */
+  kTopChipPlicIrqIdSpiHost0SpiEvent = kTopChipPlicIrqIdSpiHost0, /**< spi_host0_spi_event */
+  kTopChipPlicIrqIdSpiHost1Error = kTopChipPlicIrqIdSpiHost1, /**< spi_host1_error */
+  kTopChipPlicIrqIdSpiHost1SpiEvent = kTopChipPlicIrqIdSpiHost1, /**< spi_host1_spi_event */
+
+  kTopChipPlicIrqIdGpioGpio0 = kTopChipPlicIrqIdGpio,
+
+  kTopChipPlicIrqIdLast = 31, /**< \internal The Last Valid Interrupt ID. */
 } top_chip_plic_irq_id_t;
 
 /**

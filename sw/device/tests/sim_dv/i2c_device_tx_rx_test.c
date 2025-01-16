@@ -18,7 +18,7 @@
 #include "sw/device/lib/testing/test_framework/ottf_main.h"
 #include "sw/device/lib/testing/test_framework/status.h"
 
-#include "hw/top_earlgrey/sw/autogen/top_earlgrey.h"
+#include "hw/top_chip/sw/autogen/top_chip.h"
 #include "sw/device/lib/testing/autogen/isr_testutils.h"
 
 // TODO #14111, remove it once pinout configuration is provided
@@ -80,31 +80,31 @@ enum {
 typedef struct i2c_conf {
   const int unsigned base_addr;
   const uint32_t i2c_irq_fmt_threshold_id;
-  const top_earlgrey_plic_irq_id_t plic_irqs[kNumI2cIrqs];
+  const top_chip_plic_irq_id_t plic_irqs[kNumI2cIrqs];
 } i2c_conf_t;
 
 const i2c_conf_t i2c_configuration[] = {
-    {.base_addr = TOP_EARLGREY_I2C0_BASE_ADDR,
-     .i2c_irq_fmt_threshold_id = kTopEarlgreyPlicIrqIdI2c0FmtThreshold,
-     .plic_irqs = {kTopEarlgreyPlicIrqIdI2c0CmdComplete,
-                   kTopEarlgreyPlicIrqIdI2c0TxStretch,
-                   kTopEarlgreyPlicIrqIdI2c0AcqStretch,
-                   kTopEarlgreyPlicIrqIdI2c0UnexpStop,
-                   kTopEarlgreyPlicIrqIdI2c0HostTimeout}},
-    {.base_addr = TOP_EARLGREY_I2C1_BASE_ADDR,
-     .i2c_irq_fmt_threshold_id = kTopEarlgreyPlicIrqIdI2c1FmtThreshold,
-     .plic_irqs = {kTopEarlgreyPlicIrqIdI2c1CmdComplete,
-                   kTopEarlgreyPlicIrqIdI2c1TxStretch,
-                   kTopEarlgreyPlicIrqIdI2c1AcqStretch,
-                   kTopEarlgreyPlicIrqIdI2c1UnexpStop,
-                   kTopEarlgreyPlicIrqIdI2c1HostTimeout}},
-    {.base_addr = TOP_EARLGREY_I2C2_BASE_ADDR,
-     .i2c_irq_fmt_threshold_id = kTopEarlgreyPlicIrqIdI2c2FmtThreshold,
-     .plic_irqs = {kTopEarlgreyPlicIrqIdI2c2CmdComplete,
-                   kTopEarlgreyPlicIrqIdI2c2TxStretch,
-                   kTopEarlgreyPlicIrqIdI2c2AcqStretch,
-                   kTopEarlgreyPlicIrqIdI2c2UnexpStop,
-                   kTopEarlgreyPlicIrqIdI2c2HostTimeout}}};
+    {.base_addr = TOP_CHIP_I2C0_BASE_ADDR,
+     .i2c_irq_fmt_threshold_id = kTopChipPlicIrqIdI2c0FmtThreshold,
+     .plic_irqs = {kTopChipPlicIrqIdI2c0CmdComplete,
+                   kTopChipPlicIrqIdI2c0TxStretch,
+                   kTopChipPlicIrqIdI2c0AcqStretch,
+                   kTopChipPlicIrqIdI2c0UnexpStop,
+                   kTopChipPlicIrqIdI2c0HostTimeout}},
+    {.base_addr = TOP_CHIP_I2C1_BASE_ADDR,
+     .i2c_irq_fmt_threshold_id = kTopChipPlicIrqIdI2c1FmtThreshold,
+     .plic_irqs = {kTopChipPlicIrqIdI2c1CmdComplete,
+                   kTopChipPlicIrqIdI2c1TxStretch,
+                   kTopChipPlicIrqIdI2c1AcqStretch,
+                   kTopChipPlicIrqIdI2c1UnexpStop,
+                   kTopChipPlicIrqIdI2c1HostTimeout}},
+    {.base_addr = TOP_CHIP_I2C2_BASE_ADDR,
+     .i2c_irq_fmt_threshold_id = kTopChipPlicIrqIdI2c2FmtThreshold,
+     .plic_irqs = {kTopChipPlicIrqIdI2c2CmdComplete,
+                   kTopChipPlicIrqIdI2c2TxStretch,
+                   kTopChipPlicIrqIdI2c2AcqStretch,
+                   kTopChipPlicIrqIdI2c2UnexpStop,
+                   kTopChipPlicIrqIdI2c2HostTimeout}}};
 
 /**
  * Provides external irq handling for this test.
@@ -113,7 +113,7 @@ const i2c_conf_t i2c_configuration[] = {
  */
 void ottf_external_isr(uint32_t *exc_info) {
   plic_isr_ctx_t plic_ctx = {.rv_plic = &plic,
-                             .hart_id = kTopEarlgreyPlicTargetIbex0};
+                             .hart_id = kTopChipPlicTargetIbex0};
 
   i2c_isr_ctx_t i2c_ctx = {
       .i2c = &i2c,
@@ -122,7 +122,7 @@ void ottf_external_isr(uint32_t *exc_info) {
       .expected_irq = 0,
       .is_only_irq = false};
 
-  top_earlgrey_plic_peripheral_t peripheral;
+  top_chip_plic_peripheral_t peripheral;
   dif_i2c_irq_t i2c_irq;
   isr_testutils_i2c_isr(plic_ctx, i2c_ctx, false, &peripheral, &i2c_irq);
 
@@ -160,10 +160,10 @@ bool test_main(void) {
       mmio_region_from_addr(i2c_configuration[kI2cIdx].base_addr), &i2c));
 
   CHECK_DIF_OK(dif_pinmux_init(
-      mmio_region_from_addr(TOP_EARLGREY_PINMUX_AON_BASE_ADDR), &pinmux));
+      mmio_region_from_addr(TOP_CHIP_PINMUX_AON_BASE_ADDR), &pinmux));
 
   CHECK_DIF_OK(dif_rv_plic_init(
-      mmio_region_from_addr(TOP_EARLGREY_RV_PLIC_BASE_ADDR), &plic));
+      mmio_region_from_addr(TOP_CHIP_RV_PLIC_BASE_ADDR), &plic));
 
   CHECK_STATUS_OK(
       i2c_testutils_select_pinmux(&pinmux, kI2cIdx, I2cPinmuxPlatformIdDvsim));
@@ -173,7 +173,7 @@ bool test_main(void) {
   for (uint32_t i = 0; i < kNumI2cIrqs; ++i) {
     CHECK_DIF_OK(dif_rv_plic_irq_set_enabled(
         &plic, i2c_configuration[kI2cIdx].plic_irqs[i],
-        kTopEarlgreyPlicTargetIbex0, kDifToggleEnabled));
+        kTopChipPlicTargetIbex0, kDifToggleEnabled));
 
     // Assign a default priority
     CHECK_DIF_OK(dif_rv_plic_irq_set_priority(

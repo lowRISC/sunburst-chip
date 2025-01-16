@@ -11,22 +11,22 @@
 #include "sw/device/lib/dif/dif_gpio.h"
 #include "sw/device/lib/dif/dif_pinmux.h"
 
-#include "hw/top_earlgrey/sw/autogen/top_earlgrey.h"
+#include "hw/top_chip/sw/autogen/top_chip.h"
 
 /**
  * Define a pinmux configuration for a peripheral input and output .
  */
 typedef struct pinmux_testutils_peripheral_pin {
-  top_earlgrey_pinmux_peripheral_in_t peripheral_in;
-  top_earlgrey_pinmux_outsel_t outsel;
+  top_chip_pinmux_peripheral_in_t peripheral_in;
+  top_chip_pinmux_outsel_t outsel;
 } pinmux_testutils_peripheral_pin_t;
 
 /**
  * Define a pinmux configuration for a mio input and output.
  */
 typedef struct pinmux_testutils_mio_pin {
-  top_earlgrey_pinmux_mio_out_t mio_out;
-  top_earlgrey_pinmux_insel_t insel;
+  top_chip_pinmux_mio_out_t mio_out;
+  top_chip_pinmux_insel_t insel;
 } pinmux_testutils_mio_pin_t;
 
 /**
@@ -38,7 +38,7 @@ typedef struct pinmux_testutils_mio_pin {
  *
  * Also ensures IOR0 and IOR1 outputs are disabled, for use as USB sense inputs.
  *
- * This function is specific to top_earlgrey and top_englishbreakfast.
+ * This function is specific to top_chip and top_englishbreakfast.
  */
 void pinmux_testutils_init(dif_pinmux_t *pinmux);
 
@@ -74,7 +74,7 @@ uint32_t pinmux_testutils_get_testable_gpios_mask(void);
  */
 uint32_t pinmux_testutils_read_strap_pin(dif_pinmux_t *pinmux, dif_gpio_t *gpio,
                                          dif_gpio_pin_t io,
-                                         top_earlgrey_muxed_pads_t pad);
+                                         top_chip_muxed_pads_t pad);
 
 /**
  * Reads the OpenTitan sw strap pins for the strap configuration value.

@@ -47,7 +47,7 @@ status_t spi_host_testutils_flush(dif_spi_host_t *spi_host);
  *
  * @param pinmux A pinmux handle.
  * @param csb_outsel The chip select pin, this should be one of the eight
- * devices in the BoB connected to the bus. See ::top_earlgrey_pinmux_mio_out_t.
+ * devices in the BoB connected to the bus. See ::top_chip_pinmux_mio_out_t.
  * @param platform_id The ID of the platform where the test in running.
  * @return The result of the operation.
  */

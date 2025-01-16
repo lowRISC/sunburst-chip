@@ -13,7 +13,7 @@
 #include "sw/device/lib/dif/dif_aon_timer.h"
 #include "sw/device/lib/testing/test_framework/check.h"
 
-#include "hw/top_earlgrey/sw/autogen/top_earlgrey.h"
+#include "hw/top_chip/sw/autogen/top_chip.h"
 
 #define MODULE_ID MAKE_MODULE_ID('a', 'o', 't')
 

@@ -21,7 +21,7 @@
 #include "sw/device/lib/testing/test_framework/status.h"
 #include "sw/device/lib/testing/uart_testutils.h"
 
-#include "hw/top_earlgrey/sw/autogen/top_earlgrey.h"
+#include "hw/top_chip/sw/autogen/top_chip.h"
 
 #define UART_DATASET_SIZE 64
 
@@ -142,11 +142,11 @@ void ottf_external_isr(uint32_t *exc_info) {
   // Find which interrupt fired at PLIC by claiming it.
   dif_rv_plic_irq_id_t plic_irq_id;
   CHECK_DIF_OK(
-      dif_rv_plic_irq_claim(&plic, kTopEarlgreyPlicTargetIbex0, &plic_irq_id));
+      dif_rv_plic_irq_claim(&plic, kTopChipPlicTargetIbex0, &plic_irq_id));
 
   // Check if it is the right peripheral.
-  top_earlgrey_plic_peripheral_t peripheral = (top_earlgrey_plic_peripheral_t)
-      top_earlgrey_plic_interrupt_for_peripheral[plic_irq_id];
+  top_chip_plic_peripheral_t peripheral = (top_chip_plic_peripheral_t)
+      top_chip_plic_interrupt_for_peripheral[plic_irq_id];
   CHECK(peripheral == uart_cfg.peripheral_id,
         "Interurpt from unexpected peripheral: %d", peripheral);
 
@@ -196,7 +196,7 @@ void ottf_external_isr(uint32_t *exc_info) {
   CHECK_DIF_OK(dif_uart_irq_acknowledge(&uart, uart_irq));
 
   // Complete the IRQ at PLIC.
-  CHECK_DIF_OK(dif_rv_plic_irq_complete(&plic, kTopEarlgreyPlicTargetIbex0,
+  CHECK_DIF_OK(dif_rv_plic_irq_complete(&plic, kTopChipPlicTargetIbex0,
                                         plic_irq_id));
 }
 
@@ -266,43 +266,43 @@ static void plic_init_with_irqs(mmio_region_t base_addr, dif_rv_plic_t *plic) {
 
   // Set the threshold for the Ibex to 0.
   CHECK_DIF_OK(
-      dif_rv_plic_target_set_threshold(plic, kTopEarlgreyPlicTargetIbex0, 0x0));
+      dif_rv_plic_target_set_threshold(plic, kTopChipPlicTargetIbex0, 0x0));
 
   // Enable all UART interrupts at the PLIC.
   CHECK_DIF_OK(dif_rv_plic_irq_set_enabled(plic, uart_cfg.irq_tx_watermark_id,
-                                           kTopEarlgreyPlicTargetIbex0,
+                                           kTopChipPlicTargetIbex0,
                                            kDifToggleEnabled));
 
   CHECK_DIF_OK(dif_rv_plic_irq_set_enabled(plic, uart_cfg.irq_tx_empty_id,
-                                           kTopEarlgreyPlicTargetIbex0,
+                                           kTopChipPlicTargetIbex0,
                                            kDifToggleEnabled));
 
   CHECK_DIF_OK(dif_rv_plic_irq_set_enabled(plic, uart_cfg.irq_rx_watermark_id,
-                                           kTopEarlgreyPlicTargetIbex0,
+                                           kTopChipPlicTargetIbex0,
                                            kDifToggleEnabled));
 
   CHECK_DIF_OK(dif_rv_plic_irq_set_enabled(plic, uart_cfg.irq_tx_done_id,
-                                           kTopEarlgreyPlicTargetIbex0,
+                                           kTopChipPlicTargetIbex0,
                                            kDifToggleEnabled));
 
   CHECK_DIF_OK(dif_rv_plic_irq_set_enabled(plic, uart_cfg.irq_rx_overflow_id,
-                                           kTopEarlgreyPlicTargetIbex0,
+                                           kTopChipPlicTargetIbex0,
                                            kDifToggleEnabled));
 
   CHECK_DIF_OK(dif_rv_plic_irq_set_enabled(plic, uart_cfg.irq_rx_frame_err_id,
-                                           kTopEarlgreyPlicTargetIbex0,
+                                           kTopChipPlicTargetIbex0,
                                            kDifToggleEnabled));
 
   CHECK_DIF_OK(dif_rv_plic_irq_set_enabled(plic, uart_cfg.irq_rx_break_err_id,
-                                           kTopEarlgreyPlicTargetIbex0,
+                                           kTopChipPlicTargetIbex0,
                                            kDifToggleEnabled));
 
   CHECK_DIF_OK(dif_rv_plic_irq_set_enabled(plic, uart_cfg.irq_rx_timeout_id,
-                                           kTopEarlgreyPlicTargetIbex0,
+                                           kTopChipPlicTargetIbex0,
                                            kDifToggleEnabled));
 
   CHECK_DIF_OK(dif_rv_plic_irq_set_enabled(plic, uart_cfg.irq_rx_parity_err_id,
-                                           kTopEarlgreyPlicTargetIbex0,
+                                           kTopChipPlicTargetIbex0,
                                            kDifToggleEnabled));
 }
 
@@ -458,7 +458,7 @@ static void execute_test(const dif_uart_t *uart) {
 void config_external_clock(const dif_clkmgr_t *clkmgr) {
   dif_lc_ctrl_t lc;
   mmio_region_t lc_ctrl_base_addr =
-      mmio_region_from_addr(TOP_EARLGREY_LC_CTRL_BASE_ADDR);
+      mmio_region_from_addr(TOP_CHIP_LC_CTRL_REGS_BASE_ADDR);
   CHECK_DIF_OK(dif_lc_ctrl_init(lc_ctrl_base_addr, &lc));
 
   LOG_INFO("Read and check LC state.");
@@ -476,10 +476,10 @@ OTTF_DEFINE_TEST_CONFIG(.enable_uart_flow_control = true);
 bool test_main(void) {
   mmio_region_t base_addr;
 
-  base_addr = mmio_region_from_addr(TOP_EARLGREY_CLKMGR_AON_BASE_ADDR);
+  base_addr = mmio_region_from_addr(TOP_CHIP_CLKMGR_AON_BASE_ADDR);
   CHECK_DIF_OK(dif_clkmgr_init(base_addr, &clkmgr));
 
-  base_addr = mmio_region_from_addr(TOP_EARLGREY_PINMUX_AON_BASE_ADDR);
+  base_addr = mmio_region_from_addr(TOP_CHIP_PINMUX_AON_BASE_ADDR);
   CHECK_DIF_OK(dif_pinmux_init(base_addr, &pinmux));
 
   if (kUartIdxDv != 0xff) {
@@ -492,7 +492,7 @@ bool test_main(void) {
   if (kUartIdx == 0 && kDeviceType != kDeviceSimDV) {
     CHECK_STATUS_OK(
         uart_testutils_select_pinmux(&pinmux, 1, kUartPinmuxChannelConsole));
-    ottf_console_configure_uart(TOP_EARLGREY_UART1_BASE_ADDR);
+    ottf_console_configure_uart(TOP_CHIP_UART1_BASE_ADDR);
   }
 
   CHECK_STATUS_OK(
@@ -516,7 +516,7 @@ bool test_main(void) {
 
   // Initialize the PLIC.
   mmio_region_t plic_base_addr =
-      mmio_region_from_addr(TOP_EARLGREY_RV_PLIC_BASE_ADDR);
+      mmio_region_from_addr(TOP_CHIP_RV_PLIC_BASE_ADDR);
   plic_init_with_irqs(plic_base_addr, &plic);
 
   // Enable the external IRQ at Ibex.

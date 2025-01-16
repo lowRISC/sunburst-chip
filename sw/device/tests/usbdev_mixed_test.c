@@ -39,7 +39,7 @@ Thoughts:
 #include "sw/device/lib/testing/usb_testutils_diags.h"
 #include "sw/device/lib/testing/usb_testutils_streams.h"
 
-#include "hw/top_earlgrey/sw/autogen/top_earlgrey.h"  // Generated.
+#include "hw/top_chip/sw/autogen/top_chip.h"  // Generated.
 
 // Number of streams to be tested
 #ifndef NUM_STREAMS
@@ -58,7 +58,8 @@ Thoughts:
 /**
  * Indexed by usb_testutils_transfer_type_t
  */
-static const char *xfr_name[] = {
+//static
+ const char *xfr_name[] = {
     "Control",
     "Isochronous",
     "Bulk",
@@ -196,11 +197,11 @@ bool test_main(void) {
   LOG_INFO(" - %u stream(s), 0x%x bytes each", nstreams, transfer_bytes);
 
   CHECK_DIF_OK(dif_pinmux_init(
-      mmio_region_from_addr(TOP_EARLGREY_PINMUX_AON_BASE_ADDR), &pinmux));
+      mmio_region_from_addr(TOP_CHIP_PINMUX_AON_BASE_ADDR), &pinmux));
   pinmux_testutils_init(&pinmux);
   CHECK_DIF_OK(dif_pinmux_input_select(
-      &pinmux, kTopEarlgreyPinmuxPeripheralInUsbdevSense,
-      kTopEarlgreyPinmuxInselIoc7));
+      &pinmux, kTopChipPinmuxPeripheralInUsbdevSense,
+      kTopChipPinmuxInselIoc7));
 
   // Construct the test/stream flags to be used
   test_flags = (kSending ? kUsbdevStreamFlagRetrieve : 0U) |
