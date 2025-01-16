@@ -114,6 +114,17 @@ void ottf_machine_ecall_handler(uint32_t *exc_info);
 void ottf_user_ecall_handler(uint32_t *exc_info);
 
 /**
+ * OTTF CHERIoT exception handler.
+ *
+ * Called by default implementation of `ottf_exception_handler`. If that
+ * function is overridden, this function may not be called.
+ *
+ * `ottf_isrs.c` provides a weak definition of this symbol, which can be
+ * overridden at link-time by providing an additional non-weak definition.
+ */
+void ottf_cheriot_exc_handler(uint32_t *exc_info);
+
+/**
  * OTTF software IRQ handler.
  *
  * `ottf_isrs.c` provides a weak definition of this symbol, which can be

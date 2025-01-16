@@ -6,7 +6,6 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <string.h>
 
 #include "sw/device/lib/base/crc32.h"
 #include "sw/device/lib/base/math.h"

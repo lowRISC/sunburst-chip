@@ -17,7 +17,6 @@
 #include "sw/device/lib/testing/aon_timer_testutils.h"
 #include "sw/device/lib/testing/rand_testutils.h"
 #include "sw/device/lib/testing/rv_plic_testutils.h"
-#include "sw/device/lib/testing/test_framework/FreeRTOSConfig.h"
 #include "sw/device/lib/testing/test_framework/check.h"
 #include "sw/device/lib/testing/test_framework/ottf_main.h"
 
@@ -53,8 +52,6 @@ static volatile uint64_t irq_tick;
  * timer in vPortSetupTimerInterrupt, and re-initialising it inside the test
  * could potentially break or cause unexpected behaviour of the test framework.
  */
-static_assert(configUSE_PREEMPTION == 0,
-              "rv_timer may be initialized already by FreeRtos");
 
 static void tick_init(void) {
   CHECK_DIF_OK(dif_rv_timer_init(

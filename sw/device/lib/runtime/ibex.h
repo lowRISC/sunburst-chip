@@ -37,6 +37,7 @@ typedef enum ibex_exc {
   kIbexExcStoreAccessFault = 7,
   kIbexExcUserECall = 8,
   kIbexExcMachineECall = 11,
+  kIbexExcCHERIoT = 28,
   kIbexExcMax = 31
 } ibex_exc_t;
 

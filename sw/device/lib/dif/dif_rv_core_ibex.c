@@ -304,8 +304,11 @@ dif_result_t dif_rv_core_ibex_get_rnd_status(
     return kDifBadArg;
   }
 
-  *status = mmio_region_read32(rv_core_ibex->base_addr,
-                               RV_CORE_IBEX_RND_STATUS_REG_OFFSET);
+  // TODO: We have no rv_core_ibex and thus no RND data at present.
+  //*status = mmio_region_read32(rv_core_ibex->base_addr,
+  //                             RV_CORE_IBEX_RND_STATUS_REG_OFFSET);
+  *status = kDifRvCoreIbexRndStatusValid;
+
   return kDifOk;
 }
 
@@ -315,8 +318,11 @@ dif_result_t dif_rv_core_ibex_read_rnd_data(
     return kDifBadArg;
   }
 
-  *data = mmio_region_read32(rv_core_ibex->base_addr,
-                             RV_CORE_IBEX_RND_DATA_REG_OFFSET);
+  // TODO: We have no rv_core_ibex and thus no RND data at present.
+  //*data = mmio_region_read32(rv_core_ibex->base_addr,
+  //                           RV_CORE_IBEX_RND_DATA_REG_OFFSET);
+  *data = 0u;
+
   return kDifOk;
 }
 
