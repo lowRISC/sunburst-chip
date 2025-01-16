@@ -56,7 +56,7 @@ static uint8_t plic_irq_bit_index(dif_rv_plic_irq_id_t irq) {
  */
 static ptrdiff_t plic_irq_enable_base_for_target(dif_rv_plic_target_t target) {
   ptrdiff_t range = RV_PLIC_IE0_MULTIREG_COUNT * sizeof(uint32_t);
-  return RV_PLIC_IE0_0_REG_OFFSET + (range * (ptrdiff_t)target);
+  return RV_PLIC_IE0_REG_OFFSET + (range * (ptrdiff_t)target);
 }
 
 /**
@@ -100,7 +100,7 @@ static plic_reg_info_t plic_irq_enable_reg_info(dif_rv_plic_irq_id_t irq,
 static plic_reg_info_t plic_irq_pending_reg_info(dif_rv_plic_irq_id_t irq) {
   ptrdiff_t offset = plic_offset_from_reg0(irq);
   return (plic_reg_info_t){
-      .offset = RV_PLIC_IP_0_REG_OFFSET + offset,
+      .offset = RV_PLIC_IP_REG_OFFSET + offset,
       .bit_index = plic_irq_bit_index(irq),
   };
 }
