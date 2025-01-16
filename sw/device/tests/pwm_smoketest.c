@@ -14,7 +14,7 @@
 #include "sw/device/lib/testing/test_framework/ottf_main.h"
 #include "sw/device/lib/testing/test_framework/ottf_utils.h"
 
-#include "hw/top_earlgrey/sw/autogen/top_earlgrey.h"
+#include "hw/top_chip/sw/autogen/top_chip.h"
 
 OTTF_DEFINE_TEST_CONFIG();
 
@@ -34,24 +34,24 @@ static dif_pwm_config_t compute_clk_config(uint32_t pwm_clk) {
 
 bool test_main(void) {
   dif_pwm_t pwm;
-  mmio_region_t addr = mmio_region_from_addr(TOP_EARLGREY_PWM_AON_BASE_ADDR);
+  mmio_region_t addr = mmio_region_from_addr(TOP_CHIP_PWM_AON_BASE_ADDR);
   CHECK_DIF_OK(dif_pwm_init(addr, &pwm));
 
   dif_pinmux_t pinmux;
-  addr = mmio_region_from_addr(TOP_EARLGREY_PINMUX_AON_BASE_ADDR);
+  addr = mmio_region_from_addr(TOP_CHIP_PINMUX_AON_BASE_ADDR);
   CHECK_DIF_OK(dif_pinmux_init(addr, &pinmux));
-  CHECK_DIF_OK(dif_pinmux_output_select(&pinmux, kTopEarlgreyPinmuxMioOutIoa8,
-                                        kTopEarlgreyPinmuxOutselPwmAonPwm0));
+  CHECK_DIF_OK(dif_pinmux_output_select(&pinmux, kTopChipPinmuxMioOutIoa8,
+                                        kTopChipPinmuxOutselPwmAonPwm0));
 
   dif_gpio_t gpio;
-  addr = mmio_region_from_addr(TOP_EARLGREY_GPIO_BASE_ADDR);
+  addr = mmio_region_from_addr(TOP_CHIP_GPIO_BASE_ADDR);
   CHECK_DIF_OK(dif_gpio_init(addr, &gpio));
   CHECK_DIF_OK(dif_gpio_output_set_enabled_all(&gpio, 0x1));
 
   // The host uses IOA7 to let the device know when the sampling started.
   CHECK_DIF_OK(dif_pinmux_input_select(&pinmux,
-                                       kTopEarlgreyPinmuxPeripheralInGpioGpio0,
-                                       kTopEarlgreyPinmuxInselIoa7));
+                                       kTopChipPinmuxPeripheralInGpioGpio0,
+                                       kTopChipPinmuxInselIoa7));
 
   for (size_t i = 0; i < ARRAYSIZE(kClocksHz); ++i) {
     dif_pwm_config_t pwm_config = compute_clk_config(kClocksHz[i]);

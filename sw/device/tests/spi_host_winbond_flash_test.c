@@ -18,7 +18,7 @@
 #include "sw/device/lib/testing/test_framework/ottf_main.h"
 #include "sw/device/tests/spi_host_flash_test_impl.h"
 
-#include "hw/top_earlgrey/sw/autogen/top_earlgrey.h"
+#include "hw/top_chip/sw/autogen/top_chip.h"
 
 static_assert(__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__,
               "This test assumes the target platform is little endian.");
@@ -28,7 +28,7 @@ OTTF_DEFINE_TEST_CONFIG();
 bool test_main(void) {
   dif_spi_host_t spi_host;
   CHECK_DIF_OK(dif_spi_host_init(
-      mmio_region_from_addr(TOP_EARLGREY_SPI_HOST0_BASE_ADDR), &spi_host));
+      mmio_region_from_addr(TOP_CHIP_SPI_HOST0_BASE_ADDR), &spi_host));
 
   uint32_t spi_speed = 10000000;  // 10MHz
   if (kDeviceType == kDeviceSilicon) {
@@ -36,7 +36,7 @@ bool test_main(void) {
 
     dif_pinmux_t pinmux;
     mmio_region_t base_addr =
-        mmio_region_from_addr(TOP_EARLGREY_PINMUX_AON_BASE_ADDR);
+        mmio_region_from_addr(TOP_CHIP_PINMUX_AON_BASE_ADDR);
     CHECK_DIF_OK(dif_pinmux_init(base_addr, &pinmux));
 
     dif_pinmux_pad_attr_t out_attr;
@@ -47,11 +47,11 @@ bool test_main(void) {
                  kDifPinmuxPadAttrPullResistorUp};
 
     CHECK_DIF_OK(
-        dif_pinmux_pad_write_attrs(&pinmux, kTopEarlgreyDirectPadsSpiHost0Sd2,
+        dif_pinmux_pad_write_attrs(&pinmux, kTopChipDirectPadsSpiHost0Sd2,
                                    kDifPinmuxPadKindDio, in_attr, &out_attr));
 
     CHECK_DIF_OK(
-        dif_pinmux_pad_write_attrs(&pinmux, kTopEarlgreyDirectPadsSpiHost0Sd3,
+        dif_pinmux_pad_write_attrs(&pinmux, kTopChipDirectPadsSpiHost0Sd3,
                                    kDifPinmuxPadKindDio, in_attr, &out_attr));
   }
 

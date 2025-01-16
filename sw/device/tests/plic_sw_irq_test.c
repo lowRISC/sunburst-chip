@@ -12,12 +12,12 @@
 #include "sw/device/lib/testing/test_framework/ottf_main.h"
 #include "sw/device/lib/testing/test_framework/status.h"
 
-#include "hw/top_earlgrey/sw/autogen/top_earlgrey.h"
+#include "hw/top_chip/sw/autogen/top_chip.h"
 #include "rv_plic_regs.h"  // Generated.
 
 OTTF_DEFINE_TEST_CONFIG();
 
-static const dif_rv_plic_target_t kPlicTarget = kTopEarlgreyPlicTargetIbex0;
+static const dif_rv_plic_target_t kPlicTarget = kTopChipPlicTargetIbex0;
 
 static dif_rv_plic_t plic0;
 
@@ -92,7 +92,7 @@ bool test_main(void) {
   irq_external_ctrl(true);
 
   mmio_region_t plic_base_addr =
-      mmio_region_from_addr(TOP_EARLGREY_RV_PLIC_BASE_ADDR);
+      mmio_region_from_addr(TOP_CHIP_RV_PLIC_BASE_ADDR);
   CHECK_DIF_OK(dif_rv_plic_init(plic_base_addr, &plic0));
 
   plic_configure_irqs(&plic0);

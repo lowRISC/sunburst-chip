@@ -23,7 +23,7 @@
 #include "sw/device/lib/testing/test_framework/ujson_ottf.h"
 #include "sw/device/lib/ujson/ujson.h"
 
-#include "hw/top_earlgrey/sw/autogen/top_earlgrey.h"
+#include "hw/top_chip/sw/autogen/top_chip.h"
 
 OTTF_DEFINE_TEST_CONFIG(.enable_uart_flow_control = true);
 
@@ -68,16 +68,16 @@ void ottf_external_isr(uint32_t *exc_info) {
   // Find which interrupt fired at PLIC by claiming it.
   dif_rv_plic_irq_id_t plic_irq_id;
   CHECK_DIF_OK(
-      dif_rv_plic_irq_claim(&plic, kTopEarlgreyPlicTargetIbex0, &plic_irq_id));
+      dif_rv_plic_irq_claim(&plic, kTopChipPlicTargetIbex0, &plic_irq_id));
   // Check if it is the right peripheral.
-  top_earlgrey_plic_peripheral_t peripheral = (top_earlgrey_plic_peripheral_t)
-      top_earlgrey_plic_interrupt_for_peripheral[plic_irq_id];
+  top_chip_plic_peripheral_t peripheral = (top_chip_plic_peripheral_t)
+      top_chip_plic_interrupt_for_peripheral[plic_irq_id];
 
   // Hyper debug tests get uart interrupt by design.
   // Filter uart interrupt.
-  if (peripheral == kTopEarlgreyPlicPeripheralUart0) {
+  if (peripheral == kTopChipPlicPeripheralUart0) {
     // Complete the IRQ at PLIC.
-    CHECK_DIF_OK(dif_rv_plic_irq_complete(&plic, kTopEarlgreyPlicTargetIbex0,
+    CHECK_DIF_OK(dif_rv_plic_irq_complete(&plic, kTopChipPlicTargetIbex0,
                                           plic_irq_id));
     return;
   }
@@ -85,9 +85,9 @@ void ottf_external_isr(uint32_t *exc_info) {
   // For each test, interrupt triggers in order.
   // Once all interrupts are triggered, `intr_index` will be set to 0 for the
   // next test.
-  if (peripheral == kTopEarlgreyPlicPeripheralGpio) {
+  if (peripheral == kTopChipPlicPeripheralGpio) {
     // Correlate the interrupt fired from GPIO.
-    uint32_t gpio_pin_irq_fired = plic_irq_id - kTopEarlgreyPlicIrqIdGpioGpio0;
+    uint32_t gpio_pin_irq_fired = plic_irq_id - kTopChipPlicIrqIdGpioGpio0;
     CHECK(gpio_pin_irq_fired == kExpected_intr[intr_index],
           "Unexpected interrupt rcv:%d  exp:%d", gpio_pin_irq_fired,
           kExpected_intr[intr_index]);
@@ -104,24 +104,24 @@ void ottf_external_isr(uint32_t *exc_info) {
     CHECK_DIF_OK(dif_gpio_irq_set_enabled(&gpio, gpio_pin_irq_fired,
                                           kDifToggleDisabled));
     CHECK_DIF_OK(dif_gpio_irq_acknowledge(&gpio, gpio_pin_irq_fired));
-    CHECK_DIF_OK(dif_rv_plic_irq_complete(&plic, kTopEarlgreyPlicTargetIbex0,
+    CHECK_DIF_OK(dif_rv_plic_irq_complete(&plic, kTopChipPlicTargetIbex0,
                                           plic_irq_id));
   }
 }
 
 bool test_main(void) {
   CHECK_DIF_OK(dif_pinmux_init(
-      mmio_region_from_addr(TOP_EARLGREY_PINMUX_AON_BASE_ADDR), &pinmux));
+      mmio_region_from_addr(TOP_CHIP_PINMUX_AON_BASE_ADDR), &pinmux));
   CHECK_DIF_OK(
-      dif_gpio_init(mmio_region_from_addr(TOP_EARLGREY_GPIO_BASE_ADDR), &gpio));
+      dif_gpio_init(mmio_region_from_addr(TOP_CHIP_GPIO_BASE_ADDR), &gpio));
   CHECK_DIF_OK(dif_rv_plic_init(
-      mmio_region_from_addr(TOP_EARLGREY_RV_PLIC_BASE_ADDR), &plic));
+      mmio_region_from_addr(TOP_CHIP_RV_PLIC_BASE_ADDR), &plic));
   CHECK_DIF_OK(dif_uart_init(
-      mmio_region_from_addr(TOP_EARLGREY_UART0_BASE_ADDR), &uart0));
+      mmio_region_from_addr(TOP_CHIP_UART0_BASE_ADDR), &uart0));
 
   rv_plic_testutils_irq_range_enable(
-      &plic, kTopEarlgreyPlicTargetIbex0, kTopEarlgreyPlicIrqIdGpioGpio0,
-      kTopEarlgreyPlicIrqIdGpioGpio0 + kDifGpioNumPins);
+      &plic, kTopChipPlicTargetIbex0, kTopChipPlicIrqIdGpioGpio0,
+      kTopChipPlicIrqIdGpioGpio0 + kDifGpioNumPins);
 
   // Anker for the host
   LOG_INFO("gpio_intr_test ");

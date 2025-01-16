@@ -19,7 +19,7 @@
 #include "sw/device/lib/testing/test_framework/ottf_test_config.h"
 
 // TODO: make this toplevel agnostic.
-#include "hw/top_earlgrey/sw/autogen/top_earlgrey.h"
+#include "hw/top_chip/sw/autogen/top_chip.h"
 
 #define MODULE_ID MAKE_MODULE_ID('o', 't', 'c')
 
@@ -36,7 +36,7 @@ enum {
   /**
    * HART PLIC Target.
    */
-  kPlicTarget = kTopEarlgreyPlicTargetIbex0,
+  kPlicTarget = kTopChipPlicTargetIbex0,
 };
 
 // Potential DIF handles for OTTF console communication.
@@ -63,7 +63,7 @@ void ottf_console_init(void) {
       // configured. The default is to use UART0.
       if (base_addr == 0) {
         CHECK(kOttfTestConfig.console.type == kOttfConsoleUart);
-        base_addr = TOP_EARLGREY_UART0_BASE_ADDR;
+        base_addr = TOP_CHIP_UART0_BASE_ADDR;
       }
 
       ottf_console_configure_uart(base_addr);
@@ -99,17 +99,17 @@ void ottf_console_configure_uart(uintptr_t base_addr) {
 
 static uint32_t get_flow_control_watermark_plic_id(void) {
   switch (kOttfTestConfig.console.base_addr) {
-    case TOP_EARLGREY_UART1_BASE_ADDR:
-      return kTopEarlgreyPlicIrqIdUart1RxWatermark;
-    case TOP_EARLGREY_UART0_BASE_ADDR:
+    case TOP_CHIP_UART1_BASE_ADDR:
+      return kTopChipPlicIrqIdUart1RxWatermark;
+    case TOP_CHIP_UART0_BASE_ADDR:
     default:
-      return kTopEarlgreyPlicIrqIdUart0RxWatermark;
+      return kTopChipPlicIrqIdUart0RxWatermark;
   }
 }
 
 void ottf_console_flow_control_enable(void) {
   CHECK_DIF_OK(dif_rv_plic_init(
-      mmio_region_from_addr(TOP_EARLGREY_RV_PLIC_BASE_ADDR), &ottf_plic));
+      mmio_region_from_addr(TOP_CHIP_RV_PLIC_BASE_ADDR), &ottf_plic));
 
   dif_uart_t *uart = (dif_uart_t *)ottf_console_get();
   CHECK_DIF_OK(dif_uart_watermark_rx_set(uart, kFlowControlRxWatermark));

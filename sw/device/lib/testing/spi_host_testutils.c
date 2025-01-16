@@ -8,7 +8,7 @@
 #include "sw/device/lib/testing/pinmux_testutils.h"
 #include "sw/device/lib/testing/test_framework/check.h"
 
-#include "hw/top_earlgrey/sw/autogen/top_earlgrey.h"
+#include "hw/top_chip/sw/autogen/top_chip.h"
 
 /**
  * Define an spi pinmux configuration.
@@ -30,84 +30,84 @@ static const spi_host1_pinmux_pins_t kSpiHost1PinmuxMap[] = {
         {
             .clk =
                 {
-                    .insel = kTopEarlgreyPinmuxInselConstantZero,
-                    .mio_out = kTopEarlgreyPinmuxMioOutIoa3,
+                    .insel = kTopChipPinmuxInselConstantZero,
+                    .mio_out = kTopChipPinmuxMioOutIoa3,
                 },
             .sd0 =
                 {
-                    .insel = kTopEarlgreyPinmuxInselIoa5,
-                    .mio_out = kTopEarlgreyPinmuxMioOutIoa5,
+                    .insel = kTopChipPinmuxInselIoa5,
+                    .mio_out = kTopChipPinmuxMioOutIoa5,
                 },
             .sd1 =
                 {
-                    .insel = kTopEarlgreyPinmuxInselIoa4,
-                    .mio_out = kTopEarlgreyPinmuxMioOutIoa4,
+                    .insel = kTopChipPinmuxInselIoa4,
+                    .mio_out = kTopChipPinmuxMioOutIoa4,
                 },
             .sd2 =
                 {
-                    .insel = kTopEarlgreyPinmuxInselIoa8,
-                    .mio_out = kTopEarlgreyPinmuxMioOutIoa8,
+                    .insel = kTopChipPinmuxInselIoa8,
+                    .mio_out = kTopChipPinmuxMioOutIoa8,
                 },
             .sd3 =
                 {
-                    .insel = kTopEarlgreyPinmuxInselIoa7,
-                    .mio_out = kTopEarlgreyPinmuxMioOutIoa7,
+                    .insel = kTopChipPinmuxInselIoa7,
+                    .mio_out = kTopChipPinmuxMioOutIoa7,
                 },
         },
     [kSpiPinmuxPlatformIdCw340] =
         {
             .clk =
                 {
-                    .insel = kTopEarlgreyPinmuxInselConstantZero,
-                    .mio_out = kTopEarlgreyPinmuxMioOutIoa3,
+                    .insel = kTopChipPinmuxInselConstantZero,
+                    .mio_out = kTopChipPinmuxMioOutIoa3,
                 },
             .sd0 =
                 {
-                    .insel = kTopEarlgreyPinmuxInselIoa5,
-                    .mio_out = kTopEarlgreyPinmuxMioOutIoa5,
+                    .insel = kTopChipPinmuxInselIoa5,
+                    .mio_out = kTopChipPinmuxMioOutIoa5,
                 },
             .sd1 =
                 {
-                    .insel = kTopEarlgreyPinmuxInselIoa4,
-                    .mio_out = kTopEarlgreyPinmuxMioOutIoa4,
+                    .insel = kTopChipPinmuxInselIoa4,
+                    .mio_out = kTopChipPinmuxMioOutIoa4,
                 },
             .sd2 =
                 {
-                    .insel = kTopEarlgreyPinmuxInselIoa8,
-                    .mio_out = kTopEarlgreyPinmuxMioOutIoa8,
+                    .insel = kTopChipPinmuxInselIoa8,
+                    .mio_out = kTopChipPinmuxMioOutIoa8,
                 },
             .sd3 =
                 {
-                    .insel = kTopEarlgreyPinmuxInselIoa7,
-                    .mio_out = kTopEarlgreyPinmuxMioOutIoa7,
+                    .insel = kTopChipPinmuxInselIoa7,
+                    .mio_out = kTopChipPinmuxMioOutIoa7,
                 },
         },
     [kSpiPinmuxPlatformIdTeacup] =
         {
             .clk =
                 {
-                    .insel = kTopEarlgreyPinmuxInselConstantZero,
-                    .mio_out = kTopEarlgreyPinmuxMioOutIoa3,
+                    .insel = kTopChipPinmuxInselConstantZero,
+                    .mio_out = kTopChipPinmuxMioOutIoa3,
                 },
             .sd0 =
                 {
-                    .insel = kTopEarlgreyPinmuxInselIoa4,
-                    .mio_out = kTopEarlgreyPinmuxMioOutIoa4,
+                    .insel = kTopChipPinmuxInselIoa4,
+                    .mio_out = kTopChipPinmuxMioOutIoa4,
                 },
             .sd1 =
                 {
-                    .insel = kTopEarlgreyPinmuxInselIoa5,
-                    .mio_out = kTopEarlgreyPinmuxMioOutIoa5,
+                    .insel = kTopChipPinmuxInselIoa5,
+                    .mio_out = kTopChipPinmuxMioOutIoa5,
                 },
             .sd2 =
                 {
-                    .insel = kTopEarlgreyPinmuxInselIoa8,
-                    .mio_out = kTopEarlgreyPinmuxMioOutIoa8,
+                    .insel = kTopChipPinmuxInselIoa8,
+                    .mio_out = kTopChipPinmuxMioOutIoa8,
                 },
             .sd3 =
                 {
-                    .insel = kTopEarlgreyPinmuxInselIoa7,
-                    .mio_out = kTopEarlgreyPinmuxMioOutIoa7,
+                    .insel = kTopChipPinmuxInselIoa7,
+                    .mio_out = kTopChipPinmuxMioOutIoa7,
                 },
         },
 };
@@ -135,30 +135,30 @@ status_t spi_host1_pinmux_connect_to_bob(const dif_pinmux_t *pinmux,
 
   // CSB.
   TRY(dif_pinmux_output_select(pinmux, csb_outsel,
-                               kTopEarlgreyPinmuxOutselSpiHost1Csb));
+                               kTopChipPinmuxOutselSpiHost1Csb));
   // SCLK.
   TRY(dif_pinmux_output_select(pinmux, platform->clk.mio_out,
-                               kTopEarlgreyPinmuxOutselSpiHost1Sck));
+                               kTopChipPinmuxOutselSpiHost1Sck));
   // SD0.
-  TRY(dif_pinmux_input_select(pinmux, kTopEarlgreyPinmuxPeripheralInSpiHost1Sd0,
+  TRY(dif_pinmux_input_select(pinmux, kTopChipPinmuxPeripheralInSpiHost1Sd0,
                               platform->sd0.insel));
   TRY(dif_pinmux_output_select(pinmux, platform->sd0.mio_out,
-                               kTopEarlgreyPinmuxOutselSpiHost1Sd0));
+                               kTopChipPinmuxOutselSpiHost1Sd0));
 
   // SD1.
-  TRY(dif_pinmux_input_select(pinmux, kTopEarlgreyPinmuxPeripheralInSpiHost1Sd1,
+  TRY(dif_pinmux_input_select(pinmux, kTopChipPinmuxPeripheralInSpiHost1Sd1,
                               platform->sd1.insel));
   TRY(dif_pinmux_output_select(pinmux, platform->sd1.mio_out,
-                               kTopEarlgreyPinmuxOutselSpiHost1Sd1));
+                               kTopChipPinmuxOutselSpiHost1Sd1));
   // SD2.
-  TRY(dif_pinmux_input_select(pinmux, kTopEarlgreyPinmuxPeripheralInSpiHost1Sd2,
+  TRY(dif_pinmux_input_select(pinmux, kTopChipPinmuxPeripheralInSpiHost1Sd2,
                               platform->sd2.insel));
   TRY(dif_pinmux_output_select(pinmux, platform->sd2.mio_out,
-                               kTopEarlgreyPinmuxOutselSpiHost1Sd2));
+                               kTopChipPinmuxOutselSpiHost1Sd2));
   // SD3.
-  TRY(dif_pinmux_input_select(pinmux, kTopEarlgreyPinmuxPeripheralInSpiHost1Sd3,
+  TRY(dif_pinmux_input_select(pinmux, kTopChipPinmuxPeripheralInSpiHost1Sd3,
                               platform->sd3.insel));
   TRY(dif_pinmux_output_select(pinmux, platform->sd3.mio_out,
-                               kTopEarlgreyPinmuxOutselSpiHost1Sd3));
+                               kTopChipPinmuxOutselSpiHost1Sd3));
   return OK_STATUS();
 }

@@ -13,7 +13,7 @@
 #include "sw/device/lib/testing/test_framework/check.h"
 #include "sw/device/lib/testing/test_framework/ottf_main.h"
 
-#include "hw/top_earlgrey/sw/autogen/top_earlgrey.h"
+#include "hw/top_chip/sw/autogen/top_chip.h"
 
 OTTF_DEFINE_TEST_CONFIG();
 
@@ -100,9 +100,9 @@ bool test_main(void) {
 
   // Initialise AON Timer.
   CHECK_DIF_OK(dif_aon_timer_init(
-      mmio_region_from_addr(TOP_EARLGREY_AON_TIMER_AON_BASE_ADDR), &aon));
+      mmio_region_from_addr(TOP_CHIP_AON_TIMER_AON_BASE_ADDR), &aon));
   CHECK_DIF_OK(dif_rv_core_ibex_init(
-      mmio_region_from_addr(TOP_EARLGREY_RV_CORE_IBEX_CFG_BASE_ADDR),
+      mmio_region_from_addr(TOP_CHIP_RV_CORE_IBEX_CFG_BASE_ADDR),
       &rv_core_ibex));
 
   aon_timer_test_wakeup_timer(&aon);
