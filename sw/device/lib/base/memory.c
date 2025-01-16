@@ -199,6 +199,14 @@ void *OT_PREFIX_IF_NOT_RV32(memchr)(const void *ptr, int value, size_t len) {
       return (void *)&ptr8[i];
     }
   }
+
+  // When invoked to provide strlen() functionality we must traverse bytewise on CHERI-enabled
+  // systems because otherwise a bounds violation may result from reading beyond the end of the
+  // string.
+  if (len >= PTRDIFF_MAX) {
+    tail_offset = 0u;
+  }
+
   const uint32_t value32 = repeat_byte_to_u32(value8);
   for (; i < tail_offset; i += sizeof(uint32_t)) {
     uint32_t word = read_32(&ptr8[i]);
@@ -277,5 +285,6 @@ extern uint32_t read_32(const void *);
 extern void write_32(uint32_t, void *);
 extern uint64_t read_64(const void *);
 extern void write_64(uint64_t, void *);
+extern volatile void *memory_ptr_from_addr(uint32_t);
 
 #undef OT_PREFIX_IF_NOT_RV32

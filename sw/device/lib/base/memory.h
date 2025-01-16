@@ -22,6 +22,8 @@
 #endif
 
 #include "sw/device/lib/base/macros.h"
+// For a valid capability to access memory addresses.
+#include "sw/device/lib/base/mmio.h"
 
 // When compiling unit tests on the host machine, we must mangle the names of
 // OpenTitan's memory functions to disambiguate them from libc's variants.
@@ -274,6 +276,20 @@ void *OT_PREFIX_IF_NOT_RV32(memchr)(const void *ptr, int value, size_t len);
  * @return a pointer to the found value, or NULL.
  */
 void *OT_PREFIX_IF_NOT_RV32(memrchr)(const void *ptr, int value, size_t len);
+
+/**
+ * Given a 32-bit numerical address, return a pointer (and valid capability) to
+ * that address, spanning at least 4 bytes.
+ *
+ * @param addr the address to access.
+ * @return a pointer that may be used.
+ */
+inline volatile void *memory_ptr_from_addr(uint32_t addr) {
+  // Note: presently the mmio capability is the root capability and may be used
+  // to access any address including all of the main SRAM.
+  mmio_region_t region = mmio_region_from_addr(addr);
+  return region.base;
+}
 
 #ifdef __cplusplus
 }  // extern "C"

@@ -9,6 +9,23 @@
 #include "sw/device/lib/base/memory.h"
 
 /**
+ * Read/write capability to be used for all MMIO regions.
+ */
+static volatile void *__capability mmioRoot = NULL;
+
+/**
+ * Create a new `mmio_region_t` from the given address.
+ *
+ * @param address an address to an MMIO region.
+ * @return a `mmio_region_t` value representing that region.
+ */
+OT_WARN_UNUSED_RESULT mmio_region_t mmio_region_from_addr(uintptr_t address) {
+  return (mmio_region_t){
+    .base = (volatile void *)__builtin_cheri_address_set(mmioRoot, address)
+  };
+}
+
+/**
  * Copies a block of memory between MMIO and main memory while ensuring that
  * MMIO accesses are word-aligned.
  *
@@ -110,6 +127,15 @@ void mmio_region_memcpy_to_mmio32(mmio_region_t base, uint32_t offset,
   // for both read and write operations but `from_mmio = false` means that `src`
   // will never be written to.
   mmio_region_memcpy32(base, offset, (void *)src, len, false);
+}
+
+/**
+ * Supply a read/write capability suitable for accessing all MMIO regions.
+ *
+ * @param rwCap Read/write capability to be used.
+ */
+void mmio_set_capability(volatile void *__capability rwCap) {
+  mmioRoot = rwCap;
 }
 
 // `extern` declarations to give the inline functions in the

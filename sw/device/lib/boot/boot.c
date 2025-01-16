@@ -11,9 +11,6 @@
 #include "sw/device/lib/base/mmio.h"
 #include "sw/device/lib/base/memory.h"
 
-// TODO: Set root capability for all DIF access.
-extern volatile void *__capability mmioRoot;
-
 void boot_init_globals(void *__capability gdc, uint32_t start_addr, uint32_t stop_addr) {
   const void *__capability code_cap = __builtin_cheri_program_counter_get();
   const void *__capability rodata_cap = gdc;
@@ -48,6 +45,6 @@ void boot_init_globals(void *__capability gdc, uint32_t start_addr, uint32_t sto
     *dest = __builtin_cheri_offset_increment(src, reloc->offset);
   }
 
-  // TODO: set up MMIO accesss.
-  mmioRoot = gdc;
+  // Supply a valid read/write capability for access to all MMIO regions.
+  mmio_set_capability(gdc);
 }

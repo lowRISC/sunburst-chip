@@ -9,6 +9,7 @@
 #include <stdint.h>
 
 #include "sw/device/lib/base/macros.h"
+#include "sw/device/lib/base/memory.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,7 +38,7 @@ extern "C" {
  */
 OT_WARN_UNUSED_RESULT
 inline uint8_t abs_mmio_read8(uint32_t addr) {
-  return *((volatile uint8_t *)addr);
+  return *((volatile uint8_t *)memory_ptr_from_addr(addr));
 }
 
 /**
@@ -47,7 +48,7 @@ inline uint8_t abs_mmio_read8(uint32_t addr) {
  * @param value the value to write.
  */
 inline void abs_mmio_write8(uint32_t addr, uint8_t value) {
-  *((volatile uint8_t *)addr) = value;
+  *((volatile uint8_t *)memory_ptr_from_addr(addr)) = value;
 }
 
 /**
@@ -58,8 +59,8 @@ inline void abs_mmio_write8(uint32_t addr, uint8_t value) {
  * @param value the value to write.
  */
 inline void abs_mmio_write8_shadowed(uint32_t addr, uint8_t value) {
-  *((volatile uint8_t *)addr) = value;
-  *((volatile uint8_t *)addr) = value;
+  *((volatile uint8_t *)memory_ptr_from_addr(addr)) = value;
+  *((volatile uint8_t *)memory_ptr_from_addr(addr)) = value;
 }
 
 /**
@@ -70,7 +71,7 @@ inline void abs_mmio_write8_shadowed(uint32_t addr, uint8_t value) {
  */
 OT_WARN_UNUSED_RESULT
 inline uint32_t abs_mmio_read32(uint32_t addr) {
-  return *((volatile uint32_t *)addr);
+  return *((volatile uint32_t *)memory_ptr_from_addr(addr));
 }
 
 /**
@@ -80,7 +81,7 @@ inline uint32_t abs_mmio_read32(uint32_t addr) {
  * @param value the value to write.
  */
 inline void abs_mmio_write32(uint32_t addr, uint32_t value) {
-  *((volatile uint32_t *)addr) = value;
+  *((volatile uint32_t *)memory_ptr_from_addr(addr)) = value;
 }
 
 /**
@@ -91,8 +92,8 @@ inline void abs_mmio_write32(uint32_t addr, uint32_t value) {
  * @param value the value to write.
  */
 inline void abs_mmio_write32_shadowed(uint32_t addr, uint32_t value) {
-  *((volatile uint32_t *)addr) = value;
-  *((volatile uint32_t *)addr) = value;
+  *((volatile uint32_t *)memory_ptr_from_addr(addr)) = value;
+  *((volatile uint32_t *)memory_ptr_from_addr(addr)) = value;
 }
 
 #else  // OT_PLATFORM_RV32
