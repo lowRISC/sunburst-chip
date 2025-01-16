@@ -55,7 +55,7 @@ typedef enum log_severity {
  *
  * Any modification to this struct must be made with caution due to external
  * assumptions. A post-processing script parses the ELF file and extracts the
- * log fields. The said script uses 20-byte size as the delimiter to collect the
+ * log fields. The said script uses 32-byte size as the delimiter to collect the
  * log fields. Any changes to this struct must be accompanied with the updates
  * to the script, located here:
  * util/device_sw_utils/extract_sw_logs.py.
@@ -98,6 +98,8 @@ void base_log_internal_core(const log_fields_t *log, ...);
  */
 void base_log_internal_dv(const log_fields_t *log, uint32_t nargs, ...);
 
+extern char _dv_log_offset[];
+
 /**
  * A macro that wraps the `OT_FAIL_IF_64_BIT` macro, providing the name
  * of the LOG macro for better error messages.
@@ -136,12 +138,13 @@ void base_log_internal_dv(const log_fields_t *log, uint32_t nargs, ...);
        * the linker will dutifully discard.
        * Unfortunately, clang-format really mangles these
        * declarations, so we format them manually. */            \
+     /*
       __attribute__((section(".logs.fields")))                   \
       static const log_fields_t kLogFields =                     \
           LOG_MAKE_FIELDS_(severity, format, ##__VA_ARGS__);     \
-      base_log_internal_dv(&kLogFields,                          \
+      base_log_internal_dv((const log_fields_t*)((char*)&kLogFields + (uintptr_t)&_dv_log_offset), \
                            OT_VA_ARGS_COUNT(format, ##__VA_ARGS__), \
-                           ##__VA_ARGS__); /* clang-format on */ \
+                           ##__VA_ARGS__); */ /* clang-format on */ \
     } else {                                                     \
       static const log_fields_t log_fields =                     \
           LOG_MAKE_FIELDS_(severity, format, ##__VA_ARGS__);     \

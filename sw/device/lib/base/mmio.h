@@ -57,12 +57,7 @@ typedef struct mmio_region {
  * @param address an address to an MMIO region.
  * @return a `mmio_region_t` value representing that region.
  */
-OT_WARN_UNUSED_RESULT
-inline mmio_region_t mmio_region_from_addr(uintptr_t address) {
-  return (mmio_region_t){
-      .base = (volatile void *)address,
-  };
-}
+OT_WARN_UNUSED_RESULT mmio_region_t mmio_region_from_addr(uintptr_t address);
 
 /**
  * Reads an aligned uint8_t from the MMIO region `base` at the given byte
@@ -437,6 +432,13 @@ void mmio_region_memcpy_from_mmio32(mmio_region_t base, uint32_t offset,
  */
 void mmio_region_memcpy_to_mmio32(mmio_region_t base, uint32_t offset,
                                   const void *src, size_t len);
+
+/**
+ * Supply a read/write capability suitable for accessing all MMIO regions.
+ *
+ * @param rwCap Read/write capability to be used.
+ */
+void mmio_set_capability(volatile void *__capability rwCap);
 
 #ifdef __cplusplus
 }  // extern "C"
