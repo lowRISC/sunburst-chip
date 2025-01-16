@@ -68,7 +68,8 @@ const uintptr_t kDeviceLogBypassUartAddress =
     TOP_CHIP_RV_CORE_IBEX_CFG_BASE_ADDR +
     RV_CORE_IBEX_DV_SIM_WINDOW_REG_OFFSET + 0x04;
 #else
-const uintptr_t kDeviceTestStatusAddress = 0u;
+// TODO: Although we do have sw test status monitoring, it overlays the ROM presently.
+const uintptr_t kDeviceTestStatusAddress = TOP_CHIP_ROM_CTRL_ROM_BASE_ADDR;
 const uintptr_t kDeviceLogBypassUartAddress = 0u;  // Use simulated UART for
 #endif
 

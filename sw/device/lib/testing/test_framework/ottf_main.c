@@ -109,7 +109,10 @@ void _ottf_main(void) {
   test_status_set(kTestStatusInTest);
 
   // Initialize the console to enable logging for non-DV simulation platforms.
-  if (kDeviceType != kDeviceSimDV) {
+  //
+  // TODO: presently we must resort to simulating the UART so it must be initialized.
+  // if (kDeviceType != kDeviceSimDV) {
+  if (true) {
     ottf_console_init();
     if (!kOttfTestConfig.silence_console_prints) {
       LOG_INFO("Running %s", kOttfTestConfig.file);
