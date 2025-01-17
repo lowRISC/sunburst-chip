@@ -6,7 +6,7 @@ module rom #(
   // (Byte-addressable) address width of the SRAM.
   parameter int unsigned AddrWidth  = 17,
   parameter              InitFile   = "",
-  parameter bit          ErrOnWrite = 1'b1
+  parameter bit          ErrOnWrite = 1'b1 // TODO: Remove when sim_sram is connected elsewhere in tb.sv
 ) (
   input  logic clk_i,
   input  logic rst_ni,
@@ -32,7 +32,7 @@ module rom #(
     .SramAw          (RomAw),
     .Outstanding     (2),
     .ByteAccess      (0),
-    .ErrOnWrite      (ErrOnWrite),
+    .ErrOnWrite      (ErrOnWrite), // TODO: Change back to `1` when sim_sram is connected elsewhere in tb.sv
     .EnableRspIntgGen(1)
   ) rom_adapter (
     .clk_i,

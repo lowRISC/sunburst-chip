@@ -260,7 +260,8 @@ module top_chip_system #(
   // interface (when it exists) instead of hijacking write to the ROM.
   rom #(
     .AddrWidth(ROMAddrWidth),
-    .ErrOnWrite(1'b0) // To allow sim_sram to bind to the ROM tl_i port
+    .ErrOnWrite(1'b0) // To allow sim_sram to bind to the ROM tl_i port.
+                      // TODO: Remove when sim_sram is connected elsewhere.
   ) u_rom (
     .clk_i (clk_sys_i),
     .rst_ni(rst_sys_ni),
