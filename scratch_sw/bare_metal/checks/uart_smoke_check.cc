@@ -11,7 +11,6 @@
 #include <cheri.hh>
 #include <stdint.h>
 
-#include "../common/platform-gpio.hh"
 #include "../common/sunburst_plic.hh"
 #include "../common/sunburst-devices.hh"
 
@@ -29,13 +28,14 @@ UartPtr uart;
 extern "C" void entry_point(void *rwRoot) {
   CapRoot root{rwRoot};
 
+  CHERI::Capability<volatile uint32_t> status = root.cast<volatile uint32_t>();
+  status.address() = 0x00100000;
+  status.bounds() = 4;
+
   PLIC::SunburstPlic _plic(root);
   plic = &_plic;
 
   uart = uart_ptr(root, kUartIdx);
-
-  auto gpio = gpio_ptr(root);
-  gpio->set_oe_direct(0xffffffffu);
 
   // TODO: Use `BACKDOOR_VAR` for uart parameters
   // once SW Symbol Backdoor mechanism has been ported/implemented.
@@ -46,6 +46,9 @@ extern "C" void entry_point(void *rwRoot) {
   uart->parity(false, false);
   uart->fifos_clear();
 
+  // Signal start of test
+  *status = 0x4354u; // 'test'
+
   // Send all bytes in `kSendData`, and check that they are received via
   // the loopback mechanism.
   for (int i = 0; i < sizeof(kSendData); ++i) {
@@ -54,15 +57,12 @@ extern "C" void entry_point(void *rwRoot) {
     uint8_t receive_byte;
     receive_byte = uart->blocking_read();
     if (receive_byte != kSendData[i]) {
-      // TODO: indicate failure in some way the testing infrastructure will pickup
-
-      // Temporary failure indicator using GPIO
-      gpio->set_out_direct(0xBAD00000u + i);
+      *status = 0xbaad; // 'baad'
     }
   }
 
   // Signal test end to UVM testbench
-  gpio->set_out_direct(0xDEADBEEFu);
+  *status = 0x900d; // 'good'
 
-  while (true);
+  while (true) asm volatile("wfi");
 }
