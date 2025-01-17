@@ -7,7 +7,7 @@ module top_chip_verilator (input logic clk_i, rst_ni);
   // Clock frequencies aren't really relevant in the current verilator simulation setup (everything
   // is running on one clock), this frequency is just needed for the uart DPI.
   localparam UartClockFrequency = 50_000_000;
-  localparam BaudRate           = 921_600;
+  localparam BaudRate           = 1_500_000;
 
   logic clk_sys, clk_peri, clk_usb, clk_aon;
   logic rst_sys_n, rst_peri_n, rst_usb_n, rst_aon_n;
