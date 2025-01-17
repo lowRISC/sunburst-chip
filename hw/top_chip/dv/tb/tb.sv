@@ -252,6 +252,15 @@ module top_chip_asic_tb;
         .system_base_addr    (tl_main_pkg::ADDR_SPACE_ROM));
       `MEM_BKDR_UTIL_FILE_OP(m_mem_bkdr_util[ChipMemROM], `ROM_MEM_HIER)
 
+      `uvm_info("tb.sv", "Creating mem_bkdr_util instance for USBDEV BUFFER", UVM_MEDIUM)
+      m_mem_bkdr_util[ChipMemUsbdevBuf] = new(
+        .name  ("mem_bkdr_util[ChipMemUsbdevBuf]"),
+        .path  (`DV_STRINGIFY(`USBDEV_BUF_HIER)),
+        .depth ($size(`USBDEV_BUF_HIER)),
+        .n_bits($bits(`USBDEV_BUF_HIER)),
+        .err_detection_scheme(mem_bkdr_util_pkg::ErrDetectionNone));
+      m_mem_bkdr_util[ChipMemUsbdevBuf].clear_mem();
+
       mem = mem.first();
       do begin
         uvm_config_db#(mem_bkdr_util)::set(
