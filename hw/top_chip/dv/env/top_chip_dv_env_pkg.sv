@@ -15,7 +15,8 @@ package top_chip_dv_env_pkg;
 
   typedef enum {
     ChipMemSRAM,
-    ChipMemROM
+    ChipMemROM,
+    ChipMemUsbdevBuf
   } chip_mem_e;
 
   localparam int unsigned NGpioPins = 32;
