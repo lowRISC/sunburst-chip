@@ -28,6 +28,23 @@ class top_chip_dv_env extends uvm_env;
       end
     end
 
+    // Get the handle to the SW log monitor (for compatible SW images)
+    if (!uvm_config_db#(virtual sw_logger_if)::get(this, "", "sw_logger_vif", cfg.sw_logger_vif)) begin
+      `uvm_fatal(`gfn, "failed to get sw_logger_vif from uvm_config_db")
+    end
+    // Initialize the sw logger interface.
+    foreach (cfg.mem_image_files[i]) begin
+      if (i inside {ChipMemSRAM, ChipMemROM}) begin
+        cfg.sw_logger_vif.add_sw_log_db(cfg.mem_image_files[i]);
+      end
+    end
+    cfg.sw_logger_vif.ready();
+
+    // Get the handle to the SW test status monitor
+    if (!uvm_config_db#(virtual sw_test_status_if)::get(this, "", "sw_test_status_vif", cfg.sw_test_status_vif)) begin
+      `uvm_fatal(`gfn, "failed to get sw_test_status_vif from uvm_config_db")
+    end
+
     ifs = top_chip_dv_if_bundle::type_id::create("ifs", this);
 
     if (!uvm_config_db#(virtual clk_rst_if)::get(this, "", "sys_clk_if", ifs.sys_clk_vif)) begin

@@ -9,6 +9,9 @@ filesets:
   files_dv:
     depend:
       - lowrisc:dv:dv_utils
+      - lowrisc:dv:sim_sram
+      - lowrisc:dv:sw_test_status
+      - lowrisc:dv:sw_logger_if
       - lowrisc:dv:mem_bkdr_util
       - lowrisc:dv:pattgen_agent
       - lowrisc:dv:uart_agent

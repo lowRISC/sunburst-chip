@@ -256,8 +256,11 @@ module top_chip_system #(
     .ram_1p_cfg_i
   );
 
+  // TODO: Connect the sim_sram to a window in ibex core wrapper register
+  // interface (when it exists) instead of hijacking write to the ROM.
   rom #(
-    .AddrWidth(ROMAddrWidth)
+    .AddrWidth(ROMAddrWidth),
+    .ErrOnWrite(1'b0) // To allow sim_sram to bind to the ROM tl_i port
   ) u_rom (
     .clk_i (clk_sys_i),
     .rst_ni(rst_sys_ni),

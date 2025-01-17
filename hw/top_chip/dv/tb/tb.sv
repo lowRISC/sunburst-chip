@@ -261,7 +261,41 @@ module top_chip_asic_tb;
     end
   end : gen_generic
 
+  // Instantiate simulator SRAM for SW DV special writes
+  // TODO: Connect the sim_sram to a window in ibex core wrapper register
+  // interface (when it exists) instead of hijacking write to the ROM.
+  sim_sram u_sim_sram (
+    .clk_i    (u_dut.clk_sys),
+    .rst_ni   (u_dut.rst_sys_n),
+    .tl_in_i  (u_dut.u_top_chip_system.u_rom.tl_i),
+    .tl_in_o  (),
+    .tl_out_o (),
+    .tl_out_i ()
+  );
+
+  `define SIM_SRAM_IF u_sim_sram.u_sim_sram_if
+
+  // Bind the SW test status interface directly to the sim SRAM interface.
+  bind `SIM_SRAM_IF sw_test_status_if u_sw_test_status_if (
+    .addr     (tl_h2d.a_address),
+    .data     (tl_h2d.a_data[15:0]),
+    .fetch_en (1'b0), // use constant, as there is no pwrmgr-provided CPU fetch enable signal
+    .*
+  );
+
+  // Bind the SW logger interface directly to the sim SRAM interface.
+  bind `SIM_SRAM_IF sw_logger_if u_sw_logger_if (
+    .addr (tl_h2d.a_address),
+    .data (tl_h2d.a_data),
+    .*
+  );
+
   initial begin
+    // Set base of SW DV special write locations
+    `SIM_SRAM_IF.start_addr = SW_DV_START_ADDR;
+    `SIM_SRAM_IF.u_sw_test_status_if.sw_test_status_addr = SW_DV_TEST_STATUS_ADDR;
+    `SIM_SRAM_IF.u_sw_logger_if.sw_log_addr = SW_DV_LOG_ADDR;
+
     sys_clk_if.set_active(1'b0, 1'b0);
     peri_clk_if.set_active(1'b0, 1'b0);
     usb_clk_if.set_active(1'b0, 1'b0);
@@ -274,6 +308,12 @@ module top_chip_asic_tb;
     uvm_config_db#(virtual clk_rst_if)::set(null, "*", "peri_clk_if", peri_clk_if);
     uvm_config_db#(virtual clk_rst_if)::set(null, "*", "usb_clk_if", usb_clk_if);
     uvm_config_db#(virtual clk_rst_if)::set(null, "*", "aon_clk_if", aon_clk_if);
+
+        // SW logger and test status interfaces.
+    uvm_config_db#(virtual sw_test_status_if)::set(
+        null, "*.env", "sw_test_status_vif", `SIM_SRAM_IF.u_sw_test_status_if);
+    uvm_config_db#(virtual sw_logger_if)::set(
+        null, "*.env", "sw_logger_vif", `SIM_SRAM_IF.u_sw_logger_if);
 
     // Feed certain I/O signals to matching agents for vseq-specific driving/checking
     uvm_config_db#(virtual pins_if#(NGpioPins))::set(null, "*", "gpio_pins_vif", gpio_pins_if);

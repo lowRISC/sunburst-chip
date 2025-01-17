@@ -20,3 +20,11 @@ lint_off -rule UNUSED -file "*usbdev.sv"
 // bit in the net 'p2d'.
 lint_off -rule UNUSED -file "*usbdpi.sv" -match "*Signal is not used*"
 lint_off -rule UNUSED -file "*usbdpi.sv" -match "*Bits of signal are not used*"
+
+// Some issues in the `sw_test_status_if` and associated `sim_sram` +
+// `sim_sram_if` that we shall ignore.
+// They are used only for DV purposes, and so should be relatively safe.
+// They are also vendored from OpenTitan, which makes them a pain to change.
+lint_off -file "*sim_sram.sv"
+lint_off -file "*sim_sram_if.sv"
+lint_off -file "*sw_test_status_if.sv"
