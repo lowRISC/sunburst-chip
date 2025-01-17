@@ -40,7 +40,7 @@ const uint64_t kClockFreqUsbHz = 500 * 1000;  // 500kHz
 
 const uint64_t kClockFreqAonHz = 125 * 1000;  // 125kHz
 
-const uint64_t kUartBaudrate = 7200;
+const uint64_t kUartBaudrate = 3750;  // kClockFreqPeripheralHz / (1.5Mbaud / 50MHz)
 
 const uint32_t kUartNCOValue =
     CALCULATE_UART_NCO(kUartBaudrate, kClockFreqPeripheralHz);

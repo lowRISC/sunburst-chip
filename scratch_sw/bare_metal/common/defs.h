@@ -4,7 +4,7 @@
 // based upon BAUD_RATE and the Uart runs at the 50 MHz peripheral clock
 // frequency
 #define CPU_TIMER_HZ ( 50'000'000)
-#define BAUD_RATE    (    921'600)
+#define BAUD_RATE    (  1'500'000)
 
 #define SRAM_ADDRESS (0x0020'0000)
 #define SRAM_BOUNDS  (0x0004'0000)

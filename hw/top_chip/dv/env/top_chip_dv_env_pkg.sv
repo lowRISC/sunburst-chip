@@ -21,7 +21,7 @@ package top_chip_dv_env_pkg;
 
   localparam int unsigned NGpioPins = 32;
   localparam int unsigned NUarts = 2;
-  localparam int unsigned UartDpiBaud = 921_600;
+  localparam int unsigned UartDpiBaud = 1_500_000;
 
   // TODO: Connect the sim_sram to a window in ibex core wrapper register
   // interface (when it exists) instead of hijacking write to the ROM.
