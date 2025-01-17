@@ -19,10 +19,24 @@ class top_chip_dv_base_vseq extends uvm_sequence;
   endtask
 
   virtual task wait_for_sw_test_done();
-    // TODO: We likely want a better method for software to signal a test end (and other
-    // events) to the testbench. This is a temporary measure til that exists.
     `uvm_info(`gfn, "Waiting for software to signal test end", UVM_LOW);
-    wait(p_sequencer.ifs.gpio_pins_vif.pins == 32'hDEADBEEF);
-    `uvm_info(`gfn, "TEST PASSED! Completion signal seen from software", UVM_LOW);
+    fork
+      begin: isolation_thread
+        fork
+          begin
+            // Nice case - test status interface completion signal
+            wait(p_sequencer.cfg.sw_test_status_vif.sw_test_done);
+            // Pass/Fail message output by sw_test_status_vif
+          end
+          begin
+            // Legacy case - GPIO completion signal
+            wait(p_sequencer.ifs.gpio_pins_vif.pins == 32'hDEADBEEF);
+            `uvm_info(`gfn, "TEST PASSED! Completion signal seen from software", UVM_LOW);
+          end
+        join_any
+        disable fork;
+      end: isolation_thread
+    join
+
   endtask
 endclass

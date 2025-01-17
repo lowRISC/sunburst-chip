@@ -6,6 +6,10 @@ class top_chip_dv_env_cfg extends uvm_object;
   string mem_image_files[chip_mem_e];
   longint unsigned sys_timeout_cycles = 20_000_000;
 
+  // Software logging & status interfaces
+  virtual sw_logger_if      sw_logger_vif;
+  virtual sw_test_status_if sw_test_status_vif;
+
   // External interface agent configs
   rand pattgen_agent_cfg m_pattgen_agent_cfg;
   rand uart_agent_cfg    m_uart_agent_cfgs[NUarts];

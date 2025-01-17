@@ -4,8 +4,9 @@
 
 module rom #(
   // (Byte-addressable) address width of the SRAM.
-  parameter int unsigned AddrWidth = 17,
-  parameter              InitFile  = ""
+  parameter int unsigned AddrWidth  = 17,
+  parameter              InitFile   = "",
+  parameter bit          ErrOnWrite = 1'b1
 ) (
   input  logic clk_i,
   input  logic rst_ni,
@@ -31,7 +32,7 @@ module rom #(
     .SramAw          (RomAw),
     .Outstanding     (2),
     .ByteAccess      (0),
-    .ErrOnWrite      (1),
+    .ErrOnWrite      (ErrOnWrite),
     .EnableRspIntgGen(1)
   ) rom_adapter (
     .clk_i,

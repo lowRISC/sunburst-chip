@@ -136,6 +136,37 @@ module top_chip_verilator (input logic clk_i, rst_ni);
     .rom_cfg_i   ('0)
   );
 
+  // Instantiate simulator SRAM for SW DV special writes
+  // TODO: Connect the sim_sram to a window in ibex core wrapper register
+  // interface (when it exists) instead of hijacking write to the ROM.
+  sim_sram u_sim_sram (
+    .clk_i    (clk_sys),
+    .rst_ni   (rst_sys_n),
+    .tl_in_i  (u_top_chip_system.u_rom.tl_i),
+    .tl_in_o  (),
+    .tl_out_o (),
+    .tl_out_i ()
+  );
+
+  `define SIM_SRAM_IF u_sim_sram.u_sim_sram_if
+
+  // Connect the SW test status interface to the sim SRAM interface.
+  sw_test_status_if u_sw_test_status_if (
+    .clk_i    (`SIM_SRAM_IF.clk_i),
+    .rst_ni   (`SIM_SRAM_IF.rst_ni),
+    .fetch_en (1'b0),
+    .wr_valid (`SIM_SRAM_IF.wr_valid),
+    .addr     (`SIM_SRAM_IF.tl_h2d.a_address),
+    .data     (`SIM_SRAM_IF.tl_h2d.a_data[15:0])
+  );
+
+  // Set the start address of the simulation SRAM.
+  // Use offset 0 within the sim SRAM for SW test status indication.
+  initial begin
+    `SIM_SRAM_IF.start_addr = 'h00100000;
+    u_sw_test_status_if.sw_test_status_addr = `SIM_SRAM_IF.start_addr;
+  end
+
   assign uart_sys_tx = uart_sys_tx_raw & uart_sys_tx_en;
 
   // Virtual UART
@@ -186,7 +217,12 @@ module top_chip_verilator (input logic clk_i, rst_ni);
         $finish();
       end else if (finish_count > 3'd0) begin
         finish_count <= finish_count + 3'd1;
+      end else if (u_sw_test_status_if.sw_test_done) begin
+        // Test status interface completion signal.
+        // u_sw_test_status_if will output pass/fail message.
+        finish_count <= 3'd1;
       end else if (gpio_pins == 32'hDEADBEEF) begin
+        // Legacy test completion signal
         $display("TEST PASSED! Completion signal seen from software");
         finish_count <= 3'd1;
       end

@@ -22,6 +22,12 @@ package top_chip_dv_env_pkg;
   localparam int unsigned NUarts = 2;
   localparam int unsigned UartDpiBaud = 921_600;
 
+  // TODO: Connect the sim_sram to a window in ibex core wrapper register
+  // interface (when it exists) instead of hijacking write to the ROM.
+  localparam bit [top_pkg::TL_AW-1:0] SW_DV_START_ADDR = tl_main_pkg::ADDR_SPACE_ROM;
+  localparam bit [top_pkg::TL_AW-1:0] SW_DV_TEST_STATUS_ADDR = SW_DV_START_ADDR + 0;
+  localparam bit [top_pkg::TL_AW-1:0] SW_DV_LOG_ADDR         = SW_DV_START_ADDR + 4;
+
   `include "top_chip_dv_env_cfg.sv"
   `include "top_chip_dv_if_bundle.sv"
   `include "top_chip_dv_virtual_sequencer.sv"
