@@ -12,6 +12,41 @@
 #include "sw/device/lib/base/status.h"
 #include "sw/device/lib/dif/dif_spi_host.h"
 
+/**
+ * A set of typical opcodes for named flash commands.
+ */
+typedef enum spi_device_flash_opcode {
+  kSpiDeviceFlashOpReadJedec = 0x9f,
+  kSpiDeviceFlashOpReadSfdp = 0x5a,
+  kSpiDeviceFlashOpReadNormal = 0x03,
+  kSpiDeviceFlashOpRead4b = 0x13,
+  kSpiDeviceFlashOpReadFast = 0x0b,
+  kSpiDeviceFlashOpReadFast4b = 0x0c,
+  kSpiDeviceFlashOpReadDual = 0x3b,
+  kSpiDeviceFlashOpReadQuad = 0x6b,
+  kSpiDeviceFlashOpWriteEnable = 0x06,
+  kSpiDeviceFlashOpWriteDisable = 0x04,
+  kSpiDeviceFlashOpReadStatus1 = 0x05,
+  kSpiDeviceFlashOpReadStatus2 = 0x35,
+  kSpiDeviceFlashOpReadStatus3 = 0x15,
+  kSpiDeviceFlashOpWriteStatus1 = 0x01,
+  kSpiDeviceFlashOpWriteStatus2 = 0x31,
+  kSpiDeviceFlashOpWriteStatus3 = 0x11,
+  kSpiDeviceFlashOpChipErase = 0xc7,
+  kSpiDeviceFlashOpSectorErase = 0x20,
+  kSpiDeviceFlashOpBlockErase32k = 0x52,
+  kSpiDeviceFlashOpBlockErase64k = 0xd8,
+  kSpiDeviceFlashOpPageProgram = 0x02,
+  kSpiDeviceFlashOpEnter4bAddr = 0xb7,
+  kSpiDeviceFlashOpExit4bAddr = 0xe9,
+  kSpiDeviceFlashOpResetEnable = 0x66,
+  kSpiDeviceFlashOpReset = 0x99,
+  kSpiDeviceFlashOpSectorErase4b = 0x21,
+  kSpiDeviceFlashOpBlockErase32k4b = 0x5c,
+  kSpiDeviceFlashOpBlockErase64k4b = 0xdc,
+  kSpiDeviceFlashOpPageProgram4b = 0x12,
+} spi_device_flash_opcode_t;
+
 typedef struct spi_flash_testutils_jedec_id {
   uint16_t device_id;
   uint8_t manufacturer_id;

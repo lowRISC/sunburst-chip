@@ -11,7 +11,6 @@
 #include "sw/device/lib/runtime/hart.h"
 #include "sw/device/lib/runtime/log.h"
 #include "sw/device/lib/runtime/print.h"
-#include "sw/device/lib/testing/spi_device_testutils.h"
 #include "sw/device/lib/testing/spi_flash_testutils.h"
 #include "sw/device/lib/testing/test_framework/check.h"
 #include "sw/device/lib/testing/test_framework/ottf_main.h"

@@ -7,7 +7,6 @@
 #include "sw/device/lib/base/bitfield.h"
 #include "sw/device/lib/base/macros.h"
 #include "sw/device/lib/dif/dif_spi_host.h"
-#include "sw/device/lib/testing/spi_device_testutils.h"
 #include "sw/device/lib/testing/test_framework/check.h"
 
 #define MODULE_ID MAKE_MODULE_ID('s', 'f', 't')
