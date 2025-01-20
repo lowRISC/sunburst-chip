@@ -23,7 +23,7 @@
 #define MODULE_ID MAKE_MODULE_ID('u', 't', 'u')
 
 /**
- * This table stores the pins for all UART instances of Earlgrey.
+ * This table stores the pins for all UART instances of Sunburst.
  */
 static const pinmux_testutils_peripheral_pin_t kUartPinmuxPins[] = {
     // UART0.
@@ -35,16 +35,6 @@ static const pinmux_testutils_peripheral_pin_t kUartPinmuxPins[] = {
     {
         .peripheral_in = kTopChipPinmuxPeripheralInUart1Rx,
         .outsel = kTopChipPinmuxOutselUart1Tx,
-    },
-    // UART2.
-    {
-        .peripheral_in = kTopChipPinmuxPeripheralInUart2Rx,
-        .outsel = kTopChipPinmuxOutselUart2Tx,
-    },
-    // UART3.
-    {
-        .peripheral_in = kTopChipPinmuxPeripheralInUart3Rx,
-        .outsel = kTopChipPinmuxOutselUart3Tx,
     },
 };
 
@@ -64,7 +54,7 @@ static const pinmux_testutils_mio_pin_t
         }};
 
 /**
- * The DV platform is handled separately at the moment: all four UARTs have
+ * The DV platform is handled separately at the moment: both UARTs have
  * their own channels that they map to rather than using one channel for the
  * console and second for the DUT.
  */
@@ -78,16 +68,6 @@ static const pinmux_testutils_mio_pin_t kUartDvPins[4] = {
     {
         .mio_out = kTopChipPinmuxMioOutIob5,
         .insel = kTopChipPinmuxInselIob4,
-    },
-    // UART2.
-    {
-        .mio_out = kTopChipPinmuxMioOutIoa5,
-        .insel = kTopChipPinmuxInselIoa4,
-    },
-    // UART3.
-    {
-        .mio_out = kTopChipPinmuxMioOutIoa1,
-        .insel = kTopChipPinmuxInselIoa0,
     }};
 
 static const uart_cfg_params_t kUartCfgParams[4] = {
@@ -116,32 +96,6 @@ static const uart_cfg_params_t kUartCfgParams[4] = {
         .irq_rx_break_err_id = kTopChipPlicIrqIdUart1RxBreakErr,
         .irq_rx_timeout_id = kTopChipPlicIrqIdUart1RxTimeout,
         .irq_rx_parity_err_id = kTopChipPlicIrqIdUart1RxParityErr,
-    },
-    (uart_cfg_params_t){
-        .base_addr = TOP_CHIP_UART2_BASE_ADDR,
-        .peripheral_id = kTopChipPlicPeripheralUart2,
-        .irq_tx_watermark_id = kTopChipPlicIrqIdUart2TxWatermark,
-        .irq_tx_empty_id = kTopChipPlicIrqIdUart2TxEmpty,
-        .irq_rx_watermark_id = kTopChipPlicIrqIdUart2RxWatermark,
-        .irq_tx_done_id = kTopChipPlicIrqIdUart2TxDone,
-        .irq_rx_overflow_id = kTopChipPlicIrqIdUart2RxOverflow,
-        .irq_rx_frame_err_id = kTopChipPlicIrqIdUart2RxFrameErr,
-        .irq_rx_break_err_id = kTopChipPlicIrqIdUart2RxBreakErr,
-        .irq_rx_timeout_id = kTopChipPlicIrqIdUart2RxTimeout,
-        .irq_rx_parity_err_id = kTopChipPlicIrqIdUart2RxParityErr,
-    },
-    (uart_cfg_params_t){
-        .base_addr = TOP_CHIP_UART3_BASE_ADDR,
-        .peripheral_id = kTopChipPlicPeripheralUart3,
-        .irq_tx_watermark_id = kTopChipPlicIrqIdUart3TxWatermark,
-        .irq_tx_empty_id = kTopChipPlicIrqIdUart3TxEmpty,
-        .irq_rx_watermark_id = kTopChipPlicIrqIdUart3RxWatermark,
-        .irq_tx_done_id = kTopChipPlicIrqIdUart3TxDone,
-        .irq_rx_overflow_id = kTopChipPlicIrqIdUart3RxOverflow,
-        .irq_rx_frame_err_id = kTopChipPlicIrqIdUart3RxFrameErr,
-        .irq_rx_break_err_id = kTopChipPlicIrqIdUart3RxBreakErr,
-        .irq_rx_timeout_id = kTopChipPlicIrqIdUart3RxTimeout,
-        .irq_rx_parity_err_id = kTopChipPlicIrqIdUart3RxParityErr,
     }};
 
 status_t uart_testutils_select_pinmux(const dif_pinmux_t *pinmux,

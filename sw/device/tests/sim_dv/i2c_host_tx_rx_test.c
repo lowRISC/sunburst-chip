@@ -20,9 +20,6 @@
 #include "hw/top_chip/sw/autogen/top_chip.h"
 #include "sw/device/lib/testing/autogen/isr_testutils.h"
 
-// TODO, remove it once pinout configuration is provided
-#include "pinmux_regs.h"
-
 static dif_i2c_t i2c;
 static dif_pinmux_t pinmux;
 static dif_rv_plic_t plic;
