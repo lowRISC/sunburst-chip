@@ -16,6 +16,37 @@
 
 using namespace CHERI;
 
+typedef struct log_fields_dv {
+  /**
+   * Indicates the severity of the LOG.
+   */
+  uint32_t severity;
+  /**
+   * ADDRESS (as plain integer) of the `const char` string containing...
+   * Name of the file at which a LOG line occurs, e.g. `__FILE__`. There
+   * are no requirements for this string, other than that it be some kind of
+   * UNIX-like pathname.
+   */
+  uint32_t file_name;
+  /**
+   * Indicates the line number at which the LOG line occurs, e.g., `__LINE__`.
+   */
+  uint32_t line;
+  /**
+   * Indicates the number of arguments passed to the format string.
+   *
+   * This value used only in DV mode, and is ignored by non-DV logging.
+   */
+  uint32_t nargs;
+  /**
+   * ADDRESS (as plain integer) of the `const char` string containing...
+   * The actual format string.
+   */
+  uint32_t format;
+} log_fields_dv_t;
+
+extern uint32_t _dv_log_offset;
+
 static const uint8_t kSendData[] = "Smoke test!";
 static const uint8_t kUartIdx = 0u;
 
@@ -31,6 +62,10 @@ extern "C" void entry_point(void *rwRoot) {
   CHERI::Capability<volatile uint32_t> status = root.cast<volatile uint32_t>();
   status.address() = 0x00100000;
   status.bounds() = 4;
+
+  CHERI::Capability<volatile uint32_t> logger = root.cast<volatile uint32_t>();
+  logger.address() = 0x00100004;
+  logger.bounds() = 4;
 
   PLIC::SunburstPlic _plic(root);
   plic = &_plic;
@@ -48,6 +83,22 @@ extern "C" void entry_point(void *rwRoot) {
 
   // Signal start of test
   *status = 0x4354u; // 'test'
+
+  // Output a log message using the DV fast logging interface (as a hard-coded example)
+  __attribute__((section(".logs.fields"))) \
+  static const log_fields_dv_t kLogFields = { \
+    .severity = 0, \
+    .file_name = (uint32_t)"" __FILE__ "", \
+    .line = __LINE__, \
+    .nargs = 2, \
+    .format = (uint32_t)"Hi, I'm a log message! Here's a number: %u, and a string: %s", \
+  };
+  // TODO: remove the HARDCODED line below when we have figured out
+  //       how to get the IDEAL line working.
+  *logger = (uint32_t)&kLogFields + (uint32_t)&_dv_log_offset; // <-- IDEAL but gives unexpected value at runtime
+  *logger = 0x10004u;                                          // <-- HARDCODED address matching what the DV expects
+  *logger = 123u;
+  *logger = (uint32_t)"PAVLOVA";
 
   // Send all bytes in `kSendData`, and check that they are received via
   // the loopback mechanism.
