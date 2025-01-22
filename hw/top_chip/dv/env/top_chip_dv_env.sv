@@ -75,6 +75,7 @@ class top_chip_dv_env extends uvm_env;
     virtual_sequencer = top_chip_dv_virtual_sequencer::type_id::create("virtual_sequencer", this);
     virtual_sequencer.cfg = cfg;
     virtual_sequencer.ifs = ifs;
+    virtual_sequencer.mem_bkdr_util_h = mem_bkdr_util_h;
   endfunction
 
   function void connect_phase(uvm_phase phase);
