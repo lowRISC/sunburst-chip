@@ -9,6 +9,8 @@ class top_chip_dv_virtual_sequencer extends uvm_sequencer;
   top_chip_dv_env_cfg   cfg;
   top_chip_dv_if_bundle ifs;
 
+  mem_bkdr_util mem_bkdr_util_h[chip_mem_e];
+
   // Handles to specific interface agent sequencers. Used by some virtual
   // sequences to drive RX (to-chip) items.
   uart_sequencer       uart_sequencer_hs[NUarts];
