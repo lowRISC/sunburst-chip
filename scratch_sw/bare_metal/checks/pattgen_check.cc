@@ -12,13 +12,36 @@
 #include <stdint.h>
 
 #include "../common/asm.hh"
-#include "../common/platform-gpio.hh"
+#include "../common/backdoor.hh"
 #include "../common/sunburst_pattgen.hh"
 #include "../common/sunburst_plic.hh"
 #include "../common/sunburst-devices.hh"
 #include "../common/uart-utils.hh"
 
 using namespace CHERI;
+
+// Following volatile const will be overwritten by
+// SV testbench with random values.
+// 1: channel 0, 2: channel 1, 3: Both channels
+DEFINE_BACKDOOR_VAR(uint8_t, kChannelEnable, 3)
+
+DEFINE_BACKDOOR_VAR(uint8_t, kPattPol0, 0)
+DEFINE_BACKDOOR_VAR(uint8_t, kPattInactiveLevelPda0, 1)
+DEFINE_BACKDOOR_VAR(uint8_t, kPattInactiveLevelPcl0, 1)
+DEFINE_BACKDOOR_VAR(uint32_t, kPattDiv0, 2)
+DEFINE_BACKDOOR_VAR(uint32_t, kPattLower0, 0xF0F0F0F0u)
+DEFINE_BACKDOOR_VAR(uint32_t, kPattUpper0, 0x11111111u)
+DEFINE_BACKDOOR_VAR(uint8_t, kPattLen0, 0x40u)
+DEFINE_BACKDOOR_VAR(uint16_t, kPattRep0, 0x004u)
+
+DEFINE_BACKDOOR_VAR(uint8_t, kPattPol1, 1)
+DEFINE_BACKDOOR_VAR(uint8_t, kPattInactiveLevelPda1, 0)
+DEFINE_BACKDOOR_VAR(uint8_t, kPattInactiveLevelPcl1, 0)
+DEFINE_BACKDOOR_VAR(uint32_t, kPattDiv1, 2)
+DEFINE_BACKDOOR_VAR(uint32_t, kPattLower1, 0xF0F0F0F0u)
+DEFINE_BACKDOOR_VAR(uint32_t, kPattUpper1, 0x11111111u)
+DEFINE_BACKDOOR_VAR(uint8_t, kPattLen1, 0x40u)
+DEFINE_BACKDOOR_VAR(uint16_t, kPattRep1, 0x004u)
 
 PLIC::SunburstPlic *plic;
 PattgenPtr pattgen;
@@ -36,23 +59,28 @@ extern "C" void entry_point(void *rwRoot) {
 
   pattgen = pattgen_ptr(root);
 
-  auto gpio = gpio_ptr(root);
+  CHERI::Capability<volatile uint32_t> status = root.cast<volatile uint32_t>();
+  status.address() = 0x00100000;
+  status.bounds() = 4;
 
-  // TODO: Use `BACKDOOR_VAR` for pattgen parameters (and use_interrupts?)
-  // once SW Symbol Backdoor mechanism has been ported/implemented.
-
+  // TODO: Randomise use_interrupts somehow.
   // Select between interrupt-based or polling-based channel-done detection
   bool use_interrupts = true;
 
   // Set up pattgen to emit some test patterns.
-  pattgen->predividerCh0 = 2;
-  pattgen->predividerCh1 = 2;
-  pattgen->dataCh0_0 = 0xf0f0f0f0u;
-  pattgen->dataCh0_1 = 0x11111111u;
-  pattgen->dataCh1_0 = 0xf0f0f0f0u;
-  pattgen->dataCh1_1 = 0x11111111u;
+  pattgen->predividerCh0 = BACKDOOR_VAR(kPattDiv0);
+  pattgen->predividerCh1 = BACKDOOR_VAR(kPattDiv1);
+  pattgen->dataCh0_0 = BACKDOOR_VAR(kPattLower0);
+  pattgen->dataCh0_1 = BACKDOOR_VAR(kPattUpper0);
+  pattgen->dataCh1_0 = BACKDOOR_VAR(kPattLower1);
+  pattgen->dataCh1_1 = BACKDOOR_VAR(kPattUpper1);
   // Emit each pattern four times
-  pattgen->size = (0x003u << 22) | (0x3fu << 16) | (0x003u << 6) | 0x3fu;
+  pattgen->size = (
+    ((BACKDOOR_VAR(kPattRep1) - 1u) << 22) |
+    ((BACKDOOR_VAR(kPattLen1) - 1u) << 16) |
+    ((BACKDOOR_VAR(kPattRep0) - 1u) <<  6) |
+     (BACKDOOR_VAR(kPattLen0) - 1u)
+  );
 
   if (use_interrupts) {
     // Enable interrupt generation in pattgen
@@ -68,21 +96,34 @@ extern "C" void entry_point(void *rwRoot) {
     ASM::Ibex::global_interrupt_set(true);
   }
 
-  // Enable pattern output, and configure clock polarities and inactive levels.
-  pattgen->ctrl = 0x3bu;
+  // Configure clock polarities and inactive levels.
+  pattgen->ctrl = (
+    (BACKDOOR_VAR(kPattInactiveLevelPda1) << 7) |
+    (BACKDOOR_VAR(kPattInactiveLevelPcl1) << 6) |
+    (BACKDOOR_VAR(kPattInactiveLevelPda0) << 5) |
+    (BACKDOOR_VAR(kPattInactiveLevelPcl0) << 4) |
+    (BACKDOOR_VAR(kPattPol1) << 3) |
+    (BACKDOOR_VAR(kPattPol0) << 2)
+  );
+
+  // Signal start of test
+  *status = 0x4354u; // 'test'
+
+  // Enable pattern output.
+  // NOTE: other fields are ignored when setting the enable bit.
+  pattgen->ctrl = BACKDOOR_VAR(kChannelEnable);
 
   // Wait for pattgen to complete
   if (use_interrupts) {
-    while (pattgen_ch_done != 0x3u);
+    while (pattgen_ch_done != BACKDOOR_VAR(kChannelEnable));
   } else {
-    while (pattgen->interruptState != 0x3u);
+    while (pattgen->interruptState != BACKDOOR_VAR(kChannelEnable));
   }
 
   // Signal test end to UVM testbench
-  gpio->set_oe_direct(0xffffffffu);
-  gpio->set_out_direct(0xDEADBEEFu);
+  *status = 0x900d; // 'good'
 
-  while (true);
+  while (true) asm volatile("wfi");
 }
 
 /**

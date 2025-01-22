@@ -21,35 +21,15 @@ class top_chip_dv_uart_tx_rx_vseq extends top_chip_dv_uart_base_vseq;
     uart_rx_data.size() == UART_DATASET_SIZE;
   }
 
-  // TODO: delete these fixed constraints when the SW backdoor mechanism
-  // has been ported/implemented.
-  constraint fixed_c {
-    // Force the test parameters to match those used in uart_tx_rx_check.cc
-    // while we have no SW backdoor mechanism to allow us to affect them.
-    // Unfortunately, this means both channels must have identical params
-    // (without changing how this vseq constrains & randomises).
-    foreach (exp_uart_tx_data[i]) {
-      exp_uart_tx_data[i] == i;
-    }
-  }
-
-  // TODO: delete the dummy function below when the SW backdoor mechanism
-  // has been ported/implemented.
-  function void sw_symbol_backdoor_overwrite(input string symbol, input bit [7:0] data[]);
-  endfunction
-
   virtual task body();
     // sw_symbol_backdoor_overwrite takes an array as the input
     bit [7:0] uart_idx_data[] = {uart_idx};
     super.body();
 
-    // TODO: delete the warning message below when the SW backdoor mechanism
-    // has been ported/implemented.
-    `uvm_info(`gfn, "WARNING: TEST PARAMETERS ARE FIXED! Need to implement SW Backdoor to allow randomisation", UVM_NONE)
-
+    // Override software constants with randomised data
+    sw_symbol_backdoor_overwrite("kUartIdxDV", uart_idx_data);
     sw_symbol_backdoor_overwrite("kUartTxData", exp_uart_tx_data);
     sw_symbol_backdoor_overwrite("kExpUartRxData", uart_rx_data);
-    sw_symbol_backdoor_overwrite("kUartIdxDv", uart_idx_data);
 
     // Spawn off a thread to retrieve UART TX items.
     fork get_uart_tx_items(uart_idx); join_none

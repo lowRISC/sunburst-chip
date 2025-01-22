@@ -11,12 +11,13 @@ class top_chip_dv_pattgen_vseq extends top_chip_dv_base_vseq;
     //    0 : sample rising edge
     //    1 : sample falling edge
     bit          polarity;
+    bit          inact_lvl_pcl;
+    bit          inact_lvl_pda;
     bit [31:0]   clk_div;
     bit [31:0]   patt_lower;
     bit [31:0]   patt_upper;
     // range has +1 value of register
     // to match dif implementation
-
     // range : [1:64]
     bit [7:0]    len;
     // range : [1, 1024]
@@ -24,20 +25,21 @@ class top_chip_dv_pattgen_vseq extends top_chip_dv_base_vseq;
   } pattgen_chan_cfg_t;
 
   // expected channel config
-  pattgen_chan_cfg_t exp_cfg[NUM_PATTGEN_CHANNELS];
+  rand pattgen_chan_cfg_t exp_cfg[NUM_PATTGEN_CHANNELS];
 
   // expected 64-bit pattern
   bit [63:0] exp_pat[NUM_PATTGEN_CHANNELS];
 
-  rand pattgen_chan_cfg_t rand_chan_cfg;
   rand bit[1:0] chan_en;
 
   constraint chan_cfg_c {
     // Keep clock divisor and repetitions low to avoid chip-level tests
     // taking an excessively long time to run.
-    rand_chan_cfg.clk_div dist { 0 := 4, [1:15] := 1};
-    rand_chan_cfg.len inside {[1:64]};
-    rand_chan_cfg.rep inside {[1:5]};
+    foreach (exp_cfg[i]) {
+      exp_cfg[i].clk_div dist {0 := 4, [1:15] := 1};
+      exp_cfg[i].len inside {[1:64]};
+      exp_cfg[i].rep inside {[1:5]};
+    }
   }
 
   constraint chan_en_c {
@@ -45,56 +47,43 @@ class top_chip_dv_pattgen_vseq extends top_chip_dv_base_vseq;
     chan_en != 2'b0;
   }
 
-  // TODO: delete these fixed constraints when the SW backdoor mechanism
-  // has been ported/implemented.
+  // TODO: Remove this constraint when pattgen_monitor has been updated to
+  //       model configurable inactive levels.
   constraint fixed_c {
-    // Force the test parameters to match those used in pattgen_check.cc
-    // while we have no SW backdoor mechanism to allow us to affect them.
-    // Unfortunately, this means both channels must have identical params
-    // (without changing how this vseq constrains & randomises).
-    rand_chan_cfg.clk_div == 2;
-    rand_chan_cfg.len == 64;
-    rand_chan_cfg.rep == 4;
-    rand_chan_cfg.patt_lower == 32'hf0f0f0f0;
-    rand_chan_cfg.patt_upper == 32'h11111111;
-    rand_chan_cfg.polarity == 0;
-    chan_en == 2'b11;
+    foreach (exp_cfg[i]) {
+      exp_cfg[i].inact_lvl_pcl == 0;
+      exp_cfg[i].inact_lvl_pda == 0;
+    }
   }
-
-  // TODO: delete the dummy function below when the SW backdoor mechanism
-  // has been ported/implemented.
-  function void sw_symbol_backdoor_overwrite(input string symbol, input bit [7:0] data[]);
-  endfunction
 
   task body();
     bit[7:0] byte_arr[];
     super.body();
 
+    // Prevent pattgen_monitor from starting immediately after reset
+    p_sequencer.cfg.m_pattgen_agent_cfg.en_monitor = 0;
+
     // Wait for reset to be asserted and de-asserted before trying to set
     // config parameters, otherwise they may be reset too.
     p_sequencer.ifs.peri_clk_if.wait_for_reset();
-
-    p_sequencer.cfg.m_pattgen_agent_cfg.en_monitor = 0;
-
-    // TODO: delete the warning message below when the SW backdoor mechanism
-    // has been ported/implemented.
-    `uvm_info(`gfn, "WARNING: TEST PARAMETERS ARE FIXED! Need to implement SW Backdoor to allow randomisation", UVM_NONE)
 
     byte_arr = {chan_en};
     sw_symbol_backdoor_overwrite("kChannelEnableDV", byte_arr);
     `uvm_info(`gfn, $sformatf("PATTGEN CHAN_EN: %2b", chan_en), UVM_MEDIUM)
 
     for (int i = 0; i < NUM_PATTGEN_CHANNELS; i++) begin
-      exp_cfg[i] = rand_chan_cfg;
       p_sequencer.cfg.m_pattgen_agent_cfg.polarity[i] = exp_cfg[i].polarity;
       p_sequencer.cfg.m_pattgen_agent_cfg.length[i] = exp_cfg[i].len * exp_cfg[i].rep;
       p_sequencer.cfg.m_pattgen_agent_cfg.div[i] = 2 * (exp_cfg[i].clk_div + 1);
       exp_pat[i] = {exp_cfg[i].patt_upper, exp_cfg[i].patt_lower};
-      `DV_CHECK_MEMBER_RANDOMIZE_FATAL(rand_chan_cfg)
     end
 
     byte_arr = {exp_cfg[0].polarity};
     sw_symbol_backdoor_overwrite("kPattPol0DV", byte_arr);
+    byte_arr = {exp_cfg[0].inact_lvl_pcl};
+    sw_symbol_backdoor_overwrite("kPattInactiveLevelPcl0DV", byte_arr);
+    byte_arr = {exp_cfg[0].inact_lvl_pda};
+    sw_symbol_backdoor_overwrite("kPattInactiveLevelPda0DV", byte_arr);
     byte_arr = {<<8{{<<32{exp_cfg[0].clk_div}}}};
     sw_symbol_backdoor_overwrite("kPattDiv0DV", byte_arr);
     byte_arr = {<<8{{<<32{exp_cfg[0].patt_lower}}}};
@@ -112,6 +101,10 @@ class top_chip_dv_pattgen_vseq extends top_chip_dv_base_vseq;
 
     byte_arr = {exp_cfg[1].polarity};
     sw_symbol_backdoor_overwrite("kPattPol1DV", byte_arr);
+    byte_arr = {exp_cfg[1].inact_lvl_pcl};
+    sw_symbol_backdoor_overwrite("kPattInactiveLevelPcl1DV", byte_arr);
+    byte_arr = {exp_cfg[1].inact_lvl_pda};
+    sw_symbol_backdoor_overwrite("kPattInactiveLevelPda1DV", byte_arr);
     byte_arr = {<<8{{<<32{exp_cfg[1].clk_div}}}};
     sw_symbol_backdoor_overwrite("kPattDiv1DV", byte_arr);
     byte_arr = {<<8{{<<32{exp_cfg[1].patt_lower}}}};
@@ -126,22 +119,28 @@ class top_chip_dv_pattgen_vseq extends top_chip_dv_base_vseq;
       `uvm_info(`gfn, $sformatf("PATT_IOS CH1: cfg %p", exp_cfg[1]), UVM_MEDIUM)
     end
 
+    // Enable pattgen monitor now we have finished configuring everything
     p_sequencer.cfg.m_pattgen_agent_cfg.en_monitor = 1;
     p_sequencer.cfg.m_pattgen_agent_cfg.chk_prediv = chan_en;
 
-    // Start background checking of data from the monitor in pattgen_agent
-    foreach (p_sequencer.pattgen_rx_fifo[i]) begin
-      automatic int j = i;
-      fork begin
-        forever process_pattgen_data(j);
-      end join_none
-    end
+    // Let software configure pattgen and tell us when it is done so we can
+    // check the output from the monitor - see post_start().
+  endtask
 
+  virtual task post_start();
     // Wait for the software to tell us the pattgen has finished outputting
-    wait_for_sw_test_done();
+    super.post_start();
+
+    // Tell the pattgen monitor that SW thinks the channels are done and
+    // prevent it from starting again.
+    p_sequencer.cfg.m_pattgen_agent_cfg.en_monitor = 0;
     p_sequencer.cfg.m_pattgen_agent_cfg.channel_done = chan_en;
 
-    `uvm_info(`gfn, "TEST: body done", UVM_HIGH)
+    // Check the monitor output (will stall if didn't get enough bits)
+    foreach (p_sequencer.pattgen_rx_fifo[i]) begin
+      automatic int j = i;
+      if (chan_en[i]) process_pattgen_data(j);
+    end
   endtask
 
   // Collect pattgen_item from pattgen agent and check with expected pattern.
@@ -164,10 +163,5 @@ class top_chip_dv_pattgen_vseq extends top_chip_dv_base_vseq;
       end
       iter++;
     end
-  endtask
-
-  // Override `post_start()` from base class to avoid calling
-  // `wait_for_sw_test_done()` twice.
-  virtual task post_start();
   endtask
 endclass // top_chip_dv_pattgen_vseq
