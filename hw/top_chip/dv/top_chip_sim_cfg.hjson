@@ -135,7 +135,7 @@
   regressions: [
     {
       name: smoke
-      tests: ["top_chip_smoke", "top_usbdev_smoke"]
+      tests: ["top_chip_smoke", "top_pattgen_smoke", "top_uart_smoke", "top_usbdev_smoke"]
     }
   ]
 }
