@@ -109,9 +109,10 @@ interface sw_logger_if #(
     string sw_dir;
     string sw_basename;
     if (_ready) `dv_fatal("This function cannot be called after calling ready()")
+    sw_dir = str_utils_pkg::str_path_dirname(.filename(sw_image));
     sw_basename = str_utils_pkg::str_path_basename(.filename(sw_image), .drop_extn(1'b1));
-    sw_log_db_files[sw_basename] = {sw_basename, ".logs.txt"};
-    sw_rodata_db_files[sw_basename] = {sw_basename, ".rodata.txt"};
+    sw_log_db_files[sw_basename] = {sw_dir, "/", sw_basename, ".logs.txt"};
+    sw_rodata_db_files[sw_basename] = {sw_dir, "/", sw_basename, ".rodata.txt"};
   endfunction
 
   // signal to indicate that this monitor is good to go - all initializations are done
@@ -383,6 +384,8 @@ interface sw_logger_if #(
           join
           if (rst_occurred) continue;
           print_sw_log(sw_logs[sw][addr]);
+        end else begin
+          `dv_info($sformatf("No log entry matches addr %0h", addr), UVM_LOW)
         end
       end
     end
