@@ -11,6 +11,7 @@ class top_chip_dv_env_cfg extends uvm_object;
   virtual sw_test_status_if sw_test_status_vif;
 
   // External interface agent configs
+  rand i2c_agent_cfg     m_i2c_agent_cfgs[NI2cs];
   rand pattgen_agent_cfg m_pattgen_agent_cfg;
   rand uart_agent_cfg    m_uart_agent_cfgs[NUarts];
 
@@ -23,6 +24,13 @@ class top_chip_dv_env_cfg extends uvm_object;
 
   virtual function void initialize();
     get_mem_image_files_from_plusargs();
+
+    // create i2c agent config obj
+    foreach (m_i2c_agent_cfgs[i]) begin
+      m_i2c_agent_cfgs[i] = i2c_agent_cfg::type_id::create($sformatf("m_i2c_agent_cfg%0d", i));
+      // Set default monitor enable to zero for shared io agents.
+      m_i2c_agent_cfgs[i].en_monitor = 1'b0;
+    end
 
     // create pattgen agent config obj
     m_pattgen_agent_cfg = pattgen_agent_cfg::type_id::create("m_pattgen_agent_cfg");

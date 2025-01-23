@@ -184,6 +184,15 @@ module top_chip_asic_tb;
     IO0
   });
 
+  // Create and connect I^2C agent interfaces.
+  // Need to use port connections due to bidirectionality
+  i2c_if i2c_if[NI2cs](
+    .clk_i(peri_clk_if.clk),    // shared with all instances
+    .rst_ni(peri_clk_if.rst_n), // shared with all instances
+    .sda_io({IO34, IO32})  // {i2c1, i2c0}
+    .scl_io({IO35, IO33}), // {i2c1, i2c0}
+  );
+
   // Create and connect pattgen agent interface
   pattgen_if#(NUM_PATTGEN_CHANNELS) pattgen_if();
   assign pattgen_if.clk_i  = peri_clk_if.clk; // u_dut.u_top_chip_system.u_pattgen.clk_i
@@ -318,6 +327,12 @@ module top_chip_asic_tb;
 
     run_test();
   end
+
+  for (genvar i = 0; i < NI2cs; i++) begin : gen_i2c_if_set
+    initial begin
+      uvm_config_db#(virtual i2c_if)::set(null, $sformatf("*.env.m_i2c_agent%0d*", i), "vif", i2c_if[i]);
+    end
+  end : gen_i2c_if_set
 
   for (genvar i = 0; i < NUarts; i++) begin : gen_uart_if_set
     initial begin
