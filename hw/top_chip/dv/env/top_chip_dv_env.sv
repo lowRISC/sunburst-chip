@@ -14,6 +14,7 @@ class top_chip_dv_env extends uvm_env;
   mem_bkdr_util mem_bkdr_util_h[chip_mem_e];
 
   // Agents
+  i2c_agent     m_i2c_agents[NI2cs];
   pattgen_agent m_pattgen_agent;
   uart_agent    m_uart_agents[NUarts];
 
@@ -59,6 +60,12 @@ class top_chip_dv_env extends uvm_env;
       `uvm_fatal(`gfn, "Cannot get gpio_pins_vif")
     end
 
+    // Instantiate I^2C agents
+    foreach (m_i2c_agents[i]) begin
+      m_i2c_agents[i] = i2c_agent::type_id::create($sformatf("m_i2c_agent%0d", i), this);
+      uvm_config_db#(i2c_agent_cfg)::set(this, $sformatf("m_i2c_agent%0d*", i), "cfg",cfg.m_i2c_agent_cfgs[i]);
+    end
+
     // Instantiate pattgen agent
     m_pattgen_agent = pattgen_agent::type_id::create("m_pattgen_agent", this);
     uvm_config_db#(pattgen_agent_cfg)::set(this, "m_pattgen_agent*", "cfg", cfg.m_pattgen_agent_cfg);
@@ -82,12 +89,18 @@ class top_chip_dv_env extends uvm_env;
     super.connect_phase(phase);
     // Track specific agent sequencers in the virtual sequencer.
     // Allows virtual sequences to use the agents to drive RX items.
+    foreach (m_i2c_agents[i]) begin
+      virtual_sequencer.i2c_sequencer_hs[i] = m_i2c_agents[i].sequencer;
+    end
     foreach (m_uart_agents[i]) begin
       virtual_sequencer.uart_sequencer_hs[i] = m_uart_agents[i].sequencer;
     end
 
     // Connect monitor outputs to matching FIFOs in the virtual sequencer.
     // Allows virtual sequences to check TX items.
+    foreach (m_i2c_agents[i]) begin
+      m_i2c_agents[i].monitor.controller_mode_rd_item_port.connect(virtual_sequencer.i2c_rd_fifos[i].analysis_export);
+    end
     for (int i = 0; i < NUM_PATTGEN_CHANNELS; i++) begin
       m_pattgen_agent.monitor.item_port[i].connect(virtual_sequencer.pattgen_rx_fifo[i].analysis_export);
     end
