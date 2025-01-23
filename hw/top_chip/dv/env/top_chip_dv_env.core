@@ -13,6 +13,7 @@ filesets:
       - lowrisc:dv:sw_test_status
       - lowrisc:dv:sw_logger_if
       - lowrisc:dv:mem_bkdr_util
+      - lowrisc:dv:i2c_agent
       - lowrisc:dv:pattgen_agent
       - lowrisc:dv:uart_agent
       - lowrisc:dv:pins_if

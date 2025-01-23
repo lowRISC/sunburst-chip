@@ -6,6 +6,7 @@ package top_chip_dv_env_pkg;
   import uvm_pkg::*;
   import dv_utils_pkg::*;
   import mem_bkdr_util_pkg::*;
+  import i2c_agent_pkg::*;
   import pattgen_agent_pkg::*;
   import uart_agent_pkg::*;
 
@@ -20,6 +21,7 @@ package top_chip_dv_env_pkg;
   } chip_mem_e;
 
   localparam int unsigned NGpioPins = 32;
+  localparam int unsigned NI2cs = 2;
   localparam int unsigned NUarts = 2;
   localparam int unsigned UartDpiBaud = 1_500_000;
 

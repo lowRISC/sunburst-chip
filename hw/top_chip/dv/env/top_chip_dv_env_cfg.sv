@@ -6,11 +6,16 @@ class top_chip_dv_env_cfg extends uvm_object;
   string mem_image_files[chip_mem_e];
   longint unsigned sys_timeout_cycles = 20_000_000;
 
+  // DV CDC enable - used in top_chip_dv_i2c_host_tx_rx_vseq.
+  // TODO: Add some way to control this? Randomise for now.
+  rand bit en_dv_cdc;
+
   // Software logging & status interfaces
   virtual sw_logger_if      sw_logger_vif;
   virtual sw_test_status_if sw_test_status_vif;
 
   // External interface agent configs
+  rand i2c_agent_cfg     m_i2c_agent_cfgs[NI2cs];
   rand pattgen_agent_cfg m_pattgen_agent_cfg;
   rand uart_agent_cfg    m_uart_agent_cfgs[NUarts];
 
@@ -23,6 +28,13 @@ class top_chip_dv_env_cfg extends uvm_object;
 
   virtual function void initialize();
     get_mem_image_files_from_plusargs();
+
+    // create i2c agent config obj
+    foreach (m_i2c_agent_cfgs[i]) begin
+      m_i2c_agent_cfgs[i] = i2c_agent_cfg::type_id::create($sformatf("m_i2c_agent_cfg%0d", i));
+      // Set default monitor enable to zero for shared io agents.
+      m_i2c_agent_cfgs[i].en_monitor = 1'b0;
+    end
 
     // create pattgen agent config obj
     m_pattgen_agent_cfg = pattgen_agent_cfg::type_id::create("m_pattgen_agent_cfg");
