@@ -89,8 +89,7 @@ static status_t i2c_detach_instance(uint8_t i2c_instance) {
 
 static status_t i2c_configure_instance(uint8_t i2c_instance) {
   const uintptr_t kI2cBaseAddrTable[] = {TOP_CHIP_I2C0_BASE_ADDR,
-                                         TOP_CHIP_I2C1_BASE_ADDR,
-                                         TOP_CHIP_I2C2_BASE_ADDR};
+                                         TOP_CHIP_I2C1_BASE_ADDR};
   LOG_INFO("%d", i2c_instance);
   TRY_CHECK(i2c_instance < ARRAYSIZE(kI2cBaseAddrTable));
 

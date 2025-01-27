@@ -96,14 +96,7 @@ const i2c_conf_t i2c_configuration[] = {
                    kTopChipPlicIrqIdI2c1TxStretch,
                    kTopChipPlicIrqIdI2c1AcqStretch,
                    kTopChipPlicIrqIdI2c1UnexpStop,
-                   kTopChipPlicIrqIdI2c1HostTimeout}},
-    {.base_addr = TOP_CHIP_I2C2_BASE_ADDR,
-     .i2c_irq_fmt_threshold_id = kTopChipPlicIrqIdI2c2FmtThreshold,
-     .plic_irqs = {kTopChipPlicIrqIdI2c2CmdComplete,
-                   kTopChipPlicIrqIdI2c2TxStretch,
-                   kTopChipPlicIrqIdI2c2AcqStretch,
-                   kTopChipPlicIrqIdI2c2UnexpStop,
-                   kTopChipPlicIrqIdI2c2HostTimeout}}};
+                   kTopChipPlicIrqIdI2c1HostTimeout}}};
 
 /**
  * Provides external irq handling for this test.
