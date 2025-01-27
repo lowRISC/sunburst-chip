@@ -45,7 +45,8 @@ static void handle_uart_isr(const dif_rv_plic_irq_id_t interrupt_id) {
       uart_irq = kDifUartIrqRxOverflow;
       uart_rx_overflow_handled = true;
       break;
-    case kTopChipPlicIrqIdUart0TxDone:
+    // TODO: Sunburst - This code needs changing to consult the IP block registers now.
+    // case kTopChipPlicIrqIdUart0TxDone:
       CHECK(!uart_tx_done_handled, "UART TX done IRQ asserted more than once");
 
       uart_irq = kDifUartIrqTxDone;

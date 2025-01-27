@@ -18,11 +18,9 @@
 #include "hw/top_chip/sw/autogen/top_chip.h"
 
 static const uint8_t kSendData[] = "UART baud test!";
-static const uint32_t kBaseAddrs[4] = {
+static const uint32_t kBaseAddrs[2] = {
     TOP_CHIP_UART0_BASE_ADDR,
     TOP_CHIP_UART1_BASE_ADDR,
-    TOP_CHIP_UART2_BASE_ADDR,
-    TOP_CHIP_UART3_BASE_ADDR,
 };
 static const uint32_t kBauds[11] = {
     4800, 9600, 19200, 38400, 57600, 115200, 230400, 128000, 256000, 1000000,

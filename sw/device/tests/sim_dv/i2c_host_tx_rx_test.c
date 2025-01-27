@@ -203,36 +203,6 @@ void config_i2c_with_index(void) {
                                             kTopChipPinmuxMioOutIob10,
                                             kTopChipPinmuxOutselI2c1Sda));
       break;
-    case 2:
-      i2c_base_addr = TOP_CHIP_I2C2_BASE_ADDR;
-      i2c_irq_fmt_threshold_id = kTopChipPlicIrqIdI2c2FmtThreshold;
-
-      plic_irqs[i++] = kTopChipPlicIrqIdI2c2FmtThreshold;
-      plic_irqs[i++] = kTopChipPlicIrqIdI2c2RxThreshold;
-      plic_irqs[i++] = kTopChipPlicIrqIdI2c2RxOverflow;
-      plic_irqs[i++] = kTopChipPlicIrqIdI2c2ControllerHalt;
-      plic_irqs[i++] = kTopChipPlicIrqIdI2c2SclInterference;
-      plic_irqs[i++] = kTopChipPlicIrqIdI2c2SdaInterference;
-      plic_irqs[i++] = kTopChipPlicIrqIdI2c2StretchTimeout;
-      // TODO, leave out sda unstable for now until DV side is improved. Sda
-      // instability during the high cycle is intentionally being introduced
-      // right now.
-      // plic_irqs[i++] = kTopChipPlicIrqIdI2c2SdaUnstable;
-      plic_irqs[i++] = kTopChipPlicIrqIdI2c2CmdComplete;
-
-      CHECK_DIF_OK(dif_pinmux_input_select(
-          &pinmux, kTopChipPinmuxPeripheralInI2c2Scl,
-          kTopChipPinmuxInselIob11));
-      CHECK_DIF_OK(dif_pinmux_input_select(
-          &pinmux, kTopChipPinmuxPeripheralInI2c2Sda,
-          kTopChipPinmuxInselIob12));
-      CHECK_DIF_OK(dif_pinmux_output_select(&pinmux,
-                                            kTopChipPinmuxMioOutIob11,
-                                            kTopChipPinmuxOutselI2c2Scl));
-      CHECK_DIF_OK(dif_pinmux_output_select(&pinmux,
-                                            kTopChipPinmuxMioOutIob12,
-                                            kTopChipPinmuxOutselI2c2Sda));
-      break;
     default:
       LOG_FATAL("Unsupported i2c index %d", kI2cIdx);
   }

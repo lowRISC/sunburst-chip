@@ -134,7 +134,8 @@ void ottf_external_isr(uint32_t *exc_info) {
       CHECK_DIF_OK(
           dif_pattgen_irq_acknowledge(&pattgen, kDifPattgenIrqDoneCh0));
       break;
-    case kTopChipPlicIrqIdPattgenDoneCh1:
+    // TODO: Sunburst - This code needs changing to consult the IP block registers now.
+    // case kTopChipPlicIrqIdPattgenDoneCh1:
       channel_fired |= 1 << 1;
       LOG_INFO("Channel 1");
       // Check the expected interrupt is triggered.

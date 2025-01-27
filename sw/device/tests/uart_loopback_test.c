@@ -15,11 +15,9 @@
 #include "hw/top_chip/sw/autogen/top_chip.h"
 
 static const uint8_t kSendData[] = "Loopback test!";
-static const uint32_t kBaseAddrs[4] = {
+static const uint32_t kBaseAddrs[2] = {
     TOP_CHIP_UART0_BASE_ADDR,
     TOP_CHIP_UART1_BASE_ADDR,
-    TOP_CHIP_UART2_BASE_ADDR,
-    TOP_CHIP_UART3_BASE_ADDR,
 };
 enum {
   kTestTimeoutMicros = 1000000,
