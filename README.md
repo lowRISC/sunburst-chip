@@ -150,3 +150,44 @@ command options.
 # Run usbdev smoke regression
 ./hw/vendor/lowrisc_ip/util/dvsim/dvsim.py ./hw/vendor/lowrisc_ip/ip/usbdev/dv/usbdev_sim_cfg.hjson -i smoke --tool xcelium
 ```
+
+## Building and running top-level software tests
+
+The top-level tests imported from the OpenTitan project may be used to perform to test
+the integrated IP blocks at top/chip-level. In order to build these top-level tests a
+suitable CHERIoT toolchain must be available on your path or specified by the `CHERIOT_LLVM_BIN`
+environment variable.
+
+The software for these tests is located in the directory `/sw/device` and may be built using the
+following commands from the project root directory:
+
+```sh
+# export CHERIOT_LLVM_BIN=/path/to/cheriot-llvm/bin
+cmake -B sw/device/build -S sw/device
+cmake --build sw/device/build
+```
+
+Examples of how to run these tests using Verilator and xcelium are shown below:
+
+### Verilator simulation of top-level `usbdev_vbus_test`
+
+```sh
+build/lowrisc_sunburst_top_chip_verilator_0/sim-verilator/Vtop_chip_verilator \
+  -E ./sw/device/build/tests/usbdev_vbus_test
+```
+
+Please note that presently the following USBDEV tests work only in Xcelium simulation and do not
+work with Verilator; this is under investigation.
+
+```
+usbdev_config_host_test
+usbdev_test
+usbdev_stream_test
+usbdev_mixed_test
+usbdev_iso_test
+```
+
+### Xcelium simulation of top-level `usbdev_vbus_test` with dvsim
+```sh
+./hw/vendor/lowrisc_ip/util/dvsim/dvsim.py ./hw/top_chip/dv/top_chip_sim_cfg.hjson -i usbdev_vbus_test
+```
