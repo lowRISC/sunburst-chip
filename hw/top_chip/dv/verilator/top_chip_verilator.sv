@@ -130,6 +130,8 @@ module top_chip_verilator (input logic clk_i, rst_ni);
     .aon_timer_wkup_req_o(),
     .aon_timer_rst_req_o (),
 
+    .usbdev_aon_wkup_req_o(),
+
     .scanmode_i  (prim_mubi_pkg::MuBi4False),
     .ram_1p_cfg_i('0),
     .ram_2p_cfg_i('0),

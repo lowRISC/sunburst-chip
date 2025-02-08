@@ -106,6 +106,9 @@ module top_chip_system #(
   output logic aon_timer_wkup_req_o,
   output logic aon_timer_rst_req_o,
 
+  // USBDEV wakeup request
+  output logic usbdev_aon_wkup_req_o,
+
   // Misc
   input prim_mubi_pkg::mubi4_t        scanmode_i,
   input prim_ram_1p_pkg::ram_1p_cfg_t ram_1p_cfg_i,
@@ -137,6 +140,16 @@ module top_chip_system #(
   top_chip_system_pkg::uart_intr_t uart1_intr;
 
   top_chip_system_pkg::usbdev_intr_t usbdev_intr;
+
+  // Inter-module signals between USBDEV and USBDEV AON/Wake module.
+  logic         usbdev_dp_pullup;
+  logic         usbdev_dn_pullup;
+  logic         usbdev_aon_suspend_req;
+  logic         usbdev_aon_wake_ack;
+  logic         usbdev_aon_bus_reset;
+  logic         usbdev_aon_sense_lost;
+  logic         usbdev_aon_bus_not_idle;
+  logic         usbdev_aon_wake_detect_active;
 
   // Signals for hardware revoker
   logic [127:0] hardware_revoker_control_reg_rdata;
@@ -670,8 +683,8 @@ module top_chip_system #(
     .usb_tx_d_o         (cio_usbdev_tx_d_o),
     .usb_tx_se0_o       (cio_usbdev_tx_se0_o),
     .usb_tx_use_d_se0_o (cio_usbdev_tx_use_d_se0_o),
-    .usb_dp_pullup_o    (cio_usbdev_dp_pullup_o),
-    .usb_dn_pullup_o    (cio_usbdev_dn_pullup_o),
+    .usb_dp_pullup_o    (usbdev_dp_pullup),
+    .usb_dn_pullup_o    (usbdev_dn_pullup),
     .usb_rx_enable_o    (cio_usbdev_rx_enable_o),
 
     // Interrupt
@@ -699,12 +712,12 @@ module top_chip_system #(
     .usb_ref_pulse_o        (), //usbdev_usb_ref_pulse_o),
 
     // AON/Wake functionality not included.
-    .usb_aon_suspend_req_o        (),
-    .usb_aon_wake_ack_o           (),
-    .usb_aon_bus_reset_i          (1'b0),
-    .usb_aon_sense_lost_i         (1'b0),
-    .usb_aon_bus_not_idle_i       (1'b0),
-    .usb_aon_wake_detect_active_i (1'b0),
+    .usb_aon_suspend_req_o        (usbdev_aon_suspend_req),
+    .usb_aon_wake_ack_o           (usbdev_aon_wake_ack),
+    .usb_aon_bus_reset_i          (usbdev_aon_bus_reset),
+    .usb_aon_sense_lost_i         (usbdev_aon_sense_lost),
+    .usb_aon_bus_not_idle_i       (usbdev_aon_bus_not_idle),
+    .usb_aon_wake_detect_active_i (usbdev_aon_wake_detect_active),
 
     // Tilelink
     .tl_i       (tl_usbdev_h2d),
@@ -718,6 +731,34 @@ module top_chip_system #(
 
     // Misc
     .ram_cfg_i  (ram_1p_cfg_i)
+  );
+
+  usbdev_aon_wake u_usbdev_aon_wake (
+    // Input
+    .usb_dp_i                 (cio_usbdev_usb_dp_i),
+    .usb_dn_i                 (cio_usbdev_usb_dn_i),
+    .usb_sense_i              (cio_usbdev_sense_i),
+    .usbdev_dppullup_en_i     (usbdev_dp_pullup),
+    .usbdev_dnpullup_en_i     (usbdev_dn_pullup),
+
+    // Output
+    .usb_dppullup_en_o        (cio_usbdev_dp_pullup_o),
+    .usb_dnpullup_en_o        (cio_usbdev_dn_pullup_o),
+
+    // Inter-module signals
+    .wake_ack_aon_i           (usbdev_aon_wake_ack),
+    .suspend_req_aon_i        (usbdev_aon_suspend_req),
+    .bus_not_idle_aon_o       (usbdev_aon_bus_not_idle),
+    .bus_reset_aon_o          (usbdev_aon_bus_reset),
+    .sense_lost_aon_o         (usbdev_aon_sense_lost),
+    .wake_detect_active_aon_o (usbdev_aon_wake_detect_active),
+
+    // Wakeup request to power management.
+    .wake_req_aon_o           (usbdev_aon_wkup_req_o),
+
+    // Clock and reset connections
+    .clk_aon_i                (clk_aon_i),
+    .rst_aon_ni               (rst_aon_ni)
   );
 
 endmodule
