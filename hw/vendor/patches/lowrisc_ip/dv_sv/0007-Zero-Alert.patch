@@ -1,0 +1,18 @@
+diff --git a/cip_lib/cip_macros.svh b/cip_lib/cip_macros.svh
+index 0fe13a1..e3306e8 100644
+--- a/cip_lib/cip_macros.svh
++++ b/cip_lib/cip_macros.svh
+@@ -10,9 +10,10 @@
+ // Also set each alert_if to uvm_config_db to use in env.
+ `ifndef DV_ALERT_IF_CONNECT
+ `define DV_ALERT_IF_CONNECT(CLK_ = clk, RST_N_ = rst_n) \
+-  alert_esc_if alert_if[NUM_ALERTS](.clk(CLK_), .rst_n(RST_N_)); \
+-  prim_alert_pkg::alert_rx_t [NUM_ALERTS-1:0] alert_rx; \
+-  prim_alert_pkg::alert_tx_t [NUM_ALERTS-1:0] alert_tx; \
++  localparam uint alert_param = (NUM_ALERTS == 0) ? 1 : NUM_ALERTS; \
++  alert_esc_if alert_if[alert_param](.clk(CLK_), .rst_n(RST_N_)); \
++  prim_alert_pkg::alert_rx_t [alert_param-1:0] alert_rx; \
++  prim_alert_pkg::alert_tx_t [alert_param-1:0] alert_tx; \
+   for (genvar k = 0; k < NUM_ALERTS; k++) begin : connect_alerts_pins \
+     assign alert_rx[k] = alert_if[k].alert_rx; \
+     assign alert_if[k].alert_tx = alert_tx[k]; \
