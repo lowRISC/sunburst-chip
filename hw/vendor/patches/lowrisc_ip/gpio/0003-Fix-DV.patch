@@ -17,7 +17,7 @@ diff --git a/dv/gpio_sim_cfg.hjson b/gpio_sim_cfg.hjson
 index 6a8910a..fe53e6e 100644
 --- a/dv/gpio_sim_cfg.hjson
 +++ b/dv/gpio_sim_cfg.hjson
-@@ -25,14 +25,14 @@
+@@ -25,14 +25,13 @@
  
    // Import additional common sim cfg files.
    import_cfgs: [// Project wide common sim cfg file
@@ -31,7 +31,6 @@ index 6a8910a..fe53e6e 100644
 -                "{proj_root}/hw/dv/tools/dvsim/tests/sec_cm_tests.hjson",
 -                "{proj_root}/hw/dv/tools/dvsim/tests/stress_tests.hjson"]
 +                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/csr_tests.hjson",
-+                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/alert_test.hjson",
 +                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/intr_test.hjson",
 +                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/tl_access_tests.hjson",
 +                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/sec_cm_tests.hjson",
