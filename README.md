@@ -294,6 +294,119 @@ The smoke test for each of the blocks can be run using Xcelium with these comman
 
 Like the top-level DVsim tests, artefacts end up under *scratch/* and additional output can be generated using the `-w shm` and `-v h` options.
 
+## Sonata XL board
+
+Sonata XL is an FPGA-based development board developed by [NewAE Technology Inc.](https://www.newae.com/).
+It is a larger sibling of the more common Sonata development board and is intended for emulating sunburst-chip.
+It features an upgraded FPGA and the addition of two 80-pin board-to-board connectors.
+The FPGA in question is an AMD Artix(tm) 7 **XC7A200T**.
+This features over four-times the logic cells and memory, and twice the I/O of the XC7A50T used on the Sonata board.
+
+Sonata XL is an open-source design, like the Sonata board it is based on.
+As of writing, the design files (incl. schematic printout) for Sonata XL can be found in the [`sonata-a200` sub-directory of the sonata-pcb repository](https://github.com/newaetech/sonata-pcb/tree/main/sonata-a200).
+Unlike the Sonata board, Sonata XL boards are not generally available for purchase.
+
+The top-level module for Sonata XL builds is *top_chip_sonata_xl.sv*.
+This modules instantiates the common system, provides a starting partial mapping of the system I/O to some of the FPGA I/O and associated onboard headers/devices, and uses FPGA primitives for basic clock and reset generation.
+
+Unfortunately, the core clock had to be significantly reduced in order to get a reliably timing-clean bitstream build.
+This clock frequency may be able to be increased with some tweaking of the build and improvements to timing-critical logic paths.
+Happily, the other clocks (`peri`pheral, `usb`, `aon`) are able to be run at their intended frequencies, avoiding baud rate issues and the like on the external interfaces.
+
+Note that FuseSoC (the tool used below to build an FPGA bitstream) does not build the test software for you.
+It must have already been compiled using the instructions in the [Test software section](#Test-software) before you run the simulation.
+
+At present, **the only way to load software is to build it into the bitstream**.
+This is controlled with the `--SRAMInitFile` argument to `fusesoc`.
+Sunburst Chip currently lacks a debug module for loading a program into SRAM while live as Sonata does.
+It also (for now) lacks a bootloader, and so cannot load a program from onboard Flash.
+
+### Dependencies
+
+FPGA bitstream builds require AMD Vivado to be installed.
+This is free for the XC7A200T device used on Sonata XL.
+Please find it on AMD's website.
+
+The remaining utilities are optional:
+
+- openFPGALoader: install with `sudo apt install openfpgaloader` then setup udev USB rules as described in the (FPGA development documentation for sonata-system)[https://github.com/lowRISC/sonata-system/blob/main/doc/dev/fpga-development.md].
+- uf2conv: install with `python3 -m pip install git+https://github.com/makerdiary/uf2utils.git`.
+- picocom: install with `sudo apt install picocom`.
+
+### Build
+
+A Sunburst Chip bitstream for Sonata XL can be built using FuseSoC and Vivado using the following command:
+
+```sh
+# -- Build Sonata XL FPGA bitstream from *top_chip_sonata_xl.sv* --
+# Run from the project root directory.
+# NOTE: Vivado must be available on your path.
+fusesoc --cores-root=. run --target=synth --setup --build lowrisc:sunburst:top_chip_sonata_xl \
+  --SRAMInitFile=$PWD/scratch_sw/bare_metal/build/checks/chip_check.vmem
+```
+
+### Load
+
+There are three ways to load a bitstream onto the FPGA of Sonata XL.
+
+- Over USB to the onboard FTDI USB-to-JTAG interface.
+  - Easy, fast, but will have to load again after a power-cycle of the board.
+  - Good for active development of the design.
+- Using an AMD/Xilinx JTAG programmer of your own.
+  - No additional dependencies (use Vivado), but also will have to load again after a power cycle.
+  - Note: DIP switches on the underside of the board must be changed in order to use the JTAG headers.
+- Saving a bitstream converted to UF2 format to the onboard flash via the onboard RP2040.
+  - More time consuming, but will be retained across power-cycles.
+  - Good for development of the software or for demos.
+  - Can store up to three bitstreams, selectable using the onboard "Bitstream" switch.
+
+A bitstream can be directly loaded over USB using the following command:
+
+```sh
+# -- Program the Sonata XL FPGA with a bitstream we built earlier --
+# Run from the project root directory.
+# NOTE: host must be connected to Sonata XL via the "Main USB" connector and
+#       on Linux the required USB rules must have been applied.
+openFPGALoader -c ft4232 build/lowrisc_sunburst_top_chip_sonata_xl_0/synth-vivado/lowrisc_sunburst_top_chip_sonata_xl_0.bit
+```
+
+A standalone AMD/Xilinx JTAG programmer may be able to be used from Vivado or using a command similar to that above.
+
+Non-volatile loading using Sonata firmware on the RP2040 can be done using the following commands:
+
+```sh
+# -- Load onboard flash with a bitstream we built earlier --
+# Run from the project root directory.
+# NOTE: host must be connected to Sonata XL via the "Main USB" connector and
+#       the onboard RP2040 must be running Sonata firmware.
+
+# Convert bitstream to UF2 format for the RP2040 firmware.
+uf2conv -b 0x00000000 -f 0x6ce29e6b build/lowrisc_sunburst_top_chip_sonata_xl_0/synth-vivado/lowrisc_sunburst_top_chip_sonata_xl_0.bit -co sonata-xl.bit.slot1.uf2
+uf2conv -b 0x10000000 -f 0x6ce29e6b build/lowrisc_sunburst_top_chip_sonata_xl_0/synth-vivado/lowrisc_sunburst_top_chip_sonata_xl_0.bit -co sonata-xl.bit.slot2.uf2
+uf2conv -b 0x20000000 -f 0x6ce29e6b build/lowrisc_sunburst_top_chip_sonata_xl_0/synth-vivado/lowrisc_sunburst_top_chip_sonata_xl_0.bit -co sonata-xl.bit.slot3.uf2
+
+# Load into slot1 of the connected Sonata XL board.
+# This should take half a minute or so.
+# If you do not see a SONATA drive, you may need to update the RP2040 firmware
+# (see https://github.com/lowRISC/sonata-system/releases).
+cp sonata-xl.bit.slot1.uf2 "/media/$USER/SONATA/"
+```
+
+### Output
+
+UART logging output can be received from the FTDI UART-to-USB interface.
+This typically appears at `/dev/ttyUSB2`.
+The default baud rate for test software is 1.5 Mbaud.
+
+An example terminal utility is `picocom`, which can be used with the following command:
+
+```sh
+# -- Connect to Sonata XL UART --
+# NOTE: host must be connected to Sonata XL via the "Main USB" connector.
+picocom /dev/ttyUSB2 -b 1500000 --imap lfcrlf
+# To quit: CTRL-a then CTRL-x
+```
+
 ## Vendoring
 
 Newer versions of vendored code, or new patches, can be vendored in using the following command:

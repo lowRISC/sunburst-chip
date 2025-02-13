@@ -93,5 +93,5 @@ extern "C" void entry_point(void *rwRoot) {
   // Signal test end to UVM testbench
   gpio->set_out_direct(0xDEADBEEF);
 
-  while (true);
+  while (true) asm volatile("wfi");
 }

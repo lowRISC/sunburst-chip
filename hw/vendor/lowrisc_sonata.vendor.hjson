@@ -12,5 +12,9 @@
 
     mapping: [
         {from: "rtl/ip/rev_ctl", to: "rtl/ip/rev_ctl"},
+
+        {from: "rtl/system/debounce.sv", to: "rtl/fpga/debounce.sv"},
+        {from: "rtl/fpga/padring.sv", to: "rtl/fpga/padring.sv"},
+        {from: "rtl/fpga/rst_ctrl.sv", to: "rtl/fpga/rst_ctrl.sv"},
     ],
 }

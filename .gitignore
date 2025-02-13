@@ -14,3 +14,5 @@ xrun.history
 *.log
 *.fst
 *.shm
+*.jou
+*.str

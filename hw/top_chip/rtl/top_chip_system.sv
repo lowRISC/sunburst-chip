@@ -3,6 +3,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 module top_chip_system #(
+  // TODO: Remove SRAMInitFile when have an alt way to load programs into FPGA
+  parameter     SRAMInitFile = "",
   // parameters for gpio
   parameter bit GpioGpioAsyncOn = 1,
   // parameters for i2c0
@@ -124,9 +126,9 @@ module top_chip_system #(
   logic [31:0] gpio_intr;
 
   top_chip_system_pkg::aon_timer_intr_t aon_timer_intr;
-  logic                                 aon_timer_nmi_wdog_timer_bark;
+  logic aon_timer_nmi_wdog_timer_bark, aon_timer_nmi_wdog_timer_bark_sync;
 
-  logic rv_timer_intr;
+  logic rv_timer_intr, rv_timer_intr_sync;
 
   top_chip_system_pkg::i2c_intr_t i2c0_intr;
   top_chip_system_pkg::i2c_intr_t i2c1_intr;
@@ -249,15 +251,17 @@ module top_chip_system #(
     .boot_addr_i(tl_main_pkg::ADDR_SPACE_SRAM),
 
     .irq_software_i(rv_plic_msip),
-    .irq_timer_i   (rv_timer_intr),
+    .irq_timer_i   (rv_timer_intr_sync),
     .irq_external_i(rv_plic_irq),
     .irq_fast_i    ('0),
-    .irq_nm_i      (aon_timer_nmi_wdog_timer_bark),
+    .irq_nm_i      (aon_timer_nmi_wdog_timer_bark_sync),
 
     .ram_2p_cfg_i
   );
 
   sram #(
+    // TODO: Remove SRAMInitFile when have an alt way to load programs into FPGA
+    .InitFile(SRAMInitFile),
     .AddrWidth(SRAMAddrWidth)
   ) u_sram (
     .clk_i (clk_sys_i),
@@ -384,6 +388,16 @@ module top_chip_system #(
     .rst_aon_ni(rst_aon_ni)
   );
 
+  // Synchronize to fast Ibex clock domain
+  prim_flop_2sync #(
+    .Width(1)
+  ) u_wdog_nmi_sync (
+    .clk_i(clk_sys_i),
+    .rst_ni(rst_sys_ni),
+    .d_i(aon_timer_nmi_wdog_timer_bark),
+    .q_o(aon_timer_nmi_wdog_timer_bark_sync)
+  );
+
   rv_timer u_rv_timer (
     // Interrupt
     .intr_timer_expired_hart0_timer0_o(rv_timer_intr),
@@ -395,6 +409,17 @@ module top_chip_system #(
     // Clock and reset connections
     .clk_i (clk_peri_i),
     .rst_ni(rst_peri_ni)
+  );
+
+  // Timer interrupts do not come from rv_plic and may not be synchronous
+  // to the ibex core.
+  prim_flop_2sync #(
+    .Width(1)
+  ) u_intr_timer_sync (
+    .clk_i(clk_sys_i),
+    .rst_ni(rst_sys_ni),
+    .d_i(rv_timer_intr),
+    .q_o(rv_timer_intr_sync)
   );
 
   gpio #(
