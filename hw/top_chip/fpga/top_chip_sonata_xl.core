@@ -1,0 +1,75 @@
+CAPI=2:
+# Copyright lowRISC contributors (Sunburst project).
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+name: "lowrisc:sunburst:top_chip_sonata_xl"
+description: "Sonata XL FPGA implementation of Sunburst chip"
+filesets:
+  files_rtl:
+    depend:
+      - lowrisc:prim:mubi
+      - lowrisc:sunburst:top_chip_system
+
+  files_sonata_xl:
+    depend:
+      - lowrisc:ibex:fpga_xilinx_shared
+      - lowrisc:sunburst:top_chip_system_pkg
+      - lowrisc:sunburst:sonata_fpga
+    files:
+      - rtl/top_chip_sonata_xl_pkg.sv
+      - rtl/top_chip_sonata_xl.sv
+      - rtl/clk_rst_gen_sonata_xl.sv
+    file_type: systemVerilogSource
+
+  files_constraints_sonata:
+    files:
+      # Per AMD advice (UG949):
+      - data/pins_sonata_xl.xdc  # 1 file for physical +
+      - data/synth_timing.xdc # 1 file for timing (synthesis) +
+      - data/impl_timing.xdc  # 1 file for timing (implementation)
+    file_type: xdc
+
+  files_tcl:
+    files:
+      - flow/vivado_setup.tcl : { file_type: tclSource }
+      - flow/vivado_hook_opt_design_pre.tcl : { file_type: user, copyto: vivado_hook_opt_design_pre.tcl }
+      - flow/vivado_hook_route_design_pre.tcl : { file_type: user, copyto: vivado_hook_route_design_pre.tcl }
+
+parameters:
+  # XXX: This parameter needs to be absolute, or relative to the *.runs/synth_1
+  # directory. It's best to pass it as absolute path when invoking fusesoc, e.g.
+  # --SRAMInitFile=$PWD/scratch_sw/bare_metal/build/checks/chip_check.vmem
+  # XXX: The VMEM file should be added to the sources of the Vivado project to
+  # make the Vivado dependency tracking work. However this requires changes to
+  # fusesoc first.
+  SRAMInitFile:
+    datatype: str
+    description: SRAM initialization file in vmem hex format
+    default: "../../../../../scratch_sw/bare_metal/build/checks/chip_check.vmem"
+    paramtype: vlogparam
+
+  # For value definition, please see ip/prim/rtl/prim_pkg.sv
+  PRIM_DEFAULT_IMPL:
+    datatype: str
+    paramtype: vlogdefine
+    description: Primitives implementation to use, e.g. "prim_pkg::ImplGeneric".
+
+targets:
+  default: &default_target
+    filesets:
+      - files_rtl
+
+  synth:
+    <<: *default_target
+    default_tool: vivado
+    filesets_append:
+      - files_sonata_xl
+      - files_constraints_sonata
+      - files_tcl
+    toplevel: top_chip_sonata_xl
+    tools:
+      vivado:
+        part: "xc7a200tfbg676-2" # Sonata XL v0.2
+    parameters:
+      - SRAMInitFile
+      - PRIM_DEFAULT_IMPL=prim_pkg::ImplXilinx
