@@ -1,0 +1,63 @@
+diff --git a/dv/env/pwm_env_pkg.sv b/dv/env/pwm_env_pkg.sv
+index 6121d17..f48d5f7 100644
+--- a/dv/env/pwm_env_pkg.sv
++++ b/dv/env/pwm_env_pkg.sv
+@@ -24,8 +24,8 @@ package pwm_env_pkg;
+ 
+   // parameters
+   // alerts
+-  parameter uint NUM_ALERTS = 1;
+-  parameter string LIST_OF_ALERTS[] = {"fatal_fault"};
++  parameter uint NUM_ALERTS = 0;
++  parameter string LIST_OF_ALERTS[] = {};
+   parameter bit [31:0] MAX_32 = 32'hFFFF_FFFF;
+   parameter bit [15:0] MAX_16 = 16'hFFFF;
+   parameter bit [26:0] MAX_27 = 27'h7FF_FFFF;
+diff --git a/dv/pwm_sim_cfg.hjson b/dv/pwm_sim_cfg.hjson
+index 44503dc..efd204e 100644
+--- a/dv/pwm_sim_cfg.hjson
++++ b/dv/pwm_sim_cfg.hjson
+@@ -25,14 +25,13 @@
+ 
+   // Import additional common sim cfg files.
+   import_cfgs: [// Project wide common sim cfg file
+-                "{proj_root}/hw/dv/tools/dvsim/common_sim_cfg.hjson",
++                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/common_sim_cfg.hjson",
+                 // Common CIP test lists
+-                "{proj_root}/hw/dv/tools/dvsim/tests/csr_tests.hjson",
+-                "{proj_root}/hw/dv/tools/dvsim/tests/alert_test.hjson",
+-                "{proj_root}/hw/dv/tools/dvsim/tests/intr_test.hjson",
+-                //"{proj_root}/hw/dv/tools/dvsim/tests/stress_tests.hjson",
+-                "{proj_root}/hw/dv/tools/dvsim/tests/sec_cm_tests.hjson",
+-                "{proj_root}/hw/dv/tools/dvsim/tests/tl_access_tests.hjson"]
++                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/csr_tests.hjson",
++                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/intr_test.hjson",
++                //"{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/stress_tests.hjson",
++                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/sec_cm_tests.hjson",
++                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/tl_access_tests.hjson"]
+ 
+   // Add additional tops for simulation.
+   sim_tops: ["pwm_bind", "pwm_cov_bind", "sec_cm_prim_onehot_check_bind"]
+diff --git a/dv/tb.sv b/dv/tb.sv
+index 5f007e8..d6e2e42 100644
+--- a/dv/tb.sv
++++ b/dv/tb.sv
+@@ -31,6 +31,8 @@ module tb;
+ 
+   `DV_ALERT_IF_CONNECT()
+ 
++  assign alert_tx = '0;
++
+   // dut
+   pwm dut (
+     .clk_i         (clk),
+@@ -42,9 +44,6 @@ module tb;
+     .tl_i          (tl_if.h2d),
+     .tl_o          (tl_if.d2h),
+ 
+-    .alert_rx_i    (alert_rx),
+-    .alert_tx_o    (alert_tx),
+-
+     .cio_pwm_o     (cio_pwm),
+     .cio_pwm_en_o  (cio_pwm_en)
+   );
