@@ -3,8 +3,9 @@
 **Sunburst Chip** is an open-source microcontroller chip design based around the CHERI-enabled [CHERIoT Ibex](https://github.com/microsoft/CherIoT-ibex) RISC-V core.
 
 This repository hosts the logical design, verification environment, and associated bare-metal test software for Sunburst Chip.
+It has been put together by (lowRISC C.I.C.)[https://lowrisc.org/].
 
-Sonata is part of the [Sunburst Project](https://www.sunburst-project.org) funded by [UKRI](https://www.ukri.org/) / [DSbD](https://www.dsbd.tech/) under grant number 107540.
+Sunburst Chip is part of the [Sunburst Project](https://www.sunburst-project.org) funded by [UKRI](https://www.ukri.org/) / [DSbD](https://www.dsbd.tech/) under grant number 107540.
 
 ## Overview
 
@@ -61,13 +62,14 @@ These tests can also be grouped together into regression sets for easy access.
 [FuseSoC](https://github.com/olofk/fusesoc) is used to handle hardware related build tasks.
 It can build [Verilator](https://verilator.org/) simulations directly and is used by the [DVsim](https://opentitan.org/book/util/dvsim) tool to generate file lists that DVsim uses to build simulations.
 We use a [lowRISC specific fork of FuseSoC](https://github.com/lowRISC/fusesoc/tree/ot-dev) (which was created to handle primitive generation in the early days of OpenTitan).
-DVsim itself also has various python dependencies.
+DVsim itself also has various Python dependencies.
 Pip can be used with the `python-requirements.txt` file to install FuseSoC and the DVsim dependencies.
 The version in this repository is just a copy of the OpenTitan file, so likely contains extra dependencies that aren't required.
 You may wish to install the dependencies in a virtual environment to isolate them from the rest of your system.
 Python 3.9 or higher is required.
 
 Some packages that you'll need to install to set up the Python environment:
+
 - libxml2-dev
 - libxslt-dev
 - Cargo, which you can install using [rustup](https://rustup.rs/)
@@ -179,10 +181,10 @@ Artefacts from a test run are put into a sub-directory of the *scratch/* directo
 The exact location will follow the format `scratch/top_chip_asic.sim.xcelium/<branch>/<seed>.<test>/latest/`.
 Typical artefacts include:
 
- - *trace_core_00000000.log* - The instruction trace.
- - *uart0.log* - The output from uart0.
- - *run.log* - The log from the simulation run.
- - *waves.shm* - The wave trace (only present when DVsim is run with `-w shm`).
+- *trace_core_00000000.log* - The instruction trace.
+- *uart0.log* - The output from uart0.
+- *run.log* - The log from the simulation run.
+- *waves.shm* - The wave trace (only present when DVsim is run with `-w shm`).
 
 
 Additional output, useful for debugging, can be generated using some optional arguments:
@@ -198,7 +200,7 @@ However, it does have limitations, particularly when it comes to external interf
 It lacks UVM, and as such has to run without most of the DV environment required to check and drive many of the external interfaces.
 It also only supports 2-state simulation (0/1), lacking the high-impedance (Z) and undefined (X) states, and so cannot simulate the more complex electrical behaviour seen on multi-controller external buses (e.g. I^2C).
 
-Note that fusesoc (the tool used below to build Verilator) does not build the test software for you.
+Note that FuseSoC (the tool used below to build Verilator) does not build the test software for you.
 It must have already been compiled using the instructions in the [Test software section](#Test-software) before you run the simulation.
 
 ### Build
@@ -220,7 +222,7 @@ To enable instruction tracing add `+define+RVFI` to the `verilator_options` swit
 
 ### Run
 
-Programs can be run with the resulting executable using the following commands:
+Programs can be run with the resulting executable using the following command:
 
 ```sh
 # -- Run `usbdev_vbus_test` using a Verilator simulator we built earlier --
@@ -234,10 +236,10 @@ build/lowrisc_sunburst_top_chip_verilator_0/sim-verilator/Vtop_chip_verilator \
 
 Unlike DVsim, the simulation output files end up in the directory the executable was called from.
 
-For most test programs, you should see something in the resulting *uart0.log* file.
+For most test programs, you should see something in the resulting *uart0.log* or *usb0.log* files.
 The simulation should terminate itself with the final output looking something like this:
 
-```
+```log
 - ../src/lowrisc_sunburst_top_chip_verilator_0/top_chip_verilator.sv:217: Verilog $finish
 Received $finish() from Verilog, shutting down simulation.
 
