@@ -31,6 +31,8 @@ module tb;
 
   `DV_ALERT_IF_CONNECT()
 
+  assign alert_tx = '0;
+
   // dut
   pwm dut (
     .clk_i         (clk),
@@ -41,9 +43,6 @@ module tb;
 
     .tl_i          (tl_if.h2d),
     .tl_o          (tl_if.d2h),
-
-    .alert_rx_i    (alert_rx),
-    .alert_tx_o    (alert_tx),
 
     .cio_pwm_o     (cio_pwm),
     .cio_pwm_en_o  (cio_pwm_en)

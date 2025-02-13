@@ -24,8 +24,8 @@ package pwm_env_pkg;
 
   // parameters
   // alerts
-  parameter uint NUM_ALERTS = 1;
-  parameter string LIST_OF_ALERTS[] = {"fatal_fault"};
+  parameter uint NUM_ALERTS = 0;
+  parameter string LIST_OF_ALERTS[] = {};
   parameter bit [31:0] MAX_32 = 32'hFFFF_FFFF;
   parameter bit [15:0] MAX_16 = 16'hFFFF;
   parameter bit [26:0] MAX_27 = 27'h7FF_FFFF;
