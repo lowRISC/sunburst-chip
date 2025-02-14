@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 {
-  import_testplans: ["hw/dv/tools/dvsim/testplans/tl_device_access_types_wo_intg_testplan.hjson"]
+  import_testplans: ["hw/vendor/lowrisc_ip/dv/tools/dvsim/testplans/tl_device_access_types_wo_intg_testplan.hjson"]
   testpoints: [
     {
       name: tl_intg_err
