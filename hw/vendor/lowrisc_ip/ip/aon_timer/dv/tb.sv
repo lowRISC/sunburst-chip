@@ -50,7 +50,7 @@ module tb;
 
  `DV_ALERT_IF_CONNECT()
 
- assign alert_tx = '0;
+  assign alert_tx = '0;
 
   aon_timer dut (
     .clk_i                     (clk),
