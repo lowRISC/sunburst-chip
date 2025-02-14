@@ -65,7 +65,7 @@ _trap_vector:
   cincoffset csp, csp, -OTTF_CONTEXT_SIZE
   // Free up a temporary register, storing ct0 at offset 3.
   csc ct0, 3 * OTTF_CAP_SIZE(csp)
-  // Read and check the cause of the exception. 
+  // Read and check the cause of the exception.
   csrr t0,mcause
   andi t0, t0, 0x1f
   addi t0, t0, -MachineSoftwareInterrupt
@@ -297,7 +297,7 @@ ottf_isr_exit:
   cspecialw mepcc, ct0
 
   // Load MSTATUS for the MPIE bit.
-  clw  t0, 29 * OTTF_CAP_SIZE(csp)
+  clw  t0, 14 * OTTF_CAP_SIZE(csp)
   csrw mstatus, t0
 
   // Restore all registers from the stack.
