@@ -124,26 +124,29 @@ void ottf_external_isr(uint32_t *exc_info) {
 
   bool is_pending;
   switch (irq_id) {
-    case kTopChipPlicIrqIdPattgenDoneCh0:
-      LOG_INFO("Channel 0");
-      channel_fired |= 1 << 0;
-      // Check the expected interrupt is triggered.
+    case kTopChipPlicIrqIdPattgen:
+      // Sunburst - determine channel by reading pattgen register
       CHECK_DIF_OK(dif_pattgen_irq_is_pending(&pattgen, kDifPattgenIrqDoneCh0,
                                               &is_pending));
-      CHECK(is_pending == true);
-      CHECK_DIF_OK(
-          dif_pattgen_irq_acknowledge(&pattgen, kDifPattgenIrqDoneCh0));
-      break;
-    // TODO: Sunburst - This code needs changing to consult the IP block registers now.
-    // case kTopChipPlicIrqIdPattgenDoneCh1:
-      channel_fired |= 1 << 1;
-      LOG_INFO("Channel 1");
-      // Check the expected interrupt is triggered.
-      CHECK_DIF_OK(dif_pattgen_irq_is_pending(&pattgen, kDifPattgenIrqDoneCh1,
-                                              &is_pending));
-      CHECK(is_pending == true);
-      CHECK_DIF_OK(
-          dif_pattgen_irq_acknowledge(&pattgen, kDifPattgenIrqDoneCh1));
+      if (is_pending) {
+        LOG_INFO("Channel 0");
+        channel_fired |= 1 << 0;
+        // Check the expected interrupt is triggered.
+        CHECK_DIF_OK(dif_pattgen_irq_is_pending(&pattgen, kDifPattgenIrqDoneCh0,
+                                                &is_pending));
+        CHECK(is_pending == true);
+        CHECK_DIF_OK(
+            dif_pattgen_irq_acknowledge(&pattgen, kDifPattgenIrqDoneCh0));
+      } else {
+        channel_fired |= 1 << 1;
+        LOG_INFO("Channel 1");
+        // Check the expected interrupt is triggered.
+        CHECK_DIF_OK(dif_pattgen_irq_is_pending(&pattgen, kDifPattgenIrqDoneCh1,
+                                                &is_pending));
+        CHECK(is_pending == true);
+        CHECK_DIF_OK(
+            dif_pattgen_irq_acknowledge(&pattgen, kDifPattgenIrqDoneCh1));
+      }
       break;
     default:
       LOG_FATAL("IRQ: unknown irq %d", irq_id);
