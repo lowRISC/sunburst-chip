@@ -76,6 +76,10 @@ static const ibex_addr_translation_regs_t kRegsMap
                 },
 };
 
+// TODO: We have no rv_core_ibex and thus no true RND data at present.
+//       Generate pseudo-random data with a xorshift as an interim measure.
+static uint32_t prngState = 123u;
+
 /**
  * Convert the region address and size into a natural power of two address.
  *
@@ -304,7 +308,7 @@ dif_result_t dif_rv_core_ibex_get_rnd_status(
     return kDifBadArg;
   }
 
-  // TODO: We have no rv_core_ibex and thus no RND data at present.
+  // TODO: We have no rv_core_ibex and thus no true RND data at present.
   //*status = mmio_region_read32(rv_core_ibex->base_addr,
   //                             RV_CORE_IBEX_RND_STATUS_REG_OFFSET);
   *status = kDifRvCoreIbexRndStatusValid;
@@ -318,10 +322,16 @@ dif_result_t dif_rv_core_ibex_read_rnd_data(
     return kDifBadArg;
   }
 
-  // TODO: We have no rv_core_ibex and thus no RND data at present.
+  // TODO: We have no rv_core_ibex and thus no true RND data at present.
+  //       Generate pseudo-random data with a xorshift as an interim measure.
+  // Algorithm "xor" from p. 4 of Marsaglia, "Xorshift RNGs"
+  // (as found at https://en.wikipedia.org/wiki/Xorshift)
+  prngState ^= prngState << 13;
+  prngState ^= prngState >> 17;
+  prngState ^= prngState << 5;
+  *data = prngState;
   //*data = mmio_region_read32(rv_core_ibex->base_addr,
   //                           RV_CORE_IBEX_RND_DATA_REG_OFFSET);
-  *data = 0u;
 
   return kDifOk;
 }

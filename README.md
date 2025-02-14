@@ -57,6 +57,15 @@ Each test is primarily defined as a combination of a test program and a vseq.
 Optionally, additional plusarg parameters can be specified.
 These tests can also be grouped together into regression sets for easy access.
 
+### Key TODOs
+
+Some parts of Sunburst Chip are currently using temporary workarounds that must be removed/replaced before any tapeout.
+Key pre-tapeout actions include (but are not be limited to):
+
+- Implement a true random number generator
+  - Currently generate pseudo-random numbers in `dif_rv_core_ibex_read_rnd_data`.
+  - Possibly want to replicate the interface in [OpenTitan `rv_core_ibex`](https://opentitan.org/book/hw/ip/rv_core_ibex/doc/registers.html#rnd_data) for software compatibility.
+
 ## Dependencies
 
 [FuseSoC](https://github.com/olofk/fusesoc) is used to handle hardware related build tasks.
