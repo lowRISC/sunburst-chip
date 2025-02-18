@@ -20,8 +20,9 @@ index c582cda..dfa6796 100644
 @@ -155,7 +155,7 @@ package spi_host_env_pkg;
  
    // alerts
-   parameter uint NUM_ALERTS = 1;
+-  parameter uint NUM_ALERTS = 1;
 -  parameter string LIST_OF_ALERTS[] = {"fatal_fault"};
++  parameter uint NUM_ALERTS = 0;
 +  parameter string LIST_OF_ALERTS[] = {};
  
    // functions
@@ -46,7 +47,7 @@ index c27bc3f..aca0d8c 100644
 +                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/csr_tests.hjson",
 +                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/intr_test.hjson",
 +                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/mem_tests.hjson",
-+                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/alert_test.hjson",
++                //"{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/alert_test.hjson",
 +                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/intr_test.hjson",
 +                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/sec_cm_tests.hjson",
                  //"{proj_root}/hw/dv/tools/dvsim/tests/stress_tests.hjson", // TODO(#18886): enable for V3
@@ -188,3 +189,16 @@ index dc4f409..4b9a89b 100644
 -  `ASSERT(Sd_I_A,  passthrough_i.passthrough_en -> passthrough_o.s == cio_sd_i, clk, !rst_n)
 -
  endmodule
+diff --git a/dv/env/seq_lib/spi_host_base_vseq.sv b/dv/env/seq_lib/spi_host_base_vseq.sv
+index e6dfc5f..90c3b33 100644
+--- a/dv/env/seq_lib/spi_host_base_vseq.sv
++++ b/dv/env/seq_lib/spi_host_base_vseq.sv
+@@ -114,7 +114,7 @@ class spi_host_base_vseq extends cip_base_vseq #(
+       end
+       [cfg.seq_cfg.host_spi_middle_clkdiv+1 : 16'hFFF] : cfg.csr_spinwait_timeout_ns *= 5;
+       [16'hFFF+1 : cfg.seq_cfg.host_spi_max_clkdiv] : cfg.csr_spinwait_timeout_ns *= 10;
+-      default : `uvm_fatal(`gfn, $sformatf("spi_config_regs.clkdiv[0]=0x%0x is out range"))
++      default : `uvm_fatal(`gfn, $sformatf("spi_config_regs.clkdiv[0]=0x%0x is out range", spi_config_regs.clkdiv[0]))
+     endcase
+   endfunction
+ 
