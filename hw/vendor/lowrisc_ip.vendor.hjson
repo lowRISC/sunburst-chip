@@ -12,6 +12,11 @@
     }
 
     mapping: [
+        {from: "util/autogen_banner.py", to: "util/autogen_banner.py", patch_dir: "autogen_banner"},
+        {from: "util/autogen_testutils.py", to: "util/autogen_testutils.py"},
+        {from: "util/autogen_testutils", to: "util/autogen_testutils", patch_dir: "autogen_testutils"},
+        {from: "util/make_new_dif.py", to: "util/make_new_dif.py", patch_dir: "make_new_dif_py"},
+        {from: "util/make_new_dif",    to: "util/make_new_dif", patch_dir: "make_new_dif"},
         {from: "util/ipgen.py",        to: "util/ipgen.py"},
         {from: "util/ipgen",           to: "util/ipgen"},
         {from: "util/tlgen.py",        to: "util/tlgen.py"},
