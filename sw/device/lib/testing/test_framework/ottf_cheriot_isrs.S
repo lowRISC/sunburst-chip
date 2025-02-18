@@ -65,8 +65,10 @@ _trap_vector:
   cincoffset csp, csp, -OTTF_CONTEXT_SIZE
   // Free up a temporary register, storing ct0 at offset 3.
   csc ct0, 3 * OTTF_CAP_SIZE(csp)
-  // Read and check the cause of the exception.
-  csrr t0,mcause
+  // Read and check the cause of the interrupt/exception. The `interrupt` bit
+  // is at position XLEN-1, and so can be detected using a signed comparison.
+  csrr t0, mcause
+  bge  t0, zero, handler_exception
   andi t0, t0, 0x1f
   addi t0, t0, -MachineSoftwareInterrupt
   beqz t0, handler_irq_software
@@ -74,10 +76,7 @@ _trap_vector:
   beqz t0, handler_irq_timer
   addi t0, t0, MachineTimerInterrupt - MachineExternalInterrupt
   beqz t0, handler_irq_external
-  // Test for CHERI exceptions on CHERIoT core.
-  // TODO: Perhaps we treat everything else as an exception?
-  // addi t0, t0, -17
-  j handler_exception
+  j handler_irq_unknown
   .size _trap_vector, .-_trap_vector
 
   /**
@@ -241,6 +240,47 @@ handler_irq_external:
   // Return from ISR.
   j ottf_isr_exit
   .size handler_irq_external, .-handler_irq_external
+
+// -----------------------------------------------------------------------------
+
+  /**
+   * Unknown IRQ handler.
+   */
+  .balign 4
+  .global handler_irq_unknown
+  .type handler_irq_unknown, @function
+handler_irq_unknown:
+  // Save all registers to the stack.
+  csc  cra,  1 * OTTF_CAP_SIZE(csp)
+  csc  ctp,  2 * OTTF_CAP_SIZE(csp)
+  // ct0 has already been stored at offset 3.
+  csc  ct1,  4 * OTTF_CAP_SIZE(csp)
+  csc  ct2,  5 * OTTF_CAP_SIZE(csp)
+  csc  cs0,  6 * OTTF_CAP_SIZE(csp)
+  csc  cs1,  7 * OTTF_CAP_SIZE(csp)
+  csc  ca0,  8 * OTTF_CAP_SIZE(csp)
+  csc  ca1,  9 * OTTF_CAP_SIZE(csp)
+  csc  ca2, 10 * OTTF_CAP_SIZE(csp)
+  csc  ca3, 11 * OTTF_CAP_SIZE(csp)
+  csc  ca4, 12 * OTTF_CAP_SIZE(csp)
+  csc  ca5, 13 * OTTF_CAP_SIZE(csp)
+
+  // Save MSTATUS for the MPIE bit.
+  csrr t0, mstatus
+  csw t0, 14 * OTTF_CAP_SIZE(csp)
+
+  // Save MEPC to the stack.
+  // NOTE: this IRQ is asynchronous, therefore, we do not need to modify MEPC.
+  cspecialr ct0, mepcc
+  csc ct0, 0(csp)
+
+  // Jump to generic ISR.
+  cmove ca0, csp
+  cjal ottf_unknown_isr
+
+  // Return from ISR.
+  j ottf_isr_exit
+  .size handler_irq_unknown, .-handler_irq_unknown
 
 // -----------------------------------------------------------------------------
 

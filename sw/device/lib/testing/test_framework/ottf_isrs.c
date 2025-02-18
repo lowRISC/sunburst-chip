@@ -271,6 +271,12 @@ void ottf_external_isr(uint32_t *exc_info) {
   abort();
 }
 
+OT_WEAK
+void ottf_unknown_isr(uint32_t *exc_info) {
+  ottf_generic_fault_print(exc_info, "Unknown IRQ", ibex_mcause_read());
+  abort();
+}
+
 static void generic_internal_irq_handler(uint32_t *exc_info) {
   ottf_generic_fault_print(exc_info, "Internal IRQ", ibex_mcause_read());
   abort();
