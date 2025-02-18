@@ -149,6 +149,14 @@ void ottf_timer_isr(uint32_t *exc_info);
 void ottf_external_isr(uint32_t *exc_info);
 
 /**
+ * OTTF unknown IRQ handler.
+ *
+ * `ottf_isrs.c` provides a weak definition of this symbol, which can be
+ * overridden at link-time by providing an additional non-weak definition.
+ */
+void ottf_unknown_isr(uint32_t *exc_info);
+
+/**
  * OTTF external NMI internal IRQ handler.
  *
  * `ottf_isrs.c` provides a weak definition of this symbol, which can be
