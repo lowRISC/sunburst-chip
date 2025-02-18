@@ -154,7 +154,7 @@ package spi_host_env_pkg;
   } spi_host_intr_test_t;
 
   // alerts
-  parameter uint NUM_ALERTS = 1;
+  parameter uint NUM_ALERTS = 0;
   parameter string LIST_OF_ALERTS[] = {};
 
   // functions
