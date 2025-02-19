@@ -25,7 +25,7 @@ package uart_env_pkg;
   parameter uint MAX_RX_WATERMARK_LVL = 7;
   parameter uint MAX_TX_WATERMARK_LVL = 7;
   // alerts
-  parameter uint NUM_ALERTS = 1;
+  parameter uint NUM_ALERTS = 0;
   parameter string LIST_OF_ALERTS[] = {};
 
   typedef enum int {
