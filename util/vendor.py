@@ -294,6 +294,8 @@ class Mapping1:
 
     @staticmethod
     def apply_patch(basedir, patchfile):
+        if os.path.isfile(basedir):
+            basedir = os.path.dirname(basedir)
         cmd = ['git', 'apply', '--directory', str(basedir), '-p1',
                str(patchfile)]
         if verbose:
