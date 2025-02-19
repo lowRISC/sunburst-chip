@@ -1,0 +1,65 @@
+diff --git a/BUILD b/BUILD
+new file mode 100644
+index 6b0351d..0000000
+--- /dev/null
++++ b/BUILD
+@@ -0,0 +1,17 @@
++# Copyright lowRISC contributors (Sunburst project).
++# Licensed under the Apache License, Version 2.0, see LICENSE for details.
++# SPDX-License-Identifier: Apache-2.0
++
++load("@rules_python//python:defs.bzl", "py_library")
++
++package(default_visibility = ["//visibility:public"])
++
++py_library(
++    name = "ip",
++    srcs = ["ip.py"],
++)
++
++filegroup(
++    name = "tpl_files",
++    srcs = glob(["templates/*.tpl"]),
++)
+diff --git a/ip.py b/ip.py
+index 1c1b290..3cd102b 100644
+--- a/ip.py
++++ b/ip.py
+@@ -8,9 +8,9 @@
+ 
+ import hjson
+ 
++# This file is $REPO_TOP/hw/vendor/lowrisc_ip/util/make_new_dif/ip.py, so it takes six parent()
+-# This file is $REPO_TOP/util/make_new_dif/ip.py, so it takes three parent()
+ # calls to get back to the top.
++REPO_TOP = Path(__file__).resolve().parent.parent.parent.parent.parent.parent
+-REPO_TOP = Path(__file__).resolve().parent.parent.parent
+ 
+ 
+ class Alert:
+@@ -122,7 +122,7 @@
+             data_dir = REPO_TOP / "hw/top_earlgrey/ip/{0}/data/".format(
+                 self.name_snake)
+         else:
++            data_dir = REPO_TOP / "hw/vendor/lowrisc_ip/ip/{0}/data".format(self.name_snake)
+-            data_dir = REPO_TOP / "hw/ip/{0}/data".format(self.name_snake)
+         _hjson_file = data_dir / "{0}.hjson".format(self.name_snake)
+         with _hjson_file.open("r") as f:
+             _hjson_str = f.read()
+@@ -138,9 +138,13 @@
+         assert (self._hjson_data and
+                 "ERROR: must load IP HJSON before loading Alerts")
+         alerts = []
++        # By ignoring the alerts here we are able to generate DIF code that does not reference them
++        # but without shuffling all of the registers down. Changing the register offsets would
++        # create a software/hardware mismatch and require regeneration of the documentation.
++        #
++        # if "alert_list" in self._hjson_data:
++        #    for alert in self._hjson_data["alert_list"]:
++        #        alerts.append(Alert(alert))
+-        if "alert_list" in self._hjson_data:
+-            for alert in self._hjson_data["alert_list"]:
+-                alerts.append(Alert(alert))
+         return alerts
+ 
+     def _load_irqs(self):
