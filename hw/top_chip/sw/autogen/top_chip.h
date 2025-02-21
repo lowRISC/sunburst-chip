@@ -49,7 +49,7 @@ extern "C" {
  * This should be used with #mmio_region_from_addr to access the memory-mapped
  * registers associated with the peripheral (usually via a DIF).
  */
-#define TOP_CHIP_UART1_BASE_ADDR 0x40010000u
+#define TOP_CHIP_UART1_BASE_ADDR 0x40301000u
 
 /**
  * Peripheral size for uart1 in top chip.
@@ -211,7 +211,7 @@ extern "C" {
  * This should be used with #mmio_region_from_addr to access the memory-mapped
  * registers associated with the peripheral (usually via a DIF).
  */
-#define TOP_CHIP_PWRMGR_AON_BASE_ADDR 0x40400000u
+// #define TOP_CHIP_PWRMGR_AON_BASE_ADDR 0x40400000u
 
 /**
  * Peripheral size for pwrmgr_aon in top chip.
@@ -229,7 +229,7 @@ extern "C" {
  * This should be used with #mmio_region_from_addr to access the memory-mapped
  * registers associated with the peripheral (usually via a DIF).
  */
-#define TOP_CHIP_RSTMGR_AON_BASE_ADDR 0x40410000u
+// #define TOP_CHIP_RSTMGR_AON_BASE_ADDR 0x40410000u
 
 /**
  * Peripheral size for rstmgr_aon in top chip.
@@ -247,7 +247,7 @@ extern "C" {
  * This should be used with #mmio_region_from_addr to access the memory-mapped
  * registers associated with the peripheral (usually via a DIF).
  */
-#define TOP_CHIP_CLKMGR_AON_BASE_ADDR 0x40420000u
+// #define TOP_CHIP_CLKMGR_AON_BASE_ADDR 0x40420000u
 
 /**
  * Peripheral size for clkmgr_aon in top chip.
@@ -265,7 +265,7 @@ extern "C" {
  * This should be used with #mmio_region_from_addr to access the memory-mapped
  * registers associated with the peripheral (usually via a DIF).
  */
-#define TOP_CHIP_SYSRST_CTRL_AON_BASE_ADDR 0x40430000u
+// #define TOP_CHIP_SYSRST_CTRL_AON_BASE_ADDR 0x40430000u
 
 /**
  * Peripheral size for sysrst_ctrl_aon in top chip.
@@ -337,7 +337,7 @@ extern "C" {
  * This should be used with #mmio_region_from_addr to access the memory-mapped
  * registers associated with the peripheral (usually via a DIF).
  */
-#define TOP_CHIP_SRAM_CTRL_RET_AON_REGS_BASE_ADDR 0x40500000u
+// #define TOP_CHIP_SRAM_CTRL_RET_AON_REGS_BASE_ADDR 0x40500000u
 
 /**
  * Peripheral size for regs device on sram_ctrl_ret_aon in top chip.
@@ -355,7 +355,7 @@ extern "C" {
  * This should be used with #mmio_region_from_addr to access the memory-mapped
  * registers associated with the peripheral (usually via a DIF).
  */
-#define TOP_CHIP_SRAM_CTRL_RET_AON_RAM_BASE_ADDR 0x40600000u
+// #define TOP_CHIP_SRAM_CTRL_RET_AON_RAM_BASE_ADDR 0x40600000u
 
 /**
  * Peripheral size for ram device on sram_ctrl_ret_aon in top chip.
@@ -479,7 +479,7 @@ extern "C" {
 /**
  * Memory base address for ram_ret_aon in top chip.
  */
-#define TOP_CHIP_RAM_RET_AON_BASE_ADDR 0x40600000u
+// #define TOP_CHIP_RAM_RET_AON_BASE_ADDR 0x40600000u
 
 /**
  * Memory size for ram_ret_aon in top chip.
