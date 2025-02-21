@@ -355,7 +355,7 @@ module top_chip_asic_tb;
   ) u_uartdpi0 (
     .clk_i(u_dut.clk_peri),
     .rst_ni(u_dut.rst_peri_n),
-    .active(1'b1),
+    .active(!uart_if[0].enable),
     .tx_o(uart0_rx_dpi),
     .rx_i(!uart_if[0].enable ? IO60 : 1'bz)
   );
