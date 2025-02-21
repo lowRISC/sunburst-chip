@@ -8,6 +8,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "sw/device/lib/base/csr.h"
+
 /**
  * Update to the location of vectors as specificed in the linker file
  *
@@ -18,7 +20,15 @@ void irq_set_vector_offset(uintptr_t address);
 /**
  * Enable / disable ibex globlal interrupts
  */
-void irq_global_ctrl(bool en);
+// Global interrupt enable function has been inlined to work around CHERIoT
+// interrupt-disabling backward sentries being used to return from functions.
+inline void irq_global_ctrl(bool en) {
+  if (en) {
+    CSR_SET_BITS(CSR_REG_MSTATUS, 0x8);
+  } else {
+    CSR_CLEAR_BITS(CSR_REG_MSTATUS, 0x8);
+  }
+}
 
 /**
  * Enable / disable ibex external interrupts

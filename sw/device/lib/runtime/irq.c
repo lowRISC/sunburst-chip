@@ -14,13 +14,10 @@ void irq_set_vector_offset(uintptr_t address) {
   CSR_WRITE(CSR_REG_MTVEC, (uint32_t)address);
 }
 
-void irq_global_ctrl(bool en) {
-  if (en) {
-    CSR_SET_BITS(CSR_REG_MSTATUS, 0x8);
-  } else {
-    CSR_CLEAR_BITS(CSR_REG_MSTATUS, 0x8);
-  }
-}
+// Global interrupt enable function has been inlined to work around CHERIoT
+// interrupt-disabling backward sentries being used to return from functions.
+// See irq.h for inline definition of:
+// void irq_global_ctrl(bool en);
 
 void irq_external_ctrl(bool en) {
   const uint32_t mask = 1 << IRQ_EXT_ENABLE_OFFSET;
