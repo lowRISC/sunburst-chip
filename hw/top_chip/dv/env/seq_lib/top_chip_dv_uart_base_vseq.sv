@@ -68,8 +68,6 @@ class top_chip_dv_uart_base_vseq extends top_chip_dv_base_vseq;
     // config parameters, otherwise they may be reset too.
     p_sequencer.ifs.peri_clk_if.wait_for_reset();
 
-    // `DV_WAIT(cfg.sw_test_status_vif.sw_test_status == SwTestStatusInTest);
-
     configure_uart_agent(.uart_idx(uart_idx), .enable(1), .enable_rx_monitor(1));
   endtask
 
