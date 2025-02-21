@@ -59,10 +59,6 @@ class top_chip_dv_pattgen_vseq extends top_chip_dv_base_vseq;
   task body();
     bit[7:0] byte_arr[];
     super.body();
-
-    // Prevent pattgen_monitor from starting immediately after reset
-    p_sequencer.cfg.m_pattgen_agent_cfg.en_monitor = 0;
-
     // Wait for reset to be asserted and de-asserted before trying to set
     // config parameters, otherwise they may be reset too.
     p_sequencer.ifs.peri_clk_if.wait_for_reset();
