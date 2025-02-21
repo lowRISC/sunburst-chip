@@ -59,20 +59,19 @@
       run_opts: ["+ChipMemSRAM_image_file={proj_root}/sw/device/build/tests/pattgen_ios_test.vmem"]
     }
     {
-      name: top_uart_smoke
-      uvm_test_seq: top_chip_dv_base_vseq
-      run_opts: ["+ChipMemSRAM_image_file={proj_root}/scratch_sw/bare_metal/build/checks/uart_smoke_check.vmem"]
+      name: uart_baud_rate_test
+      uvm_test_seq: top_chip_dv_uart_rand_baudrate_vseq
+      run_opts: ["+ChipMemSRAM_image_file={proj_root}/sw/device/build/tests/uart_tx_rx_test.vmem"]
     }
     {
-      name: top_uart_tx_rx
+      name: uart_smoketest
+      uvm_test_seq: top_chip_dv_base_vseq
+      run_opts: ["+ChipMemSRAM_image_file={proj_root}/sw/device/build/tests/uart_smoketest.vmem"]
+    }
+    {
+      name: uart_tx_rx_test
       uvm_test_seq: top_chip_dv_uart_tx_rx_vseq
-      run_opts: ["+ChipMemSRAM_image_file={proj_root}/scratch_sw/bare_metal/build/checks/uart_tx_rx_check.vmem",
-                 "+uart_idx=0"]
-    }
-    {
-      name: top_usbdev_smoke
-      uvm_test_seq: top_chip_dv_base_vseq
-      run_opts: ["+ChipMemSRAM_image_file={proj_root}/scratch_sw/bare_metal/build/checks/usbdev_check.vmem"]
+      run_opts: ["+ChipMemSRAM_image_file={proj_root}/sw/device/build/tests/uart_tx_rx_test.vmem"]
     }
     {
       name: usbdev_config_host_test
@@ -135,7 +134,11 @@
   regressions: [
     {
       name: smoke
-      tests: ["top_chip_smoke", "pattgen_ios_test", "top_uart_smoke", "top_usbdev_smoke"]
+      tests: ["top_chip_smoke", "pattgen_ios_test", "uart_smoketest", "top_usbdev_smoke"]
+    }
+    {
+      name: uart
+      tests: ["uart_baud_rate_test", "uart_smoketest", "uart_tx_rx_test"]
     }
   ]
 }
