@@ -2,18 +2,25 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
+#define HAVE_CLKMGR 0
+
 #include "sw/device/lib/arch/device.h"
+#include "sw/device/lib/base/bitfield.h"
 #include "sw/device/lib/base/mmio.h"
 #include "sw/device/lib/dif/dif_base.h"
+#if HAVE_CLKMGR
 #include "sw/device/lib/dif/dif_clkmgr.h"
 #include "sw/device/lib/dif/dif_lc_ctrl.h"
+#endif
 #include "sw/device/lib/dif/dif_pinmux.h"
 #include "sw/device/lib/dif/dif_rv_plic.h"
 #include "sw/device/lib/dif/dif_uart.h"
 #include "sw/device/lib/runtime/hart.h"
 #include "sw/device/lib/runtime/irq.h"
 #include "sw/device/lib/runtime/log.h"
+#if HAVE_CLKMGR
 #include "sw/device/lib/testing/clkmgr_testutils.h"
+#endif
 #include "sw/device/lib/testing/test_framework/check.h"
 #include "sw/device/lib/testing/test_framework/ottf_console.h"
 #include "sw/device/lib/testing/test_framework/ottf_main.h"
@@ -25,7 +32,9 @@
 
 #define UART_DATASET_SIZE 64
 
+#if HAVE_CLKMGR
 static dif_clkmgr_t clkmgr;
+#endif
 static dif_pinmux_t pinmux;
 static dif_rv_plic_t plic;
 static dif_uart_t uart;
@@ -84,13 +93,15 @@ static volatile uint8_t kUartIdx = 0xff;
  * Similar to `kUartIdx`, this may be overridden in DV testbench
  */
 static volatile const bool kUseExtClk = false;
+#if HAVE_CLKMGR
 static volatile const bool kUseLowSpeedSel = false;
+#endif
 
 // A set of bytes to be send out of TX.
 //
 // The first byte must be FF so we can differentiate this blob from ASCII sent
 // by the ROM when it starts. FF is not UTF-8 / ASCII.
-static const uint8_t kUartTxData[UART_DATASET_SIZE] = {
+static volatile const uint8_t kUartTxData[UART_DATASET_SIZE] = {
     0xff, 0x50, 0xc6, 0xb4, 0xbe, 0x16, 0xed, 0x55, 0x16, 0x1d, 0xe6,
     0x1c, 0xde, 0x9f, 0xfd, 0x24, 0x89, 0x81, 0x4d, 0x0d, 0x1a, 0x12,
     0x4f, 0x57, 0xea, 0xd6, 0x6f, 0xc0, 0x7d, 0x46, 0xe7, 0x37, 0x81,
@@ -100,7 +111,7 @@ static const uint8_t kUartTxData[UART_DATASET_SIZE] = {
 };
 
 // The set of bytes expected to be received over RX.
-static const uint8_t kExpUartRxData[UART_DATASET_SIZE] = {
+static volatile const uint8_t kExpUartRxData[UART_DATASET_SIZE] = {
     0x1b, 0x95, 0xc5, 0xb5, 0x8a, 0xa4, 0xa8, 0x9f, 0x6a, 0x7d, 0x6b,
     0x0c, 0xcd, 0xd5, 0xa6, 0x8f, 0x07, 0x3a, 0x9e, 0x82, 0xe6, 0xa2,
     0x2b, 0xe0, 0x0c, 0x30, 0xe8, 0x5a, 0x05, 0x14, 0x79, 0x8a, 0xFf,
@@ -152,34 +163,46 @@ void ottf_external_isr(uint32_t *exc_info) {
 
   // Correlate the interrupt fired at PLIC with UART.
   dif_uart_irq_t uart_irq;
-  if (plic_irq_id == uart_cfg.irq_tx_watermark_id) {
+  // Sunburst - determine interrupt by reading uart interrupt registers
+  dif_uart_irq_state_snapshot_t state_snapshot;
+  dif_uart_irq_enable_snapshot_t enable_snapshot;
+  CHECK_DIF_OK(dif_uart_irq_get_state(&uart, &state_snapshot));
+  CHECK_DIF_OK(dif_uart_irq_disable_all(&uart, &enable_snapshot));
+  CHECK_DIF_OK(dif_uart_irq_restore_all(&uart, &enable_snapshot));
+  if (bitfield_bit32_read(state_snapshot, kDifUartIrqTxWatermark) &&
+      bitfield_bit32_read(enable_snapshot, kDifUartIrqTxWatermark)) {
     CHECK_DIF_OK(dif_uart_irq_set_enabled(&uart, kDifUartIrqTxWatermark,
                                           kDifToggleDisabled));
     CHECK(exp_uart_irq_tx_watermark, "Unexpected TX watermark interrupt");
     uart_irq_tx_watermark_fired = true;
     uart_irq = kDifUartIrqTxWatermark;
-  } else if (plic_irq_id == uart_cfg.irq_tx_empty_id) {
+  } else if (bitfield_bit32_read(state_snapshot, kDifUartIrqTxEmpty) &&
+             bitfield_bit32_read(enable_snapshot, kDifUartIrqTxEmpty)) {
     CHECK_DIF_OK(dif_uart_irq_set_enabled(&uart, kDifUartIrqTxEmpty,
                                           kDifToggleDisabled));
     CHECK(exp_uart_irq_tx_empty, "Unexpected TX empty interrupt");
     uart_irq_tx_empty_fired = true;
     uart_irq = kDifUartIrqTxEmpty;
-  } else if (plic_irq_id == uart_cfg.irq_rx_watermark_id) {
+  } else if (bitfield_bit32_read(state_snapshot, kDifUartIrqRxWatermark) &&
+             bitfield_bit32_read(enable_snapshot, kDifUartIrqRxWatermark)) {
     CHECK_DIF_OK(dif_uart_irq_set_enabled(&uart, kDifUartIrqRxWatermark,
                                           kDifToggleDisabled));
     CHECK(exp_uart_irq_rx_watermark, "Unexpected RX watermark interrupt");
     uart_irq_rx_watermark_fired = true;
     uart_irq = kDifUartIrqRxWatermark;
-  } else if (plic_irq_id == uart_cfg.irq_tx_done_id) {
+  } else if (bitfield_bit32_read(state_snapshot, kDifUartIrqTxDone) &&
+             bitfield_bit32_read(enable_snapshot, kDifUartIrqTxDone)) {
     CHECK(exp_uart_irq_tx_done, "Unexpected TX done interrupt");
     uart_irq_tx_done_fired = true;
     uart_irq = kDifUartIrqTxDone;
-  } else if (plic_irq_id == uart_cfg.irq_rx_overflow_id) {
+  } else if (bitfield_bit32_read(state_snapshot, kDifUartIrqRxOverflow) &&
+             bitfield_bit32_read(enable_snapshot, kDifUartIrqRxOverflow)) {
     CHECK(exp_uart_irq_rx_overflow, "Unexpected RX overflow interrupt");
     uart_irq_rx_overflow_fired = true;
     uart_irq = kDifUartIrqRxOverflow;
   } else {
-    LOG_ERROR("Unexpected interrupt (at PLIC): %d", plic_irq_id);
+    LOG_ERROR("Unexpected interrupt (at uart state, enable): %x, %x",
+              state_snapshot, enable_snapshot);
     test_status_set(kTestStatusFailed);
     // The `abort()` call below is redundant. It is added to prevent the
     // compilation error due to not initializing the `uart_irq` enum variable
@@ -455,6 +478,7 @@ static void execute_test(const dif_uart_t *uart) {
   }
 }
 
+#if HAVE_CLKMGR
 void config_external_clock(const dif_clkmgr_t *clkmgr) {
   dif_lc_ctrl_t lc;
   mmio_region_t lc_ctrl_base_addr =
@@ -470,14 +494,28 @@ void config_external_clock(const dif_clkmgr_t *clkmgr) {
   CHECK_STATUS_OK(
       clkmgr_testutils_enable_external_clock_blocking(clkmgr, kUseLowSpeedSel));
 }
+#endif
 
-OTTF_DEFINE_TEST_CONFIG(.enable_uart_flow_control = true);
+// enable_uart_flow_control = false
+//   Prevent enabling interrupts as part of usual uart console configuration.
+//   Otherwise, when testing uart0, it affects the test. Instead, call
+//   `ottf_console_flow_control_enable()` ourselves once we've switched
+//   console to uart1.
+// silence_console_prints = true
+//   Silence log messages from `_ottf_main()`. Otherwise, when testing uart0,
+//   messages could be output from uart0 before we can switch console to uart1.
+// TODO: Set `enable_uart_flow_control` and remove `silence_console_prints`
+//       when DV fast/backdoor logging works.
+OTTF_DEFINE_TEST_CONFIG(.enable_uart_flow_control = false,
+                        .silence_console_prints = true);
 
 bool test_main(void) {
   mmio_region_t base_addr;
 
+#if HAVE_CLKMGR
   base_addr = mmio_region_from_addr(TOP_CHIP_CLKMGR_AON_BASE_ADDR);
   CHECK_DIF_OK(dif_clkmgr_init(base_addr, &clkmgr));
+#endif
 
   base_addr = mmio_region_from_addr(TOP_CHIP_PINMUX_AON_BASE_ADDR);
   CHECK_DIF_OK(dif_pinmux_init(base_addr, &pinmux));
@@ -489,11 +527,18 @@ bool test_main(void) {
   }
 
   // If we're testing UART0 we need to move the console to UART1.
-  if (kUartIdx == 0 && kDeviceType != kDeviceSimDV) {
+  // TODO: reintroduce `kDeviceType` check when DV fast/backdoor logging works.
+  if (kUartIdx == 0 /*&& kDeviceType != kDeviceSimDV*/) {
     CHECK_STATUS_OK(
         uart_testutils_select_pinmux(&pinmux, 1, kUartPinmuxChannelConsole));
     ottf_console_configure_uart(TOP_CHIP_UART1_BASE_ADDR);
   }
+  // Enable console interrupts here, after possibly switching console UART,
+  // instead of during pre-test setup (controlled by `enable_uart_flow_control`
+  // above). This is to avoid affecting the test when we are targetting uart0.
+  // TODO: Remove `ottf_console_flow_control_enable()` call when
+  //       DV fast/backdoor logging works.
+  ottf_console_flow_control_enable();
 
   CHECK_STATUS_OK(
       uart_testutils_cfg_params(kUartIdx, (uart_cfg_params_t *)&uart_cfg));
@@ -504,11 +549,17 @@ bool test_main(void) {
   CHECK_STATUS_OK(
       uart_testutils_select_pinmux(&pinmux, kUartIdx, kUartPinmuxChannelDut));
 
+#if HAVE_CLKMGR
   if (kUseExtClk) {
     config_external_clock(&clkmgr);
   }
   CHECK_STATUS_OK(clkmgr_testutils_enable_clock_counts_with_expected_thresholds(
       &clkmgr, /*jitter_enabled=*/false, kUseExtClk, kUseLowSpeedSel));
+#else
+  if (kUseExtClk) {
+    LOG_FATAL("Invalid clock selection - External clock. No clkmgr integrated");
+  }
+#endif
 
   // Initialize the UART.
   mmio_region_t chosen_uart_region = mmio_region_from_addr(uart_cfg.base_addr);
@@ -525,7 +576,9 @@ bool test_main(void) {
 
   // Execute the test.
   execute_test(&uart);
+#if HAVE_CLKMGR
   CHECK_STATUS_OK(clkmgr_testutils_check_measurement_counts(&clkmgr));
+#endif
 
   return true;
 }
