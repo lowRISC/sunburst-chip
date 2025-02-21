@@ -23,8 +23,7 @@ set(TESTS
   uart_loopback_test.c
   uart_parity_break_test.c
   uart_smoketest.c
-# Needs (dif_)clkmgr:
-#  uart_tx_rx_test.c
+  uart_tx_rx_test.c
   usbdev_config_host_test.c
   usbdev_iso_test.c
   usbdev_mem_test.c
