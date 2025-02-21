@@ -27,12 +27,17 @@ class top_chip_dv_env_cfg extends uvm_object;
     // create pattgen agent config obj
     m_pattgen_agent_cfg = pattgen_agent_cfg::type_id::create("m_pattgen_agent_cfg");
     m_pattgen_agent_cfg.if_mode = Device;
+    // Configuration is required to perform meaningful monitoring
+    m_pattgen_agent_cfg.en_monitor = 0;
 
     // create uart agent config obj
     foreach (m_uart_agent_cfgs[i]) begin
       m_uart_agent_cfgs[i] = uart_agent_cfg::type_id::create($sformatf("m_uart_agent_cfg%0d", i));
       // Do not create uart agent fcov in chip level test.
       m_uart_agent_cfgs[i].en_cov = 0;
+      // Configuration is required to perform meaningful monitoring
+      m_uart_agent_cfgs[i].en_tx_monitor = 0;
+      m_uart_agent_cfgs[i].en_rx_monitor = 0;
     end
   endfunction
 
