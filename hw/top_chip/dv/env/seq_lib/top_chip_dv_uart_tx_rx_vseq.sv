@@ -27,7 +27,7 @@ class top_chip_dv_uart_tx_rx_vseq extends top_chip_dv_uart_base_vseq;
     super.body();
 
     // Override software constants with randomised data
-    sw_symbol_backdoor_overwrite("kUartIdxDV", uart_idx_data);
+    sw_symbol_backdoor_overwrite("kUartIdxDv", uart_idx_data);
     sw_symbol_backdoor_overwrite("kUartTxData", exp_uart_tx_data);
     sw_symbol_backdoor_overwrite("kExpUartRxData", uart_rx_data);
 
