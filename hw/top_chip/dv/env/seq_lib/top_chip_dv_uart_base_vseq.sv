@@ -6,7 +6,13 @@ class top_chip_dv_uart_base_vseq extends top_chip_dv_base_vseq;
   `uvm_object_utils(top_chip_dv_uart_base_vseq)
   `uvm_object_new
 
-  int uart_idx;
+  uart_agent_pkg::baud_rate_e uart_baud_rate = uart_agent_pkg::BaudRate1p5Mbps;
+
+  rand int uart_idx;
+
+  constraint uart_idx_c {
+    uart_idx inside {[0:NUarts-1]};
+  }
 
   // Local queue for holding received UART TX data.
   byte uart_tx_data_q[$];
@@ -35,7 +41,7 @@ class top_chip_dv_uart_base_vseq extends top_chip_dv_base_vseq;
                                              bit enable_rx_monitor = 1'b0,
                                              bit en_parity = 1'b0,
                                              bit odd_parity = 1'b0,
-                                             baud_rate_e baud_rate = BaudRate1Mbps);
+                                             baud_rate_e baud_rate = uart_baud_rate);
     if (enable) begin
       `uvm_info(`gfn, $sformatf("Configuring and connecting UART%0d", uart_idx), UVM_LOW)
      p_sequencer.cfg.m_uart_agent_cfgs[uart_idx].set_parity(en_parity, odd_parity);
