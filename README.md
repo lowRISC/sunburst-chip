@@ -275,32 +275,31 @@ gtkwave util/gpio_and_pc.gtkw
 
 Block-level DV for all of the IP blocks vendored from OpenTitan can also be run using DVsim.
 Many blocks default to running using VCS, but they can be forced to use Xcelium using the `-t xcelium` option.
-At the time of writing, spi_host was having issues running properly on Xcelium but all other blocks pass their smoke regressions.
-
-The smoke test for each of the blocks can be run using Xcelium with these commands:
+The full regression (called nightly) for each of the blocks can be run using Xcelium with these commands:
 
 ```sh
 # -- Build and run block-level tests using Xcelium --
 # Run all the below from the project root directory.
-# Run aon_timer smoke regression
-./hw/vendor/lowrisc_ip/util/dvsim/dvsim.py ./hw/vendor/lowrisc_ip/ip/aon_timer/dv/aon_timer_sim_cfg.hjson -i smoke -t xcelium
-# Run gpio smoke regression
-./hw/vendor/lowrisc_ip/util/dvsim/dvsim.py ./hw/vendor/lowrisc_ip/ip/gpio/dv/gpio_sim_cfg.hjson -i smoke -t xcelium
+# Run aon_timer regression
+hw/vendor/lowrisc_ip/util/dvsim/dvsim.py hw/vendor/lowrisc_ip/ip/aon_timer/dv/aon_timer_sim_cfg.hjson -i nightly --max-parallel 32 --tool xcelium
+# Run gpio regression
+hw/vendor/lowrisc_ip/util/dvsim/dvsim.py hw/vendor/lowrisc_ip/ip/gpio/dv/gpio_sim_cfg.hjson -i nightly --max-parallel 32 --tool xcelium
 # Run i2c smoke regression
-./hw/vendor/lowrisc_ip/util/dvsim/dvsim.py ./hw/vendor/lowrisc_ip/ip/i2c/dv/i2c_sim_cfg.hjson -i smoke -t xcelium
-# Run pattgen smoke regression
-./hw/vendor/lowrisc_ip/util/dvsim/dvsim.py ./hw/vendor/lowrisc_ip/ip/pattgen/dv/pattgen_sim_cfg.hjson -i smoke -t xcelium
-# Run pwm smoke regression
-# Note: pwm is awaiting an updated DV environment.
-# ./hw/vendor/lowrisc_ip/util/dvsim/dvsim.py ./hw/vendor/lowrisc_ip/ip/pwm/dv/pwm_sim_cfg.hjson -i smoke -t xcelium
-# Run rv_timer smoke regression
-./hw/vendor/lowrisc_ip/util/dvsim/dvsim.py ./hw/vendor/lowrisc_ip/ip/rv_timer/dv/rv_timer_sim_cfg.hjson -i smoke -t xcelium
-# Run spi_host smoke regression
-./hw/vendor/lowrisc_ip/util/dvsim/dvsim.py ./hw/vendor/lowrisc_ip/ip/spi_host/dv/spi_host_sim_cfg.hjson -i smoke -t xcelium
-# Run uart smoke regression
-./hw/vendor/lowrisc_ip/util/dvsim/dvsim.py ./hw/vendor/lowrisc_ip/ip/uart/dv/uart_sim_cfg.hjson -i smoke -t xcelium
-# Run usbdev smoke regression
-./hw/vendor/lowrisc_ip/util/dvsim/dvsim.py ./hw/vendor/lowrisc_ip/ip/usbdev/dv/usbdev_sim_cfg.hjson -i smoke -t xcelium
+# Note: The full I2C regression is experiencing timeouts which is being tracked here: https://github.com/lowRISC/sunburst-chip/issues/42
+# The command below just executes the smoke test for now.
+hw/vendor/lowrisc_ip/util/dvsim/dvsim.py hw/vendor/lowrisc_ip/ip/i2c/dv/i2c_sim_cfg.hjson -i smoke --max-parallel 32 --tool xcelium
+# Run pattgen regression
+hw/vendor/lowrisc_ip/util/dvsim/dvsim.py hw/vendor/lowrisc_ip/ip/pattgen/dv/pattgen_sim_cfg.hjson -i nightly --max-parallel 32 --tool xcelium
+# Run pwm regression
+hw/vendor/lowrisc_ip/util/dvsim/dvsim.py hw/vendor/lowrisc_ip/ip/pwm/dv/pwm_sim_cfg.hjson -i nightly --max-parallel 32 --tool xcelium
+# Run rv_timer regression
+hw/vendor/lowrisc_ip/util/dvsim/dvsim.py hw/vendor/lowrisc_ip/ip/rv_timer/dv/rv_timer_sim_cfg.hjson -i nightly --max-parallel 32 --tool xcelium
+# Run spi_host regression
+hw/vendor/lowrisc_ip/util/dvsim/dvsim.py hw/vendor/lowrisc_ip/ip/spi_host/dv/spi_host_sim_cfg.hjson -i nightly --max-parallel 32 --tool xcelium
+# Run uart regression
+hw/vendor/lowrisc_ip/util/dvsim/dvsim.py hw/vendor/lowrisc_ip/ip/uart/dv/uart_sim_cfg.hjson -i nightly --max-parallel 32 --tool xcelium
+# Run usbdev regression
+hw/vendor/lowrisc_ip/util/dvsim/dvsim.py hw/vendor/lowrisc_ip/ip/usbdev/dv/usbdev_sim_cfg.hjson -i nightly --max-parallel 32 --tool xcelium
 ```
 
 Like the top-level DVsim tests, artefacts end up under *scratch/* and additional output can be generated using the `-w shm` and `-v h` options.
