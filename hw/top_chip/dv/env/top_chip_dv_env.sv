@@ -16,6 +16,7 @@ class top_chip_dv_env extends uvm_env;
   // Agents
   i2c_agent     m_i2c_agents[NI2cs];
   pattgen_agent m_pattgen_agent;
+  spi_agent     m_spi_device_agents[NSpis];
   uart_agent    m_uart_agents[NUarts];
 
   function void build_phase(uvm_phase phase);
@@ -70,6 +71,13 @@ class top_chip_dv_env extends uvm_env;
     m_pattgen_agent = pattgen_agent::type_id::create("m_pattgen_agent", this);
     uvm_config_db#(pattgen_agent_cfg)::set(this, "m_pattgen_agent*", "cfg", cfg.m_pattgen_agent_cfg);
 
+    // Instantiate SPI device agents (for connecting to SPI hosts)
+    foreach (m_spi_device_agents[i]) begin
+      m_spi_device_agents[i] = spi_agent::type_id::create($sformatf("m_spi_device_agents%0d", i), this);
+      uvm_config_db#(spi_agent_cfg)::set(this, $sformatf("m_spi_device_agents%0d*", i), "cfg",
+                                         cfg.m_spi_device_agent_cfgs[i]);
+    end
+
     // Instantiate uart agents
     foreach (m_uart_agents[i]) begin
       m_uart_agents[i] = uart_agent::type_id::create($sformatf("m_uart_agent%0d", i), this);
@@ -91,6 +99,9 @@ class top_chip_dv_env extends uvm_env;
     // Allows virtual sequences to use the agents to drive RX items.
     foreach (m_i2c_agents[i]) begin
       virtual_sequencer.i2c_sequencer_hs[i] = m_i2c_agents[i].sequencer;
+    end
+    foreach (m_spi_device_agents[i]) begin
+      virtual_sequencer.spi_device_sequencer_hs[i] = m_spi_device_agents[i].sequencer;
     end
     foreach (m_uart_agents[i]) begin
       virtual_sequencer.uart_sequencer_hs[i] = m_uart_agents[i].sequencer;
