@@ -3,7 +3,7 @@
 **Sunburst Chip** is an open-source microcontroller chip design based around the CHERI-enabled [CHERIoT Ibex](https://github.com/microsoft/CherIoT-ibex) RISC-V core.
 
 This repository hosts the logical design, verification environment, and associated bare-metal test software for Sunburst Chip.
-It has been put together by (lowRISC C.I.C.)[https://lowrisc.org/].
+It has been put together by [lowRISC C.I.C.](https://lowrisc.org/)
 
 Sunburst Chip is part of the [Sunburst Project](https://www.sunburst-project.org) funded by [UKRI](https://www.ukri.org/) / [DSbD](https://www.dsbd.tech/) under grant number 107540.
 
