@@ -205,6 +205,18 @@ module top_chip_asic_tb;
   assign pattgen_if.pda_tx = {IO54, IO52}; // {CH1, CH0}
   assign pattgen_if.pcl_tx = {IO55, IO53}; // {CH1, CH0}
 
+  // Create and connect SPI agent interfaces.
+  // Full-duplex usage { N/A,   N/A,  CIPO,  COPI }
+  // Quad SPI usage    {bidir, bidir, bidir, bidir}
+  spi_if spi_device_if[NSpis](
+    .rst_n(peri_clk_if.rst_n), // shared with all instances
+    .sio({{IO39, IO38, IO37, IO36}, {IO45, IO44, IO43, IO42}}) // {{spi0} {spi1}}
+  );
+  assign spi_device_if[0].sck = IO40;
+  assign spi_device_if[0].csb = {1'b1, IO41}; // pad single chip enable (active low)
+  assign spi_device_if[1].sck = IO46;
+  assign spi_device_if[1].csb = {1'b1, IO47}; // pad single chip enable (active low)
+
   // Create and connect uart agent interfaces. Mux UART0 as it is shared with a DPI model,
   // using the vif enable signal that can be poked by the virtual sequence.
   // Might as well leave UART1 connected all the time.
@@ -337,6 +349,12 @@ module top_chip_asic_tb;
       uvm_config_db#(virtual i2c_if)::set(null, $sformatf("*.env.m_i2c_agent%0d*", i), "vif", i2c_if[i]);
     end
   end : gen_i2c_if_set
+
+  for (genvar i = 0; i < NSpis; i++) begin : gen_spi_if_set
+    initial begin
+      uvm_config_db#(virtual spi_if)::set(null, $sformatf("*.env.m_spi_device_agents%0d*", i), "vif", spi_device_if[i]);
+    end
+  end : gen_spi_if_set
 
   for (genvar i = 0; i < NUarts; i++) begin : gen_uart_if_set
     initial begin

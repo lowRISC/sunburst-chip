@@ -17,6 +17,7 @@ class top_chip_dv_env_cfg extends uvm_object;
   // External interface agent configs
   rand i2c_agent_cfg     m_i2c_agent_cfgs[NI2cs];
   rand pattgen_agent_cfg m_pattgen_agent_cfg;
+  rand spi_agent_cfg     m_spi_device_agent_cfgs[NSpis];
   rand uart_agent_cfg    m_uart_agent_cfgs[NUarts];
 
   `uvm_object_utils_begin(top_chip_dv_env_cfg)
@@ -41,6 +42,13 @@ class top_chip_dv_env_cfg extends uvm_object;
     m_pattgen_agent_cfg.if_mode = Device;
     // Configuration is required to perform meaningful monitoring
     m_pattgen_agent_cfg.en_monitor = 0;
+
+    // create spi device agent config obj
+    foreach (m_spi_device_agent_cfgs[i]) begin
+      m_spi_device_agent_cfgs[i] = spi_agent_cfg::type_id::create($sformatf("m_spi_device_agent_cfg%0d", i));
+      // all the spi_agents talking to the host interface should be configured into device mode.
+      m_spi_device_agent_cfgs[i].if_mode = dv_utils_pkg::Device;
+    end
 
     // create uart agent config obj
     foreach (m_uart_agent_cfgs[i]) begin
