@@ -76,17 +76,6 @@ module top_chip_asic_tb;
   wire IO54;
   wire IO55;
   wire IO56;
-  wire IO57;
-  wire IO58;
-  wire IO59;
-  wire IO60;
-  wire IO61;
-  wire IO62;
-  wire IO63;
-  wire IO64;
-  wire IO65;
-  wire IO66;
-  wire IO67;
 
   // ------ DUT ------
 
@@ -148,17 +137,6 @@ module top_chip_asic_tb;
     .IO54,
     .IO55,
     .IO56,
-    .IO57,
-    .IO58,
-    .IO59,
-    .IO60,
-    .IO61,
-    .IO62,
-    .IO63,
-    .IO64,
-    .IO65,
-    .IO66,
-    .IO67,
 
     .USB_P,
     .USB_N
@@ -210,18 +188,18 @@ module top_chip_asic_tb;
   pattgen_if#(NUM_PATTGEN_CHANNELS) pattgen_if();
   assign pattgen_if.clk_i  = peri_clk_if.clk; // u_dut.u_top_chip_system.u_pattgen.clk_i
   assign pattgen_if.rst_ni = peri_clk_if.rst_n; // u_dut.u_top_chip_system.u_pattgen.rst_ni
-  assign pattgen_if.pda_tx = {IO66, IO64};
-  assign pattgen_if.pcl_tx = {IO67, IO65};
+  assign pattgen_if.pda_tx = {IO54, IO52}; // {CH1, CH0}
+  assign pattgen_if.pcl_tx = {IO55, IO53}; // {CH1, CH0}
 
   // Create and connect uart agent interfaces. Mux UART0 as it is shared with a DPI model,
   // using the vif enable signal that can be poked by the virtual sequence.
   // Might as well leave UART1 connected all the time.
   uart_if uart_if[NUarts]();
   logic uart0_rx_dpi;
-  assign IO59 = uart_if[0].enable ? uart_if[0].uart_rx : uart0_rx_dpi;
-  assign uart_if[0].uart_tx = uart_if[0].enable ? IO60 : 1'bz;
-  assign IO61 = uart_if[1].uart_rx;
-  assign uart_if[1].uart_tx = IO62;
+  assign IO48 = uart_if[0].enable ? uart_if[0].uart_rx : uart0_rx_dpi;
+  assign uart_if[0].uart_tx = uart_if[0].enable ? IO49 : 1'bz;
+  assign IO50 = uart_if[1].uart_rx;
+  assign uart_if[1].uart_tx = IO51;
 
   // ------ Memory ------
 
@@ -357,7 +335,7 @@ module top_chip_asic_tb;
     .rst_ni(u_dut.rst_peri_n),
     .active(!uart_if[0].enable),
     .tx_o(uart0_rx_dpi),
-    .rx_i(!uart_if[0].enable ? IO60 : 1'bz)
+    .rx_i(!uart_if[0].enable ? IO49 : 1'bz)
   );
 
   // The USB DPI model (simulated host controller) has its own clock and reset signal,
@@ -383,7 +361,7 @@ module top_chip_asic_tb;
     .clk_i            (clk_usbdpi),
     .rst_ni           (rst_usbdpi_n),
 
-    .usb_vbus         (IO63),
+    .usb_vbus         (IO56),
     .usb_p            (USB_P),
     .usb_n            (USB_N)
   );
