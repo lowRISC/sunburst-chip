@@ -159,7 +159,7 @@ It must have already been compiled using the instructions in the [Test software 
 
 ### Build & run
 
-The `smoke` regression test set (defined in top_chip_sim_cfg.hjson) can be built and run under Xcellium using the following commands:
+The **`smoke` regression test set** (defined in top_chip_sim_cfg.hjson) can be built and run under Xcellium using the following commands:
 
 ```sh
 # -- Build and run top-level `smoke` regression set using Xcelium --
@@ -169,7 +169,7 @@ The `smoke` regression test set (defined in top_chip_sim_cfg.hjson) can be built
 ./hw/vendor/lowrisc_ip/util/dvsim/dvsim.py ./hw/top_chip/dv/top_chip_sim_cfg.hjson -i smoke
 ```
 
-Single tests (also defined in top_chip_sim_cfg.hjson) can be specified in the same way, such as `usbdev_vbus_test`:
+**Single tests** (also defined in top_chip_sim_cfg.hjson) can be specified in the same way, such as `usbdev_vbus_test`:
 
 ```sh
 # -- Build and run the `usbdev_vbus_test` top-level test using Xcelium --
@@ -181,6 +181,16 @@ Single tests (also defined in top_chip_sim_cfg.hjson) can be specified in the sa
 
 You can **increase the number of times each test is run** using the `-rx <multiplier>` option.
 For example, `... -i smoke -rx 10` to run the `smoke` regression set 10 times.
+
+**All tests** can be built and run simply by specifying `all` instead of a regression set or test name:
+
+```sh
+# -- Build and run all top-level tests 10 times using Xcelium --
+# Run from the project root directory.
+# NOTE: test software must have already been built beforehand and Xcelium
+#       must be available on your path.
+./hw/vendor/lowrisc_ip/util/dvsim/dvsim.py ./hw/top_chip/dv/top_chip_sim_cfg.hjson -i all -rx 10
+```
 
 ### Output
 
