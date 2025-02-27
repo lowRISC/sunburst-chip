@@ -60,26 +60,15 @@ module top_chip_asic (
   inout IO54,
   inout IO55,
   inout IO56,
-  inout IO57,
-  inout IO58,
-  inout IO59,
-  inout IO60,
-  inout IO61,
-  inout IO62,
-  inout IO63,
-  inout IO64,
-  inout IO65,
-  inout IO66,
-  inout IO67,
 
   // Dedicated Pads
   inout USB_P,
   inout USB_N
 );
-  localparam int NPads = 70;
+  localparam int NPads = 59;
 
-  localparam int PadUsbP = 68;
-  localparam int PadUsbN = 69;
+  localparam int PadUsbP = 57;
+  localparam int PadUsbN = 58;
 
   wire clk_sys, clk_peri, clk_usb, clk_aon;
   wire rst_sys_n, rst_peri_n, rst_usb_n, rst_aon_n;
@@ -315,63 +304,79 @@ module top_chip_asic (
     pad_out = '0;
     pad_oe = '0;
 
+    // gpio
     cio_gpio_i    = pad_in[31:0];
     pad_out[31:0] = cio_gpio_o;
     pad_oe[31:0]  = cio_gpio_en_o;
 
+    // i2c0
     cio_i2c0_sda_i = pad_in[32];
+    pad_out[32] = cio_i2c0_sda_o;
+    pad_oe[32]  = cio_i2c0_sda_en_o;
+
     cio_i2c0_scl_i = pad_in[33];
+    pad_out[33] = cio_i2c0_scl_o;
+    pad_oe[33]  = cio_i2c0_scl_en_o;
 
-    pad_out[34] = cio_i2c0_sda_o;
-    pad_oe[34]  = cio_i2c0_sda_en_o;
-    pad_out[35] = cio_i2c0_scl_o;
-    pad_oe[35]  = cio_i2c0_scl_en_o;
+    // i2c1
+    cio_i2c1_sda_i = pad_in[34];
+    pad_out[34] = cio_i2c1_sda_o;
+    pad_oe[34]  = cio_i2c1_sda_en_o;
 
-    cio_i2c1_sda_i = pad_in[36];
-    cio_i2c1_scl_i = pad_in[37];
+    cio_i2c1_scl_i = pad_in[35];
+    pad_out[35] = cio_i2c1_scl_o;
+    pad_oe[35]  = cio_i2c1_scl_en_o;
 
-    pad_out[38] = cio_i2c1_sda_o;
-    pad_oe[38]  = cio_i2c1_sda_en_o;
-    pad_out[39] = cio_i2c1_scl_o;
-    pad_oe[39]  = cio_i2c1_scl_en_o;
+    // spi0
+    cio_spi_host0_sd_i = pad_in[39:36];
+    pad_out[39:36] = cio_spi_host0_sd_o;
+    pad_oe[39:36]  = cio_spi_host0_sd_en_o;
 
-    cio_spi_host0_sd_i = pad_in[42:39];
+    pad_out[40]    = cio_spi_host0_sck_o;
+    pad_oe[40]     = cio_spi_host0_sck_en_o;
 
-    pad_out[43]    = cio_spi_host0_sck_o;
-    pad_oe[43]     = cio_spi_host0_sck_en_o;
-    pad_out[44]    = cio_spi_host0_csb_o;
-    pad_oe[44]     = cio_spi_host0_csb_en_o;
-    pad_out[48:45] = cio_spi_host0_sd_o;
-    pad_oe[48:45]  = cio_spi_host0_sd_en_o;
+    pad_out[41]    = cio_spi_host0_csb_o;
+    pad_oe[41]     = cio_spi_host0_csb_en_o;
 
-    cio_spi_host1_sd_i = pad_in[52:49];
+    // spi1
+    cio_spi_host1_sd_i = pad_in[45:42];
+    pad_out[45:42] = cio_spi_host1_sd_o;
+    pad_oe[45:42]  = cio_spi_host1_sd_en_o;
 
-    pad_out[53]    = cio_spi_host1_sck_o;
-    pad_oe[53]     = cio_spi_host1_sck_en_o;
-    pad_out[54]    = cio_spi_host1_csb_o;
-    pad_oe[54]     = cio_spi_host1_csb_en_o;
-    pad_out[58:55] = cio_spi_host1_sd_o;
-    pad_oe[58:55]  = cio_spi_host1_sd_en_o;
+    pad_out[46]    = cio_spi_host1_sck_o;
+    pad_oe[46]     = cio_spi_host1_sck_en_o;
 
-    cio_uart0_rx_i = pad_in[59];
-    pad_out[60] = cio_uart0_tx_o;
-    pad_oe[60]  = cio_uart0_tx_en_o;
+    pad_out[47]    = cio_spi_host1_csb_o;
+    pad_oe[47]     = cio_spi_host1_csb_en_o;
 
-    cio_uart1_rx_i = pad_in[61];
-    pad_out[62] = cio_uart1_tx_o;
-    pad_oe[62]  = cio_uart1_tx_en_o;
+    // uart0
+    cio_uart0_rx_i = pad_in[48];
 
-    cio_usbdev_sense_i = pad_in[63];
+    pad_out[49] = cio_uart0_tx_o;
+    pad_oe[49]  = cio_uart0_tx_en_o;
+
+    // uart1
+    cio_uart1_rx_i = pad_in[50];
+
+    pad_out[51] = cio_uart1_tx_o;
+    pad_oe[51]  = cio_uart1_tx_en_o;
+
+    // pattgen
+    pad_out[52] = cio_pattgen_pda0_tx_o;
+    pad_oe[52]  = cio_pattgen_pda0_tx_en_o;
+
+    pad_out[53] = cio_pattgen_pcl0_tx_o;
+    pad_oe[53]  = cio_pattgen_pcl0_tx_en_o;
+
+    pad_out[54] = cio_pattgen_pda1_tx_o;
+    pad_oe[54]  = cio_pattgen_pda1_tx_en_o;
+
+    pad_out[55] = cio_pattgen_pcl1_tx_o;
+    pad_oe[55]  = cio_pattgen_pcl1_tx_en_o;
+
+    // usbdev
+    cio_usbdev_sense_i = pad_in[56];
     // no output driver required.
-
-    pad_out[64] = cio_pattgen_pda0_tx_o;
-    pad_oe[64]  = cio_pattgen_pda0_tx_en_o;
-    pad_out[65] = cio_pattgen_pcl0_tx_o;
-    pad_oe[65]  = cio_pattgen_pcl0_tx_en_o;
-    pad_out[66] = cio_pattgen_pda1_tx_o;
-    pad_oe[66]  = cio_pattgen_pda1_tx_en_o;
-    pad_out[67] = cio_pattgen_pcl1_tx_o;
-    pad_oe[67]  = cio_pattgen_pcl1_tx_en_o;
 
     // USB_P/N may require special treatment beyond the drive strength.
     pad_out[PadUsbP] = cio_usbdev_usb_dp_o;
@@ -389,17 +394,6 @@ module top_chip_asic (
       USB_N,
       USB_P,
 
-      IO67,
-      IO66,
-      IO65,
-      IO64,
-      IO63,
-      IO62,
-      IO61,
-      IO60,
-      IO59,
-      IO58,
-      IO57,
       IO56,
       IO55,
       IO54,
