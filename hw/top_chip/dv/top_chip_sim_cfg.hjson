@@ -134,7 +134,7 @@
   regressions: [
     {
       name: smoke
-      tests: ["top_chip_smoke", "pattgen_ios_test", "uart_smoketest", "top_usbdev_smoke"]
+      tests: ["top_chip_smoke", "pattgen_ios_test", "uart_smoketest", "usbdev_vbus_test"]
     }
     {
       name: uart
