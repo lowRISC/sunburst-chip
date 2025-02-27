@@ -145,5 +145,13 @@
       name: uart
       tests: ["uart_baud_rate_test", "uart_smoketest", "uart_tx_rx_test"]
     }
+    {
+      name: usbdev
+      tests: [
+        "top_usbdev_smoke", "usbdev_config_host_test", "usbdev_iso_test", "usbdev_mem_test",
+        "usbdev_mixed_test", "usbdev_pincfg_test", "usbdev_pullup_test", "usbdev_setuprx_test",
+        "usbdev_stream_test", "usbdev_test", "usbdev_toggle_restore_test", "usbdev_vbus_test"
+      ]
+    }
   ]
 }
