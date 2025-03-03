@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "sw/device/lib/arch/device.h"
+#include "sw/device/lib/base/bitfield.h"
 #include "sw/device/lib/base/mmio.h"
 #include "sw/device/lib/dif/dif_base.h"
 #include "sw/device/lib/dif/dif_i2c.h"
@@ -54,65 +55,81 @@ static volatile bool done_irq_seen = false;
 /**
  * these variables store values based on kI2cIdx
  */
-static uint32_t i2c_irq_fmt_threshold_id;
 static uint32_t i2c_base_addr;
-static top_chip_plic_irq_id_t plic_irqs[8];
+static top_chip_plic_irq_id_t plic_irq;
+static top_chip_plic_peripheral_t peripheral_id;
 
 void ottf_external_isr(uint32_t *exc_info) {
-  plic_isr_ctx_t plic_ctx = {.rv_plic = &plic,
-                             .hart_id = kTopChipPlicTargetIbex0};
+  // Find which interrupt fired at PLIC by claiming it.
+  dif_rv_plic_irq_id_t plic_irq_id;
+  CHECK_DIF_OK(
+      dif_rv_plic_irq_claim(&plic, kTopChipPlicTargetIbex0, &plic_irq_id));
 
-  i2c_isr_ctx_t i2c_ctx = {.i2c = &i2c,
-                           .plic_i2c_start_irq_id = i2c_irq_fmt_threshold_id,
-                           .expected_irq = 0,
-                           .is_only_irq = false};
+  // Check if it is the right peripheral.
+  top_chip_plic_peripheral_t peripheral = (top_chip_plic_peripheral_t)
+      top_chip_plic_interrupt_for_peripheral[plic_irq_id];
+  CHECK(peripheral == peripheral_id,
+        "Interrupt from unexpected peripheral: %d", peripheral);
 
-  top_chip_plic_peripheral_t peripheral;
-  dif_i2c_irq_t i2c_irq;
-  isr_testutils_i2c_isr(plic_ctx, i2c_ctx, false, &peripheral, &i2c_irq);
+  // Sunburst - determine interrupt by reading i2c block interrupt registers
+  dif_i2c_irq_state_snapshot_t state_snapshot;
+  dif_i2c_irq_enable_snapshot_t enable_snapshot;
+  dif_i2c_irq_state_snapshot_t pending_enabled;
+  CHECK_DIF_OK(dif_i2c_irq_get_state(&i2c, &state_snapshot));
+  CHECK_DIF_OK(dif_i2c_irq_disable_all(&i2c, &enable_snapshot));
+  CHECK_DIF_OK(dif_i2c_irq_restore_all(&i2c, &enable_snapshot));
+  pending_enabled = state_snapshot & enable_snapshot;
 
+  dif_i2c_irq_t i2c_irq = 0;
   bool disable = false;
-  switch (i2c_irq) {
-    case kDifI2cIrqFmtThreshold:
-      fmt_irq_seen = true;
-      i2c_irq = kDifI2cIrqFmtThreshold;
-      disable = true;
-      break;
-    case kDifI2cIrqRxThreshold:
-      rx_irq_seen = true;
-      i2c_irq = kDifI2cIrqRxThreshold;
-      disable = true;
-      break;
-    case kDifI2cIrqCmdComplete:
-      done_irq_seen = true;
-      i2c_irq = kDifI2cIrqCmdComplete;
-      break;
-    default:
-      LOG_ERROR("Unexpected interrupt (at I2C): %d", i2c_irq);
-      break;
+  if (bitfield_bit32_read(pending_enabled, kDifI2cIrqFmtThreshold)) {
+    fmt_irq_seen = true;
+    i2c_irq = kDifI2cIrqFmtThreshold;
+    disable = true;
+  } else if (bitfield_bit32_read(pending_enabled, kDifI2cIrqRxThreshold)) {
+    rx_irq_seen = true;
+    i2c_irq = kDifI2cIrqRxThreshold;
+    disable = true;
+  } else if (bitfield_bit32_read(pending_enabled, kDifI2cIrqCmdComplete)) {
+    done_irq_seen = true;
+    i2c_irq = kDifI2cIrqCmdComplete;
+  } else {
+    LOG_ERROR("Unexpected interrupts (at I2C): %0x (%0x & %0x)",
+              pending_enabled, state_snapshot, enable_snapshot);
+    if (bitfield_bit32_read(pending_enabled, kDifI2cIrqControllerHalt)) {
+      LOG_ERROR("ControllerHalt!");
+      dif_i2c_controller_halt_events_t halt_events = {0};
+      CHECK_DIF_OK(dif_i2c_get_controller_halt_events(&i2c, &halt_events));
+      LOG_ERROR("CONTROLLER_EVENTS:\n  nack received: %d\n  "
+                 "unhandled nack timeout: %d\n  bus timeout: %d\n  "
+                 "arbitration lost: %d",
+                halt_events.nack_received, halt_events.unhandled_nack_timeout,
+                halt_events.bus_timeout, halt_events.arbitration_lost);
+    }
+    test_status_set(kTestStatusFailed);
   }
 
   if (disable) {
     // Status type interrupt must be disabled since it cannot be cleared
     CHECK_DIF_OK(dif_i2c_irq_set_enabled(&i2c, i2c_irq, kDifToggleDisabled));
   }
+
+  // Clear the interrupt at I^2C block.
+  CHECK_DIF_OK(dif_i2c_irq_acknowledge(&i2c, i2c_irq));
+
+  // Complete the IRQ at PLIC.
+  CHECK_DIF_OK(dif_rv_plic_irq_complete(&plic, kTopChipPlicTargetIbex0,
+                                        plic_irq_id));
 }
 
 static void en_plic_irqs(dif_rv_plic_t *plic) {
-  // Enable functional interrupts as well as error interrupts to make sure
-  // everything is behaving as expected.
-  for (uint32_t i = 0; i < ARRAYSIZE(plic_irqs); ++i) {
-    CHECK_DIF_OK(dif_rv_plic_irq_set_enabled(
-        plic, plic_irqs[i], kTopChipPlicTargetIbex0, kDifToggleEnabled));
+  // Enable interrupts
+  CHECK_DIF_OK(dif_rv_plic_irq_set_enabled(
+      plic, plic_irq, kTopChipPlicTargetIbex0, kDifToggleEnabled));
 
-    // Assign a default priority
-    CHECK_DIF_OK(dif_rv_plic_irq_set_priority(plic, plic_irqs[i],
-                                              kDifRvPlicMaxPriority));
-  }
-
-  // Enable the external IRQ at Ibex.
-  irq_global_ctrl(true);
-  irq_external_ctrl(true);
+  // Assign a default priority
+  CHECK_DIF_OK(dif_rv_plic_irq_set_priority(plic, plic_irq,
+                                            kDifRvPlicMaxPriority));
 }
 
 static void en_i2c_irqs(dif_i2c_t *i2c) {
@@ -120,11 +137,12 @@ static void en_i2c_irqs(dif_i2c_t *i2c) {
       kDifI2cIrqRxThreshold, kDifI2cIrqRxOverflow, kDifI2cIrqControllerHalt,
       kDifI2cIrqSclInterference, kDifI2cIrqSdaInterference,
       kDifI2cIrqStretchTimeout,
-      // Removed for now, see plic_irqs above for
-      // explanation kDifI2cIrqSdaUnstable,
+      // Removed for now, instability is intentionally introduced in testing(?)
+      // kDifI2cIrqSdaUnstable,
       kDifI2cIrqCmdComplete};
 
-  for (uint32_t i = 0; i <= ARRAYSIZE(i2c_irqs); ++i) {
+  for (uint32_t i = 0; i < ARRAYSIZE(i2c_irqs); ++i) {
+
     CHECK_DIF_OK(dif_i2c_irq_set_enabled(i2c, i2c_irqs[i], kDifToggleEnabled));
   }
 }
@@ -141,25 +159,13 @@ static void en_i2c_status_irqs(dif_i2c_t *i2c) {
 
 // handle i2c index related configure
 void config_i2c_with_index(void) {
-  uint8_t i = 0;
   switch (kI2cIdx) {
     case 0:
       i2c_base_addr = TOP_CHIP_I2C0_BASE_ADDR;
-      i2c_irq_fmt_threshold_id = kTopChipPlicIrqIdI2c0FmtThreshold;
+      plic_irq = kTopChipPlicIrqIdI2c0;
+      peripheral_id = kTopChipPlicPeripheralI2c0;
 
-      plic_irqs[i++] = kTopChipPlicIrqIdI2c0FmtThreshold;
-      plic_irqs[i++] = kTopChipPlicIrqIdI2c0RxThreshold;
-      plic_irqs[i++] = kTopChipPlicIrqIdI2c0RxOverflow;
-      plic_irqs[i++] = kTopChipPlicIrqIdI2c0ControllerHalt;
-      plic_irqs[i++] = kTopChipPlicIrqIdI2c0SclInterference;
-      plic_irqs[i++] = kTopChipPlicIrqIdI2c0SdaInterference;
-      plic_irqs[i++] = kTopChipPlicIrqIdI2c0StretchTimeout;
-      // TODO, leave out sda unstable for now until DV side is improved. Sda
-      // instability during the high cycle is intentionally being introduced
-      // right now.
-      // plic_irqs[i++] = kTopChipPlicIrqIdI2c0SdaUnstable;
-      plic_irqs[i++] = kTopChipPlicIrqIdI2c0CmdComplete;
-
+      // Sunburst - pinmux code kept as placeholder
       CHECK_DIF_OK(dif_pinmux_input_select(
           &pinmux, kTopChipPinmuxPeripheralInI2c0Scl,
           kTopChipPinmuxInselIoa8));
@@ -175,21 +181,10 @@ void config_i2c_with_index(void) {
       break;
     case 1:
       i2c_base_addr = TOP_CHIP_I2C1_BASE_ADDR;
-      i2c_irq_fmt_threshold_id = kTopChipPlicIrqIdI2c1FmtThreshold;
+      plic_irq = kTopChipPlicIrqIdI2c1;
+      peripheral_id = kTopChipPlicPeripheralI2c1;
 
-      plic_irqs[i++] = kTopChipPlicIrqIdI2c1FmtThreshold;
-      plic_irqs[i++] = kTopChipPlicIrqIdI2c1RxThreshold;
-      plic_irqs[i++] = kTopChipPlicIrqIdI2c1RxOverflow;
-      plic_irqs[i++] = kTopChipPlicIrqIdI2c1ControllerHalt;
-      plic_irqs[i++] = kTopChipPlicIrqIdI2c1SclInterference;
-      plic_irqs[i++] = kTopChipPlicIrqIdI2c1SdaInterference;
-      plic_irqs[i++] = kTopChipPlicIrqIdI2c1StretchTimeout;
-      // TODO, leave out sda unstable for now until DV side is improved. Sda
-      // instability during the high cycle is intentionally being introduced
-      // right now.
-      // plic_irqs[i++] = kTopChipPlicIrqIdI2c1SdaUnstable;
-      plic_irqs[i++] = kTopChipPlicIrqIdI2c1CmdComplete;
-
+      // Sunburst - pinmux code kept as placeholder
       CHECK_DIF_OK(dif_pinmux_input_select(
           &pinmux, kTopChipPinmuxPeripheralInI2c1Scl,
           kTopChipPinmuxInselIob9));
@@ -281,6 +276,12 @@ bool test_main(void) {
       mmio_region_from_addr(TOP_CHIP_RV_PLIC_BASE_ADDR), &plic));
 
   en_plic_irqs(&plic);
+
+  // Enable the external IRQ at Ibex.
+  // Sunburst - moved to be inline in main to avoid interrupt bit being cleared
+  //            by interrupt-clearing backward sentry on function return.
+  irq_global_ctrl(true);
+  irq_external_ctrl(true);
 
   // I2C speed parameters.
   dif_i2c_timing_config_t timing_config = {

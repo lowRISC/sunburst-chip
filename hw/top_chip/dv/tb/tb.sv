@@ -185,13 +185,18 @@ module top_chip_asic_tb;
   });
 
   // Create and connect I^2C agent interfaces.
-  // Need to use port connections due to bidirectionality
+  // Need to use port connections due to bidirectionality.
   i2c_if i2c_if[NI2cs](
     .clk_i(peri_clk_if.clk),    // shared with all instances
     .rst_ni(peri_clk_if.rst_n), // shared with all instances
-    .sda_io({IO34, IO32})  // {i2c1, i2c0}
-    .scl_io({IO35, IO33}), // {i2c1, i2c0}
+    .sda_io({IO32, IO34}), // {i2c0, i2c1}
+    .scl_io({IO33, IO35})  // {i2c0, i2c1}
   );
+  // Add weak pull-ups to I^2C lines
+  assign (weak1, weak0) IO32 = 1'b1;
+  assign (weak1, weak0) IO33 = 1'b1;
+  assign (weak1, weak0) IO34 = 1'b1;
+  assign (weak1, weak0) IO35 = 1'b1;
 
   // Create and connect pattgen agent interface
   pattgen_if#(NUM_PATTGEN_CHANNELS) pattgen_if();
@@ -204,7 +209,7 @@ module top_chip_asic_tb;
   // Full-duplex usage { N/A,   N/A,  CIPO,  COPI }
   // Quad SPI usage    {bidir, bidir, bidir, bidir}
   spi_if spi_device_if[NSpis](
-    .rst_n(peri_clk_if.rst_n) // shared with all instances
+    .rst_n(peri_clk_if.rst_n), // shared with all instances
     .sio({{IO45, IO44, IO43, IO42}, {IO39, IO38, IO37, IO36}}) // {{spi1} {spi0}}
   );
   assign spi_device_if[0].sck = IO40;

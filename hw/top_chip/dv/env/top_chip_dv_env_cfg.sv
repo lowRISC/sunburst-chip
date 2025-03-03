@@ -6,6 +6,10 @@ class top_chip_dv_env_cfg extends uvm_object;
   string mem_image_files[chip_mem_e];
   longint unsigned sys_timeout_cycles = 20_000_000;
 
+  // DV CDC enable - used in top_chip_dv_i2c_host_tx_rx_vseq.
+  // TODO: Add some way to control this? Randomise for now.
+  bit en_dv_cdc = $urandom_range(1,0);
+
   // Software logging & status interfaces
   virtual sw_logger_if      sw_logger_vif;
   virtual sw_test_status_if sw_test_status_vif;

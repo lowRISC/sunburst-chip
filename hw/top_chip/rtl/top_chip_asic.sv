@@ -67,6 +67,10 @@ module top_chip_asic (
 );
   localparam int NPads = 59;
 
+  localparam int PadI2c0Sda = 32;
+  localparam int PadI2c0Scl = 33;
+  localparam int PadI2c1Sda = 34;
+  localparam int PadI2c1Scl = 35;
   localparam int PadUsbP = 57;
   localparam int PadUsbN = 58;
 
@@ -296,8 +300,15 @@ module top_chip_asic (
   prim_pad_wrapper_pkg::pad_attr_t pad_attr [NPads];
 
   for (genvar i_pad=0;i_pad < NPads;i_pad++) begin : gen_drive_strength
-    // `Strong` drive strength required for USB_P/USB_N to overpower the pullup.
-    assign pad_attr[i_pad] = '{drive_strength: (i_pad == PadUsbP || i_pad == PadUsbN), default: '0};
+    assign pad_attr[i_pad] = '{
+      // `Strong` drive strength required for USB_P/USB_N to overpower the pullup.
+      drive_strength: (i_pad == PadUsbP || i_pad == PadUsbN),
+      // // Enable pull-ups for I^2C lines.
+      // pull_en: (i_pad == PadI2c0Sda || i_pad == PadI2c0Scl ||
+      //           i_pad == PadI2c1Sda || i_pad == PadI2c1Scl),
+      // pull_select: 1,
+      default: '0
+    };
   end
 
   always_comb begin

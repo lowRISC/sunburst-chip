@@ -54,6 +54,11 @@
       run_opts: ["+ChipMemSRAM_image_file={proj_root}/scratch_sw/bare_metal/build/tests/test_runner.vmem"]
     }
     {
+      name: i2c_host_tx_rx_test
+      uvm_test_seq: top_chip_dv_i2c_host_tx_rx_vseq
+      run_opts: ["+ChipMemSRAM_image_file={proj_root}/sw/device/build/tests/i2c_host_tx_rx_test.vmem", "+i2c_idx=1"]
+    }
+    {
       name: pattgen_ios_test
       uvm_test_seq: top_chip_dv_pattgen_vseq
       run_opts: ["+ChipMemSRAM_image_file={proj_root}/sw/device/build/tests/pattgen_ios_test.vmem"]
