@@ -7,9 +7,6 @@
 module pwm
   import pwm_reg_pkg::*;
 #(
-  parameter bit                             EnableRacl                = 1'b0,
-  parameter bit                             RaclErrorRsp              = EnableRacl,
-  parameter top_racl_pkg::racl_policy_sel_t RaclPolicySelVec[NumRegs] = '{NumRegs{0}},
   parameter int                             PhaseCntDw                = 16,
   parameter int                             BeatCntDw                 = 27
 ) (
@@ -22,30 +19,20 @@ module pwm
   input                       tlul_pkg::tl_h2d_t tl_i,
   output                      tlul_pkg::tl_d2h_t tl_o,
 
-  // RACL interface
-  input  top_racl_pkg::racl_policy_vec_t  racl_policies_i,
-  output top_racl_pkg::racl_error_log_t   racl_error_o,
-
   output logic [NOutputs-1:0] cio_pwm_o,
   output logic [NOutputs-1:0] cio_pwm_en_o
 );
 
   pwm_reg_pkg::pwm_reg2hw_t reg2hw;
 
-  pwm_reg_top #(
-    .EnableRacl(EnableRacl),
-    .RaclErrorRsp(RaclErrorRsp),
-    .RaclPolicySelVec(RaclPolicySelVec)
-  ) u_reg (
+  pwm_reg_top u_reg (
     .clk_i,
     .rst_ni,
     .clk_core_i,
     .rst_core_ni,
     .tl_i             (tl_i),
     .tl_o             (tl_o),
-    .reg2hw           (reg2hw),
-    .racl_policies_i  (racl_policies_i),
-    .racl_error_o     (racl_error_o)
+    .reg2hw           (reg2hw)
   );
 
   assign cio_pwm_en_o = {NOutputs{1'b1}};
@@ -66,6 +53,4 @@ module pwm
 
   `ASSERT_KNOWN(CioPWMKnownO_A, cio_pwm_o)
   `ASSERT(CioPWMEnIsOneO_A, (&cio_pwm_en_o) === 1'b1)
-
-  `ASSERT_KNOWN(RaclErrorValidKnown_A, racl_error_o.valid)
 endmodule : pwm
