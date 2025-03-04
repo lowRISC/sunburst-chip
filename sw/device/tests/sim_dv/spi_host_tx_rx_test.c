@@ -154,7 +154,7 @@ void setup_pads_spi_host0(void) {
       .drive_strength = 0,
       .flags = kDifPinmuxPadAttrPullResistorEnable |
                kDifPinmuxPadAttrPullResistorUp};
-  for (uint32_t i = 0; i <= ARRAYSIZE(spi_host0_direct_pads); ++i) {
+  for (uint32_t i = 0; i < ARRAYSIZE(spi_host0_direct_pads); ++i) {
     CHECK_DIF_OK(dif_pinmux_pad_write_attrs(&pinmux, spi_host0_direct_pads[i],
                                             kDifPinmuxPadKindDio, in_attr,
                                             &out_attr));
@@ -175,7 +175,7 @@ void setup_pinmux_pads_spi_host1(void) {
       // set weak pull-ups for all the pads
       .flags = kDifPinmuxPadAttrPullResistorEnable |
                kDifPinmuxPadAttrPullResistorUp};
-  for (uint32_t i = 0; i <= ARRAYSIZE(spi_host1_muxed_pads); ++i) {
+  for (uint32_t i = 0; i < ARRAYSIZE(spi_host1_muxed_pads); ++i) {
     CHECK_DIF_OK(dif_pinmux_pad_write_attrs(&pinmux, spi_host1_muxed_pads[i],
                                             kDifPinmuxPadKindMio, in_attr,
                                             &out_attr));
@@ -206,7 +206,7 @@ bool test_main(void) {
   setup_pinmux_pads_spi_host1();  // muxed
 
   // Setup spi host configuration
-  LOG_INFO("Testing spi_host%0d", kSPIHostIdx);
+  LOG_INFO("Testing spi_host%u", kSPIHostIdx);
   uintptr_t base_addr;
   uint64_t clkHz;
   switch (kSPIHostIdx) {
