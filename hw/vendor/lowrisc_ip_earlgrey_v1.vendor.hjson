@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 {
-    name: "lowrisc_ip",
+    name: "lowrisc_ip_earlgrey_v1",
     target_dir: "lowrisc_ip",
     patch_dir: "patches/lowrisc_ip",
 
