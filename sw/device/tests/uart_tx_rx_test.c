@@ -166,43 +166,41 @@ void ottf_external_isr(uint32_t *exc_info) {
   // Sunburst - determine interrupt by reading uart interrupt registers
   dif_uart_irq_state_snapshot_t state_snapshot;
   dif_uart_irq_enable_snapshot_t enable_snapshot;
+  dif_uart_irq_state_snapshot_t pending_enabled;
   CHECK_DIF_OK(dif_uart_irq_get_state(&uart, &state_snapshot));
   CHECK_DIF_OK(dif_uart_irq_disable_all(&uart, &enable_snapshot));
   CHECK_DIF_OK(dif_uart_irq_restore_all(&uart, &enable_snapshot));
-  if (bitfield_bit32_read(state_snapshot, kDifUartIrqTxWatermark) &&
-      bitfield_bit32_read(enable_snapshot, kDifUartIrqTxWatermark)) {
+  pending_enabled = state_snapshot & enable_snapshot;
+
+  if (bitfield_bit32_read(pending_enabled, kDifUartIrqTxWatermark)) {
     CHECK_DIF_OK(dif_uart_irq_set_enabled(&uart, kDifUartIrqTxWatermark,
                                           kDifToggleDisabled));
     CHECK(exp_uart_irq_tx_watermark, "Unexpected TX watermark interrupt");
     uart_irq_tx_watermark_fired = true;
     uart_irq = kDifUartIrqTxWatermark;
-  } else if (bitfield_bit32_read(state_snapshot, kDifUartIrqTxEmpty) &&
-             bitfield_bit32_read(enable_snapshot, kDifUartIrqTxEmpty)) {
+  } else if (bitfield_bit32_read(pending_enabled, kDifUartIrqTxEmpty)) {
     CHECK_DIF_OK(dif_uart_irq_set_enabled(&uart, kDifUartIrqTxEmpty,
                                           kDifToggleDisabled));
     CHECK(exp_uart_irq_tx_empty, "Unexpected TX empty interrupt");
     uart_irq_tx_empty_fired = true;
     uart_irq = kDifUartIrqTxEmpty;
-  } else if (bitfield_bit32_read(state_snapshot, kDifUartIrqRxWatermark) &&
-             bitfield_bit32_read(enable_snapshot, kDifUartIrqRxWatermark)) {
+  } else if (bitfield_bit32_read(pending_enabled, kDifUartIrqRxWatermark)) {
     CHECK_DIF_OK(dif_uart_irq_set_enabled(&uart, kDifUartIrqRxWatermark,
                                           kDifToggleDisabled));
     CHECK(exp_uart_irq_rx_watermark, "Unexpected RX watermark interrupt");
     uart_irq_rx_watermark_fired = true;
     uart_irq = kDifUartIrqRxWatermark;
-  } else if (bitfield_bit32_read(state_snapshot, kDifUartIrqTxDone) &&
-             bitfield_bit32_read(enable_snapshot, kDifUartIrqTxDone)) {
+  } else if (bitfield_bit32_read(pending_enabled, kDifUartIrqTxDone)) {
     CHECK(exp_uart_irq_tx_done, "Unexpected TX done interrupt");
     uart_irq_tx_done_fired = true;
     uart_irq = kDifUartIrqTxDone;
-  } else if (bitfield_bit32_read(state_snapshot, kDifUartIrqRxOverflow) &&
-             bitfield_bit32_read(enable_snapshot, kDifUartIrqRxOverflow)) {
+  } else if (bitfield_bit32_read(pending_enabled, kDifUartIrqRxOverflow)) {
     CHECK(exp_uart_irq_rx_overflow, "Unexpected RX overflow interrupt");
     uart_irq_rx_overflow_fired = true;
     uart_irq = kDifUartIrqRxOverflow;
   } else {
-    LOG_ERROR("Unexpected interrupt (at uart state, enable): %x, %x",
-              state_snapshot, enable_snapshot);
+    LOG_ERROR("Unexpected interrupts (at uart): %0x (%0x & %0x)",
+              pending_enabled, state_snapshot, enable_snapshot);
     test_status_set(kTestStatusFailed);
     // The `abort()` call below is redundant. It is added to prevent the
     // compilation error due to not initializing the `uart_irq` enum variable
@@ -383,7 +381,7 @@ static void execute_test(const dif_uart_t *uart) {
   exp_uart_irq_tx_watermark = true;
   exp_uart_irq_tx_empty = true;
   // Set the flag below to true to allow TX data to be sent the first time in
-  // the if comdition below. Subsequently, TX watermark interrupt will trigger
+  // the if condition below. Subsequently, TX watermark interrupt will trigger
   // more data to be sent.
   uart_irq_tx_watermark_fired = true;
   exp_uart_irq_tx_done = false;
@@ -393,7 +391,7 @@ static void execute_test(const dif_uart_t *uart) {
   size_t uart_rx_bytes_read = 0;
   exp_uart_irq_rx_watermark = true;
   // Set the flag below to true to allow RX data to be received the first time
-  // in the if comdition below. Subsequently, RX watermark interrupt will
+  // in the if condition below. Subsequently, RX watermark interrupt will
   // trigger more data to be received.
   uart_irq_rx_watermark_fired = true;
   exp_uart_irq_rx_overflow = false;
