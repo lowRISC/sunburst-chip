@@ -69,6 +69,11 @@
       run_opts: ["+ChipMemSRAM_image_file={proj_root}/sw/device/build/tests/pattgen_ios_test.vmem"]
     }
     {
+      name: spi_host_tx_rx_test
+      uvm_test_seq: top_chip_dv_spi_host_tx_rx_vseq
+      run_opts: ["+ChipMemSRAM_image_file={proj_root}/sw/device/build/tests/spi_host_tx_rx_test.vmem"]
+    }
+    {
       name: uart_baud_rate_test
       uvm_test_seq: top_chip_dv_uart_rand_baudrate_vseq
       run_opts: ["+ChipMemSRAM_image_file={proj_root}/sw/device/build/tests/uart_tx_rx_test.vmem"]
@@ -150,7 +155,7 @@
   regressions: [
     {
       name: smoke
-      tests: ["top_chip_smoke", "i2c_host_tx_rx_test", "pattgen_ios_test", "uart_smoketest", "top_usbdev_smoke"]
+      tests: ["top_chip_smoke", "i2c_host_tx_rx_test", "pattgen_ios_test", "spi_host_tx_rx_test", "uart_smoketest", "top_usbdev_smoke"]
     }
     {
       name: i2c
