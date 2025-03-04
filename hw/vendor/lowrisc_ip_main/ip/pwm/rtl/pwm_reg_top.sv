@@ -6,13 +6,7 @@
 
 `include "prim_assert.sv"
 
-module pwm_reg_top
-  # (
-    parameter bit          EnableRacl           = 1'b0,
-    parameter bit          RaclErrorRsp         = 1'b1,
-    parameter top_racl_pkg::racl_policy_sel_t RaclPolicySelVec[pwm_reg_pkg::NumRegs] =
-      '{pwm_reg_pkg::NumRegs{0}}
-  ) (
+module pwm_reg_top (
   input clk_i,
   input rst_ni,
   input clk_core_i,
@@ -20,11 +14,7 @@ module pwm_reg_top
   input  tlul_pkg::tl_h2d_t tl_i,
   output tlul_pkg::tl_d2h_t tl_o,
   // To HW
-  output pwm_reg_pkg::pwm_reg2hw_t reg2hw, // Write
-
-  // RACL interface
-  input  top_racl_pkg::racl_policy_vec_t racl_policies_i,
-  output top_racl_pkg::racl_error_log_t  racl_error_o
+  output pwm_reg_pkg::pwm_reg2hw_t reg2hw // Write
 );
 
   import pwm_reg_pkg::* ;
@@ -84,8 +74,7 @@ module pwm_reg_top
     .be_o    (reg_be),
     .busy_i  (reg_busy),
     .rdata_i (reg_rdata),
-    // Translate RACL error to TLUL error if enabled
-    .error_i (reg_error | (RaclErrorRsp & racl_error_o.valid))
+    .error_i (reg_error)
   );
 
   // cdc oversampling signals
@@ -3061,32 +3050,12 @@ module pwm_reg_top
 
 
   logic [22:0] addr_hit;
-  top_racl_pkg::racl_role_vec_t racl_role_vec;
-  top_racl_pkg::racl_role_t racl_role;
 
   logic [22:0] racl_addr_hit_read;
   logic [22:0] racl_addr_hit_write;
 
-  if (EnableRacl) begin : gen_racl_role_logic
-    // Retrieve RACL role from user bits and one-hot encode that for the comparison bitmap
-    assign racl_role = top_racl_pkg::tlul_extract_racl_role_bits(tl_i.a_user.rsvd);
-
-    prim_onehot_enc #(
-      .OneHotWidth( $bits(top_racl_pkg::racl_role_vec_t) )
-    ) u_racl_role_encode (
-      .in_i ( racl_role     ),
-      .en_i ( 1'b1          ),
-      .out_o( racl_role_vec )
-    );
-  end else begin : gen_no_racl_role_logic
-    assign racl_role     = '0;
-    assign racl_role_vec = '0;
-  end
-
   always_comb begin
     addr_hit = '0;
-    racl_addr_hit_read  = '0;
-    racl_addr_hit_write = '0;
     addr_hit[ 0] = (reg_addr == PWM_ALERT_TEST_OFFSET);
     addr_hit[ 1] = (reg_addr == PWM_REGWEN_OFFSET);
     addr_hit[ 2] = (reg_addr == PWM_CFG_OFFSET);
@@ -3110,37 +3079,11 @@ module pwm_reg_top
     addr_hit[20] = (reg_addr == PWM_BLINK_PARAM_3_OFFSET);
     addr_hit[21] = (reg_addr == PWM_BLINK_PARAM_4_OFFSET);
     addr_hit[22] = (reg_addr == PWM_BLINK_PARAM_5_OFFSET);
-
-    if (EnableRacl) begin : gen_racl_hit
-      for (int unsigned slice_idx = 0; slice_idx < 23; slice_idx++) begin
-        racl_addr_hit_read[slice_idx] =
-            addr_hit[slice_idx] & (|(racl_policies_i[RaclPolicySelVec[slice_idx]].read_perm
-                                      & racl_role_vec));
-        racl_addr_hit_write[slice_idx] =
-            addr_hit[slice_idx] & (|(racl_policies_i[RaclPolicySelVec[slice_idx]].write_perm
-                                      & racl_role_vec));
-      end
-    end else begin : gen_no_racl
-      racl_addr_hit_read  = addr_hit;
-      racl_addr_hit_write = addr_hit;
-    end
+    racl_addr_hit_read  = addr_hit;
+    racl_addr_hit_write = addr_hit;
   end
 
   assign addrmiss = (reg_re || reg_we) ? ~|addr_hit : 1'b0 ;
-  // A valid address hit, access, but failed the RACL check
-  assign racl_error_o.valid = |addr_hit & ((reg_re & ~|racl_addr_hit_read) |
-                                           (reg_we & ~|racl_addr_hit_write));
-  assign racl_error_o.request_address = top_pkg::TL_AW'(reg_addr);
-  assign racl_error_o.racl_role       = racl_role;
-  assign racl_error_o.overflow        = 1'b0;
-
-  if (EnableRacl) begin : gen_racl_log
-    assign racl_error_o.ctn_uid     = top_racl_pkg::tlul_extract_ctn_uid_bits(tl_i.a_user.rsvd);
-    assign racl_error_o.read_access = tl_i.a_opcode == tlul_pkg::Get;
-  end else begin : gen_no_racl_log
-    assign racl_error_o.ctn_uid     = '0;
-    assign racl_error_o.read_access = 1'b0;
-  end
 
   // Check sub-word write is permitted
   always_comb begin
@@ -3424,8 +3367,6 @@ module pwm_reg_top
   logic unused_be;
   assign unused_wdata = ^reg_wdata;
   assign unused_be = ^reg_be;
-  logic unused_policy_sel;
-  assign unused_policy_sel = ^racl_policies_i;
 
   // Assertions for Register Interface
   `ASSERT_PULSE(wePulse, reg_we, clk_i, !rst_ni)
