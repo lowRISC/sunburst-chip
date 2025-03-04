@@ -83,3 +83,13 @@ index 5f007e8..d6e2e42 100644
      .cio_pwm_o     (cio_pwm),
      .cio_pwm_en_o  (cio_pwm_en)
    );
+diff --git a/dv/cov/cover.ccf b/dv/cov/cover.ccf
+index 5b8de80..86ef5c2 100644
+--- a/dv/cov/cover.ccf
++++ b/dv/cov/cover.ccf
+@@ -6,4 +6,4 @@
+ include_ccf ${dv_root}/tools/xcelium/cover.ccf
+ 
+ // Exclude some impossible toggle coverage
+-set_toggle_excludefile -bitexclude ${proj_root}/hw/ip/pwm/dv/cov/toggle.exclude
++set_toggle_excludefile -bitexclude ${proj_root}/hw/vendor/lowrisc_ip_main/ip/pwm/dv/cov/toggle.exclude
