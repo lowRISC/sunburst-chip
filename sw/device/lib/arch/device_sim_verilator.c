@@ -32,7 +32,8 @@ uint64_t to_cpu_cycles(uint64_t usec) {
   return (usec + 1) / 2;
 }
 
-const uint64_t kClockFreqHiSpeedPeripheralHz = 500 * 1000;  // 500kHz
+// Sunburst - no high speed peripheral clock, use normal peripheral clock freq
+const uint64_t kClockFreqHiSpeedPeripheralHz = 125 * 1000;  // 125kHz
 
 const uint64_t kClockFreqPeripheralHz = 125 * 1000;  // 125kHz
 
