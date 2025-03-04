@@ -1,0 +1,18 @@
+// Copyright lowRISC contributors.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+{
+    name: "lowrisc_ip_main",
+    target_dir: "lowrisc_ip_main",
+    patch_dir: "patches/lowrisc_ip",
+
+    upstream: {
+        url: "https://github.com/lowRISC/opentitan"
+        // Pinned revision of main branch
+        rev: "0f968f4c0475c43fbe6ae2ef8074282b213f6f6f"
+    }
+
+    mapping: [
+        {from: "hw/ip/pwm", to: "ip/pwm", patch_dir: "pwm"},
+    ]
+}
