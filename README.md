@@ -435,7 +435,7 @@ Newer versions of vendored code, or new patches, can be vendored in using the fo
 # -- Apply patches to vendored OpenTitan IP --
 # Run from the project root directory.
 # Currently vendored revision (5ad69...) found in lowrisc_ip.lock.hjson
-util/vendor.py --update -Dupstream.rev=5ad6963fa71a63b4cc7817fb3bae5052c796bfc1 --verbose hw/vendor/lowrisc_ip.vendor.hjson
+util/vendor.py --update -Dupstream.rev=5ad6963fa71a63b4cc7817fb3bae5052c796bfc1 --verbose hw/vendor/lowrisc_ip_earlgrey_v1.vendor.hjson
 ```
 
 ## Licence
