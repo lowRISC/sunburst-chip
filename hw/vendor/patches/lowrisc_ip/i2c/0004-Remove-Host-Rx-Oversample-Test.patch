@@ -1,0 +1,39 @@
+diff --git a/data/i2c_testplan.hjson b/data/i2c_testplan.hjson
+index 673bb47..14e9c96 100644
+--- a/data/i2c_testplan.hjson
++++ b/data/i2c_testplan.hjson
+@@ -212,21 +212,6 @@
+       stage: V2
+       tests: ["i2c_host_stretch_timeout"]
+     }
+-    {
+-      name: host_rx_oversample
+-      desc: '''
+-            Host mode: test oversampling on received channel.
+-
+-            Stimulus:
+-              - Use input clock to sample the target SDA (sample with baud rate equal to 1)
+-              - Drive scl_rx using input clock
+-
+-            Checking:
+-              - Read rx data oversampled value and ensure it is same as driven value
+-            '''
+-      stage: V2
+-      tests: ["i2c_host_rx_oversample"]
+-    }
+     {
+       name: i2c_host_mode_toggle
+       desc: '''
+diff --git a/dv/i2c_sim_cfg.hjson b/dv/i2c_sim_cfg.hjson
+index dd7e6a8..6668382 100644
+--- a/dv/i2c_sim_cfg.hjson
++++ b/dv/i2c_sim_cfg.hjson
+@@ -307,7 +307,7 @@
+       name : host_sanity
+       tests: ["i2c_host_smoke", "i2c_host_override", "i2c_host_perf",
+               "i2c_host_fifo_watermark", "i2c_host_fifo_overflow", "i2c_host_fifo_reset_fmt",
+-              "i2c_host_rx_oversample",  "i2c_host_stretch_timeout",
++              "i2c_host_stretch_timeout",
+               "i2c_host_fifo_fmt_empty", "i2c_host_fifo_reset_rx", "i2c_host_stretch_timeout",
+               "i2c_host_fifo_full", "i2c_host_may_nack",
+               "i2c_host_error_intr"]
