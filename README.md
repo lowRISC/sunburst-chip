@@ -2,10 +2,25 @@
 
 **Sunburst Chip** is an open-source microcontroller chip design based around the CHERI-enabled [CHERIoT Ibex](https://github.com/microsoft/CherIoT-ibex) RISC-V core.
 
-This repository hosts the logical design, verification environment, and associated bare-metal test software for Sunburst Chip.
+This repository hosts the logical design, design verification (DV) environment, and associated bare-metal test software for Sunburst Chip.
 It has been put together by [lowRISC C.I.C.](https://lowrisc.org/)
 
 Sunburst Chip is part of the [Sunburst Project](https://www.sunburst-project.org) funded by [UKRI](https://www.ukri.org/) / [DSbD](https://www.dsbd.tech/) under grant number 107540.
+
+## Contents
+
+Major sections below include:
+
+- [Overview](#overview)
+- [Dependencies](#dependencies)
+- [Test software](#test-software)
+- [Top-level Xcelium simulation](#top-level-xcelium-simulation)
+- [Top-level Verilator simulation](#top-level-verilator-simulation)
+- [Block-level Xcelium simulation](#block-level-xcelium-simulation)
+- [Sonata XL development board](#sonata-xl-development-board)
+- [Vendoring](#vendoring)
+- [Porting](#porting)
+- [Licence](#licence)
 
 ## Overview
 
@@ -52,10 +67,10 @@ A typical top-level test with a custom vseq may operate as follows:
 - The **test software** starts running on the simulated core, drives output transactions, checks input transactions driven by UVM agents, reports fail-status to the testbench if a check fails, reports done-status when finished.
 - The **vseq** checks transactions received by UVM agents, terminates the simulation early if one of these checks fails or fail-status is reported by test software, or terminates the simulation normally if done-status is reported and all checks complete.
 
-Top-level tests are defined in [*top_chip_sim_cfg.hjson*](hw/top_chip/dv/top_chip_sim_cfg.hjson).
+Top-level DVsim tests and test sets are defined in [*top_chip_sim_cfg.hjson*](hw/top_chip/dv/top_chip_sim_cfg.hjson).
 Each test is primarily defined as a combination of a test program and a vseq.
 Optionally, additional plusarg parameters can be specified.
-These tests can also be grouped together into regression sets for easy access.
+These tests can also be grouped together into regression sets for easy use.
 
 ### Key TODOs
 
@@ -63,8 +78,13 @@ Some parts of Sunburst Chip are currently using temporary workarounds that must 
 Key pre-tapeout actions include (but are not be limited to):
 
 - Implement a true random number generator
-  - Currently generate pseudo-random numbers in `dif_rv_core_ibex_read_rnd_data`.
-  - Possibly want to replicate the interface in [OpenTitan `rv_core_ibex`](https://opentitan.org/book/hw/ip/rv_core_ibex/doc/registers.html#rnd_data) for software compatibility.
+  - Currently, pseudo-random numbers are generated in `dif_rv_core_ibex_read_rnd_data` due to the lack of true random numbers.
+  - May want to replicate the interface in [OpenTitan `rv_core_ibex`](https://opentitan.org/book/hw/ip/rv_core_ibex/doc/registers.html#rnd_data) for software compatibility.
+- Implement a real reset and clock manager.
+  - Currently, there are only simulation and FPGA-specific implementations.
+- Implement top-level tests for all blocks for which performing integration testing makes sense.
+  - Currently, only some key blocks have top-level tests defined in [*top_chip_sim_cfg.hjson*](hw/top_chip/dv/top_chip_sim_cfg.hjson).
+- Triage the many TODOs throughout the codebase.
 
 ## Dependencies
 
@@ -157,9 +177,11 @@ The primary simulator for running top-level tests is Xcelium, via DVsim.
 Note that DVsim does not build the test software for you.
 It must have already been compiled using the instructions in the [Test software section](#Test-software) before you call DVsim.
 
+All top-level DVsim tests and test sets are defined in [*top_chip_sim_cfg.hjson*](hw/top_chip/dv/top_chip_sim_cfg.hjson).
+
 ### Build & run
 
-The **`smoke` regression test set** (defined in top_chip_sim_cfg.hjson) can be built and run under Xcellium using the following commands:
+The **`smoke` regression test set** can be built and run under Xcelium using the following commands:
 
 ```sh
 # -- Build and run top-level `smoke` regression set using Xcelium --
@@ -169,7 +191,7 @@ The **`smoke` regression test set** (defined in top_chip_sim_cfg.hjson) can be b
 ./hw/vendor/lowrisc_ip/util/dvsim/dvsim.py ./hw/top_chip/dv/top_chip_sim_cfg.hjson -i smoke
 ```
 
-**Single tests** (also defined in top_chip_sim_cfg.hjson) can be specified in the same way, such as `usbdev_vbus_test`:
+**Single tests** can be specified in the same way, such as `usbdev_vbus_test`:
 
 ```sh
 # -- Build and run the `usbdev_vbus_test` top-level test using Xcelium --
@@ -314,7 +336,7 @@ hw/vendor/lowrisc_ip/util/dvsim/dvsim.py hw/vendor/lowrisc_ip/ip/usbdev/dv/usbde
 
 Like the top-level DVsim tests, artefacts end up under *scratch/* and additional output can be generated using the `-w shm` and `-v h` options.
 
-## Sonata XL board
+## Sonata XL development board
 
 Sonata XL is an FPGA-based development board developed by [NewAE Technology Inc.](https://www.newae.com/).
 It is a larger sibling of the more common Sonata development board and is intended for emulating sunburst-chip.
@@ -429,15 +451,65 @@ picocom /dev/ttyUSB2 -b 1500000 --imap lfcrlf
 
 ## Vendoring
 
-Newer versions of vendored code, or new patches, can be vendored in using the following command:
+Many IP blocks in the design and associated code have been imported from the Ibex, OpenTitan, and Sonata repositories using the 'vendor' flow.
+The goal is to import select parts of the target repositories, optionally from a particular revision, and automatically apply local patches that make Sunburst Chip-specific changes.
+The [*vendor.py*](util/vendor.py) script automates this process based on the *\*.vendor.hjson* configuration files in *hw/vendor*.
+All the vendored code ends up in subdirectories under *hw/vendor*.
+
+The vendor script can be re-run using the following command:
 
 ```sh
-# -- Apply patches to vendored OpenTitan IP --
+# -- Apply patches to vendored OpenTitan earlgrey_v1 IP --
 # Run from the project root directory.
-# Currently vendored revision (5ad69...) found in lowrisc_ip.lock.hjson
-util/vendor.py --update -Dupstream.rev=5ad6963fa71a63b4cc7817fb3bae5052c796bfc1 --verbose hw/vendor/lowrisc_ip_earlgrey_v1.vendor.hjson
+util/vendor.py --update --verbose hw/vendor/lowrisc_ip_earlgrey_v1.vendor.hjson
 ```
+
+To **change the revision or the selection** being vendored, adjust the relevant *\*.vendor.hjson* file before re-running the vendor script.
+A branch name can be specified instead of a specific revision in order to make the vendor script automatically pull the latest revision when run.
+In such cases, the revision can be overridden using the `-Dupstream.rev=...` command line argument for patching without pulling newer versions.
+
+## Porting
+
+Modifying and integrating the imported blocks and associated code is often more involved than simply vendoring it in, particularly for top-level verification.
+Porting top-level DV elements such as UVM agents, virtual sequences (vseq), and test software for an OpenTitan block can take days to weeks depending on the complexity.
+Factors include the complexity of the top-level DV for that block, applicable differences between OpenTitan and Sunburst Chip (e.g. PLIC interrupt granularity), and familiarity with the two projects.
+
+Here are some notes on common steps required when porting top-level DV for a block from OpenTitan to Sunburst Chip:
+
+- UVM agent integration (for I/O blocks)
+  - Add and connect to the DUT the appropriate virtual interface (such as `spi_if`) in the testbench *hw/top_chip/dv/tb/tb.sv* for export using `uvm_config_db`.
+    - This may require adding an enable signal if the DUT connections need to be shared with a DPI model.
+    - OpenTitan has an additional level of interface in the form of [chip_if.sv](https://github.com/lowRISC/opentitan/blob/earlgrey_1.0.0/hw/top_earlgrey/dv/env/chip_if.sv), but this has been omitted to keep Sunburst Chip simpler.
+  - Add a sequencer variable or array thereof to *hw/top_chip/dv/env/top_chip_dv_virtual_sequencer.sv*
+  - Add an agent or array of agents to *hw/top_chip/dv/env/top_chip_dv_env.sv*.
+    - Instantiate and register in `uvm_config_db` in the `build_phase()`.
+    - Store handles to their sequencers into the virtual sequencer in the `connect_phase()`.
+  - Add a randomised agent config in *hw/top_chip/dv/env/top_chip_dv_env_cfg.sv*.
+    Initialise it in `initialize()`.
+  - Add the agent to *hw/top_chip/dv/env/top_chip_dv_env.core*
+  - Import the agent’s package in *hw/top_chip/dv/env/top_chip_dv_env_pkg.sv*
+- Virtual sequence porting
+  - Copy vseq into *hw/top_chip/dv/env/seq_lib/*
+    - Check for any block-specific base vseq and copy that too.
+  - Rename vseq to use Sunburst Chip top-level prefix `top_chip_dv_`.
+    - Remember to update it in the `uvm_object_utils` call too.
+  - Change `chip_sw_base_vseq` to `top_chip_dv_base_vseq` in `class ... extends` section.
+  - Replace OpenTitan chip constants (such as `NUM_SPI_HOSTS`) with an equivalent in *hw/top_chip/dv/env/top_chip_dv_env_pkg.sv* or other appropriate package.
+  - Prepend `p_sequencer.` to `cfg.*` usages.
+  - Merge contents of task `cpu_init()` with the top of task `body()`.
+  - Add `p_sequencer.ifs.peri_clk_if.wait_for_reset();` near the start of `body()`, if required.
+    - Change clock interface from `peri_clk_if` if the block is driven by a different clock.
+  - Replace `` `DV_WAIT `` with `wait`, removing any failure message (unfortunately).
+  - Add the vseq to the lists in following files:
+    - *hw/top_chip/dv/env/seq_lib/top_chip_dv_vseq_list.sv*
+    - *hw/top_chip/dv/env/top_chip_dv_env.core*
+    - *hw/top_chip/dv/top_chip_sim_cfg.hjson*
+- Test program porting
+  - Rework interrupt code (if any) to account for the PLIC only having one interrupt per block rather than per cause in each block.
+  - Move macro-ified `irq_global_ctrl()` call (if any) to be inside `test_main()` rather than any sub-function to avoid interrupt-clearing side effects resulting from function returns compiled by the CHERIoT toolchain.
+    - For information of the mechanics of interrupt-disabling backward sentries, see the "Sealed capabilities" section of the CHERIoT ISA.
 
 ## Licence
 
-Unless otherwise noted, everything in the repository is covered by the [Apache License](https://www.apache.org/licenses/LICENSE-2.0.html), Version 2.0. See the [LICENSE](https://github.com/lowRISC/sonata-system/blob/main/LICENSE) file for more information on licensing.
+Unless otherwise noted, everything in the repository is covered by the [Apache License](https://www.apache.org/licenses/LICENSE-2.0.html), Version 2.0.
+See the [LICENSE](https://github.com/lowRISC/sonata-system/blob/main/LICENSE) file for more information on licensing.
