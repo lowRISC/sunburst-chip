@@ -213,21 +213,6 @@
       tests: ["i2c_host_stretch_timeout"]
     }
     {
-      name: host_rx_oversample
-      desc: '''
-            Host mode: test oversampling on received channel.
-
-            Stimulus:
-              - Use input clock to sample the target SDA (sample with baud rate equal to 1)
-              - Drive scl_rx using input clock
-
-            Checking:
-              - Read rx data oversampled value and ensure it is same as driven value
-            '''
-      stage: V2
-      tests: ["i2c_host_rx_oversample"]
-    }
-    {
       name: i2c_host_mode_toggle
       desc: '''
             Host mode: disable host mode during host mode sequence
