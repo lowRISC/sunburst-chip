@@ -106,9 +106,10 @@ Some packages that you'll need to install to set up the Python environment:
 
 Python environment setup:
 ```sh
-python3 -m venv ./sunburst-py-venv
-source ./sunburst-py-venv/bin/activate
-pip3 install -r ./python-requirements.txt
+python3 -m venv sunburst-py-venv
+source sunburst-py-venv/bin/activate
+pip3 install -U pip "setuptools<66.0.0"
+pip3 install -r python-requirements.txt
 ```
 
 It is strongly recommended you build Verilator from source as packaged versions are often very out of date.
