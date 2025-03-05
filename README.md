@@ -301,7 +301,7 @@ hw/vendor/lowrisc_ip/util/dvsim/dvsim.py hw/vendor/lowrisc_ip/ip/i2c/dv/i2c_sim_
 # Run pattgen regression
 hw/vendor/lowrisc_ip/util/dvsim/dvsim.py hw/vendor/lowrisc_ip/ip/pattgen/dv/pattgen_sim_cfg.hjson -i nightly --max-parallel 32 --tool xcelium
 # Run pwm regression
-hw/vendor/lowrisc_ip/util/dvsim/dvsim.py hw/vendor/lowrisc_ip/ip/pwm/dv/pwm_sim_cfg.hjson -i nightly --max-parallel 32 --tool xcelium
+hw/vendor/lowrisc_ip/util/dvsim/dvsim.py hw/vendor/lowrisc_ip_main/ip/pwm/dv/pwm_sim_cfg.hjson -i nightly --max-parallel 32 --tool xcelium
 # Run rv_timer regression
 hw/vendor/lowrisc_ip/util/dvsim/dvsim.py hw/vendor/lowrisc_ip/ip/rv_timer/dv/rv_timer_sim_cfg.hjson -i nightly --max-parallel 32 --tool xcelium
 # Run spi_host regression
