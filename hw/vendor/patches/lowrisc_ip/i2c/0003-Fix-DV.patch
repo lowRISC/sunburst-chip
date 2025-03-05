@@ -89,7 +89,7 @@ diff --git a/data/i2c_testplan.hjson b/i2c/data/i2c_testplan.hjson
 index 07120ff..f194499 100644
 --- a/data/i2c_testplan.hjson
 +++ b/data/i2c_testplan.hjson
-@@ -3,10 +3,10 @@
+@@ -3,10 +3,8 @@
  // SPDX-License-Identifier: Apache-2.0
  {
    name: "i2c"
@@ -97,10 +97,9 @@ index 07120ff..f194499 100644
 -                     "hw/dv/tools/dvsim/testplans/alert_test_testplan.hjson",
 -                     "hw/dv/tools/dvsim/testplans/intr_test_testplan.hjson",
 -                     "hw/dv/tools/dvsim/testplans/tl_device_access_types_testplan.hjson",
+-                     "i2c_sec_cm_testplan.hjson"]
 +  import_testplans: ["hw/vendor/lowrisc_ip/dv/tools/dvsim/testplans/csr_testplan.hjson",
-+                     //"hw/vendor/lowrisc_ip/dv/tools/dvsim/testplans/alert_test_testplan.hjson",
 +                     "hw/vendor/lowrisc_ip/dv/tools/dvsim/testplans/intr_test_testplan.hjson",
-+                     "hw/vendor/lowrisc_ip/dv/tools/dvsim/testplans/tl_device_access_types_testplan.hjson",
-                      "i2c_sec_cm_testplan.hjson"]
++                     "hw/vendor/lowrisc_ip/dv/tools/dvsim/testplans/tl_device_access_types_wo_intg_testplan.hjson"]
    testpoints: [
      //-----------------------------------------------
