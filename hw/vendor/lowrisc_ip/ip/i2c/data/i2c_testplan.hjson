@@ -4,10 +4,8 @@
 {
   name: "i2c"
   import_testplans: ["hw/vendor/lowrisc_ip/dv/tools/dvsim/testplans/csr_testplan.hjson",
-                     //"hw/vendor/lowrisc_ip/dv/tools/dvsim/testplans/alert_test_testplan.hjson",
                      "hw/vendor/lowrisc_ip/dv/tools/dvsim/testplans/intr_test_testplan.hjson",
-                     "hw/vendor/lowrisc_ip/dv/tools/dvsim/testplans/tl_device_access_types_testplan.hjson",
-                     "i2c_sec_cm_testplan.hjson"]
+                     "hw/vendor/lowrisc_ip/dv/tools/dvsim/testplans/tl_device_access_types_wo_intg_testplan.hjson"]
   testpoints: [
     //-----------------------------------------------
     // Tests for I2C DUT in HOST mode
