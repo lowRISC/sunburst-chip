@@ -46,6 +46,14 @@ module top_chip_system #(
   output logic cio_i2c1_scl_o,
   output logic cio_i2c1_scl_en_o,
 
+  // JTAG
+  input  logic cio_jtag_tck_i,
+  input  logic cio_jtag_tms_i,
+  input  logic cio_jtag_trst_ni,
+  input  logic cio_jtag_td_i,
+  output logic cio_jtag_td_o,
+  output logic cio_jtag_td_en_o,
+
   // Pattgen
   output logic cio_pattgen_pda0_tx_o,
   output logic cio_pattgen_pda0_tx_en_o,
@@ -188,6 +196,8 @@ module top_chip_system #(
   tlul_pkg::tl_d2h_t tl_core_ibex__corei_d2h;
   tlul_pkg::tl_h2d_t tl_core_ibex__cored_h2d;
   tlul_pkg::tl_d2h_t tl_core_ibex__cored_d2h;
+  tlul_pkg::tl_h2d_t tl_dbg_h2d;
+  tlul_pkg::tl_d2h_t tl_dbg_d2h;
 
   tlul_pkg::tl_h2d_t tl_sram_h2d;
   tlul_pkg::tl_d2h_t tl_sram_d2h;
@@ -215,7 +225,9 @@ module top_chip_system #(
     .tl_core_ibex__corei_o  (tl_core_ibex__corei_d2h),
     .tl_core_ibex__cored_i  (tl_core_ibex__cored_h2d),
     .tl_core_ibex__cored_o  (tl_core_ibex__cored_d2h),
-
+    .tl_dbg_i           (tl_dbg_h2d),
+    .tl_dbg_o           (tl_dbg_d2h),
+    
      // Device interfaces
     .tl_sram_o            (tl_sram_h2d),
     .tl_sram_i            (tl_sram_d2h),
@@ -233,6 +245,43 @@ module top_chip_system #(
     .tl_peri_i            (tl_peri_d2h),
 
     .scanmode_i
+  );
+
+  // Debug module top.
+  rv_dm #(
+    .AlertAsyncOn ( '0), // TODO: Do we need alerts? Shall we remove them all together?
+    .IdcodeValue  ( '0)  // TODO: jtag_id_pkg::RV_DM_JTAG_IDCODE )
+  ) u_rv_dm (
+    .clk_i                     (clk_sys_i ),
+    .clk_lc_i                  (clk_sys_i ),
+    .rst_ni                    (rst_sys_ni),
+    .rst_lc_ni                 (rst_sys_ni),
+    .next_dm_addr_i            ('0        ),
+    .lc_hw_debug_en_i          (lc_ctrl_pkg::On ), // TODO: Uneducated guess
+    .lc_dft_en_i               (lc_ctrl_pkg::Off), // TODO: Uneducated guess
+    .pinmux_hw_debug_en_i      (lc_ctrl_pkg::On ), // TODO: Uneducated guess
+    .otp_dis_rv_dm_late_debug_i(MuBi8False), // TODO: Uneducated guess
+    .scanmode_i                (scanmode_i),
+    .scan_rst_ni               (1'b1      ),
+    .ndmreset_req_o            (/*unused*/), // TODO: ndmreset_req),
+    .dmactive_o                (/*unused*/),
+    .debug_req_o               (/*unused*/), // TODO connect to debug_req_i
+    .unavailable_i             ('0        ),
+    // bus device for comportable CSR access
+    .regs_tl_d_i               ('0        ),
+    .regs_tl_d_o               (/*unused*/),
+    // bus device with debug memory, for an execution based technique
+    .mem_tl_d_i                ('0        ),
+    .mem_tl_d_o                (/*unused*/),
+    // bus host, for system bus accesses
+    .sba_tl_h_o                (tl_dbg_h2d),
+    .sba_tl_h_i                (tl_dbg_d2h),
+    // Alerts
+    .alert_rx_i                ('0        ),
+    .alert_tx_o                (/*unused*/),
+    // JTAG
+    .jtag_i                    ({cio_jtag_tck_i, cio_jtag_tms_i, cio_jtag_trst_ni, cio_jtag_td_i}),
+    .jtag_o                    ({cio_jtag_td_o, cio_jtag_td_en_o})
   );
 
   core_ibex u_core_ibex (

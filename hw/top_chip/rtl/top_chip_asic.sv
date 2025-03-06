@@ -60,15 +60,20 @@ module top_chip_asic (
   inout IO54,
   inout IO55,
   inout IO56,
+  inout IO57,
+  inout IO58,
+  inout IO59,
+  inout IO60,
+  inout IO61,
 
   // Dedicated Pads
   inout USB_P,
   inout USB_N
 );
-  localparam int NPads = 59;
+  localparam int NPads = 64;
 
-  localparam int PadUsbP = 57;
-  localparam int PadUsbN = 58;
+  localparam int PadUsbP = 62;
+  localparam int PadUsbN = 63;
 
   wire clk_sys, clk_peri, clk_usb, clk_aon;
   wire rst_sys_n, rst_peri_n, rst_usb_n, rst_aon_n;
@@ -92,6 +97,14 @@ module top_chip_asic (
   logic cio_i2c1_sda_en_o;
   logic cio_i2c1_scl_o;
   logic cio_i2c1_scl_en_o;
+
+  // JTAG
+  logic cio_jtag_tck_i;
+  logic cio_jtag_tms_i;
+  logic cio_jtag_trst_ni;
+  logic cio_jtag_td_i;
+  logic cio_jtag_td_o;
+  logic cio_jtag_td_en_o;
 
   // Pattgen
   logic cio_pattgen_pda0_tx_o;
@@ -191,6 +204,13 @@ module top_chip_asic (
     .cio_i2c1_sda_en_o,
     .cio_i2c1_scl_o,
     .cio_i2c1_scl_en_o,
+
+    .cio_jtag_tck_i,
+    .cio_jtag_tms_i,
+    .cio_jtag_trst_ni,
+    .cio_jtag_td_i,
+    .cio_jtag_td_o,
+    .cio_jtag_td_en_o,
 
     .cio_pwm_o,
     .cio_pwm_en_o,
@@ -378,6 +398,15 @@ module top_chip_asic (
     cio_usbdev_sense_i = pad_in[56];
     // no output driver required.
 
+    // jtag
+    cio_jtag_tck_i   = pad_in[57];
+    cio_jtag_tms_i   = pad_in[58];
+    cio_jtag_trst_ni = pad_in[59];
+    cio_jtag_td_i    = pad_in[60];
+
+    pad_out[61] = cio_jtag_td_o;
+    pad_oe[61]  = cio_jtag_td_en_o;
+
     // USB_P/N may require special treatment beyond the drive strength.
     pad_out[PadUsbP] = cio_usbdev_usb_dp_o;
     pad_oe[PadUsbP]  = cio_usbdev_usb_dp_en_o;
@@ -393,7 +422,12 @@ module top_chip_asic (
       // Dedicated pads.
       USB_N,
       USB_P,
-
+      
+      IO61,
+      IO60,
+      IO59,
+      IO58,
+      IO57,
       IO56,
       IO55,
       IO54,

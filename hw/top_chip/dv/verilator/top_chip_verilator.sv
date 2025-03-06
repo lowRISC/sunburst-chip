@@ -76,6 +76,12 @@ module top_chip_verilator (input logic clk_i, rst_ni);
     .cio_i2c1_scl_o   (),
     .cio_i2c1_scl_en_o(),
 
+    .cio_jtag_tck_i   ('0),
+    .cio_jtag_tms_i   ('0),
+    .cio_jtag_trst_ni ('0),
+    .cio_jtag_td_i    ('0),
+    .cio_jtag_td_o    (),
+
     .cio_pattgen_pda0_tx_o    (),
     .cio_pattgen_pda0_tx_en_o (),
     .cio_pattgen_pcl0_tx_o    (),

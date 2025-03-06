@@ -76,6 +76,11 @@ module top_chip_asic_tb;
   wire IO54;
   wire IO55;
   wire IO56;
+  wire IO57;
+  wire IO58;
+  wire IO59;
+  wire IO60;
+  wire IO61;
 
   // ------ DUT ------
 
@@ -137,7 +142,12 @@ module top_chip_asic_tb;
     .IO54,
     .IO55,
     .IO56,
-
+    .IO57,
+    .IO58,
+    .IO59,
+    .IO60,
+    .IO61,
+    
     .USB_P,
     .USB_N
   );
