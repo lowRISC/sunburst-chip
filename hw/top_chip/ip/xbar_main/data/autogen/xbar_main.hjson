@@ -24,6 +24,12 @@
       act:    "rsp"
       package: "tlul_pkg"
     }
+    { struct: "tl"
+      type:   "req_rsp"
+      name:   "tl_dbg"
+      act:    "rsp"
+      package: "tlul_pkg"
+    }
     // device
     { struct: "tl"
       type:   "req_rsp"

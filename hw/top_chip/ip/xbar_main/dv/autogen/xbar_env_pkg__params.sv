@@ -43,4 +43,13 @@ tl_host_t xbar_hosts[$] = '{
         "core_ibex__cfg",
         "rv_plic",
         "peri"}}
+    ,
+    '{"dbg", 2, '{
+        "sram",
+        "rom",
+        "revocation_ram",
+        "rev_ctl",
+        "core_ibex__cfg",
+        "rv_plic",
+        "peri"}}
 };

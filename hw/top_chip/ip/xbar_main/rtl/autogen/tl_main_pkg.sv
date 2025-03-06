@@ -22,7 +22,7 @@ package tl_main_pkg;
   localparam logic [31:0] ADDR_MASK_RV_PLIC        = 32'h 03ffffff;
   localparam logic [31:0] ADDR_MASK_PERI           = 32'h 3fffffff;
 
-  localparam int N_HOST   = 2;
+  localparam int N_HOST   = 3;
   localparam int N_DEVICE = 7;
 
   typedef enum int {
@@ -37,7 +37,8 @@ package tl_main_pkg;
 
   typedef enum int {
     TlCoreIbexCorei = 0,
-    TlCoreIbexCored = 1
+    TlCoreIbexCored = 1,
+    TlDbg = 2
   } tl_host_e;
 
 endpackage

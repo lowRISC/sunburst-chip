@@ -32,6 +32,13 @@
       xbar:     false,
       pipeline: false
     },
+    { name:     "dbg",
+      type:     "host",
+      clock:    "clk_sys_i",
+      reset:    "rst_sys_ni",
+      xbar:     false,
+      pipeline: false
+    },
     { name:  "rom",
       type:  "device",
       clock: "clk_sys_i",
@@ -125,5 +132,9 @@
                       "revocation_ram", "rev_ctl",
                       "core_ibex.cfg",
                       "rv_plic", "peri"]
+    dbg: ["sram", "rom",
+          "revocation_ram", "rev_ctl",
+          "core_ibex.cfg",
+          "rv_plic", "peri"]
   }
 }
