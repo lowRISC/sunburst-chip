@@ -9,6 +9,7 @@ filesets:
   files_rtl_generic:
     depend:
       - lowrisc:ip:gpio
+      - lowrisc:ip:rv_dm
       - lowrisc:ip:rv_timer
       - lowrisc:ip:spi_host
       - lowrisc:ip:i2c
