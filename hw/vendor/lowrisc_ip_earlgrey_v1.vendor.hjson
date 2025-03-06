@@ -33,6 +33,7 @@
         {from: "hw/ip/i2c",          to: "ip/i2c",       patch_dir: "i2c"},
         {from: "hw/ip/pattgen",      to: "ip/pattgen",   patch_dir: "pattgen"},
         {from: "hw/ip/tlul",         to: "ip/tlul",      patch_dir: "tlul"},
+        {from: "hw/ip/rv_dm",        to: "ip/rv_dm",     patch_dir: "rv_dm"},
         {from: "hw/ip/rv_timer",     to: "ip/rv_timer",  patch_dir: "rv_timer"},
         {from: "hw/ip/uart",         to: "ip/uart",      patch_dir: "uart"},
         {from: "hw/ip/usbdev",       to: "ip/usbdev",    patch_dir: "usbdev"},
@@ -44,6 +45,8 @@
 
         {from: "hw/ip_templates/rv_plic", to: "ip_templates/rv_plic", patch_dir: "rv_plic"},
 
+        {from: "hw/dv/dpi/common/tcp_server", to: "dv/dpi/common/tcp_server", patch_dir: "tcp_server"},
+        {from: "hw/dv/dpi/jtagdpi",  to: "dv/dpi/jtagdpi"},
         {from: "hw/dv/dpi/uartdpi",  to: "dv/dpi/uartdpi", patch_dir: "uartdpi"},
         {from: "hw/dv/dpi/usbdpi",   to: "dv/dpi/usbdpi", patch_dir: "usbdpi"},
 
