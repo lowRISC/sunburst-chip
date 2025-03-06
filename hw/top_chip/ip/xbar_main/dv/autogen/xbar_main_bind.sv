@@ -18,6 +18,12 @@ module xbar_main_bind;
     .h2d    (tl_core_ibex__cored_i),
     .d2h    (tl_core_ibex__cored_o)
   );
+  bind xbar_main tlul_assert #(.EndpointType("Device")) tlul_assert_host_dbg (
+    .clk_i  (clk_sys_i),
+    .rst_ni (rst_sys_ni),
+    .h2d    (tl_dbg_i),
+    .d2h    (tl_dbg_o)
+  );
 
   // Device interfaces
   bind xbar_main tlul_assert #(.EndpointType("Host")) tlul_assert_device_rom (

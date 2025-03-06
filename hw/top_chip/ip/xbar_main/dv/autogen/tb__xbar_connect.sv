@@ -19,6 +19,7 @@ initial force dut.rst_peri_ni = rst_n;
 // Host TileLink interface connections
 `CONNECT_TL_HOST_IF(core_ibex__corei, dut, clk_sys_i, rst_n)
 `CONNECT_TL_HOST_IF(core_ibex__cored, dut, clk_sys_i, rst_n)
+`CONNECT_TL_HOST_IF(dbg, dut, clk_sys_i, rst_n)
 
 // Device TileLink interface connections
 `CONNECT_TL_DEVICE_IF(rom, dut, clk_sys_i, rst_n)
