@@ -1,0 +1,41 @@
+From 156c37270ff6aa29fd5b7d8c28a545fd41625a48 Mon Sep 17 00:00:00 2001
+From: Samuel Riedel <sriedel@lowrisc.org>
+Date: Thu, 6 Mar 2025 17:29:07 +0000
+Subject: [PATCH 2/8] Replace PULP debug module with SCISemi's in `rv_dm`
+
+---
+ dv/env/rv_dm_env.core | 2 +-
+ rv_dm.core            | 3 ++-
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/dv/env/rv_dm_env.core b/dv/env/rv_dm_env.core
+index 9f452c1..ac9ec41 100644
+--- a/dv/env/rv_dm_env.core
++++ b/dv/env/rv_dm_env.core
+@@ -15,7 +15,7 @@ filesets:
+       - lowrisc:opentitan:bus_params_pkg
+       # Note: This core pulls in an rv_dm implementation. We actually
+       # just need the package (dm_pkg.sv) for DV here.
+-      - pulp-platform:riscv-dbg:0.1
++      - scisemi:ip:debug_module
+     files:
+       - rv_dm_env_pkg.sv
+       - rv_dm_if.sv
+diff --git a/rv_dm.core b/rv_dm.core
+index bed37f7..05d3806 100644
+--- a/rv_dm.core
++++ b/rv_dm.core
+@@ -14,8 +14,9 @@ filesets:
+       - lowrisc:prim:lc_sync
+       - lowrisc:prim:clock_mux2
+       - lowrisc:prim:mubi
++      - lowrisc:tlul:lc_gate
+       - lowrisc:tlul:adapter_host
+-      - pulp-platform:riscv-dbg:0.1
++      - scisemi:ip:debug_module
+       - lowrisc:prim:lc_sync
+     files:
+       - rtl/rv_dm_reg_pkg.sv
+-- 
+2.34.1
+

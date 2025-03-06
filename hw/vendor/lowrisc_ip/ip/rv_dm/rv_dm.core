@@ -14,8 +14,9 @@ filesets:
       - lowrisc:prim:lc_sync
       - lowrisc:prim:clock_mux2
       - lowrisc:prim:mubi
+      - lowrisc:tlul:lc_gate
       - lowrisc:tlul:adapter_host
-      - pulp-platform:riscv-dbg:0.1
+      - scisemi:ip:debug_module
       - lowrisc:prim:lc_sync
     files:
       - rtl/rv_dm_reg_pkg.sv
