@@ -58,7 +58,6 @@ const uint32_t kUartTxFifoCpuCycles = CALCULATE_UART_TX_FIFO_CPU_CYCLES(
 const uint32_t kAstCheckPollCpuCycles =
     CALCULATE_AST_CHECK_POLL_CPU_CYCLES(kClockFreqCpuHz);
 
-// TODO: We presently have no debug registers in core_ibex to mirror those present in rv_core_ibex
 #if 0
 const uintptr_t kDeviceTestStatusAddress =
     TOP_CHIP_RV_CORE_IBEX_CFG_BASE_ADDR +
@@ -68,9 +67,10 @@ const uintptr_t kDeviceLogBypassUartAddress =
     TOP_CHIP_RV_CORE_IBEX_CFG_BASE_ADDR +
     RV_CORE_IBEX_DV_SIM_WINDOW_REG_OFFSET + 0x04;
 #else
-// TODO: Although we do have sw test status monitoring, it overlays the ROM presently.
+// TODO: Although we do have sw test status monitoring and logging, these overlay
+// the ROM presently.
 const uintptr_t kDeviceTestStatusAddress = TOP_CHIP_ROM_CTRL_ROM_BASE_ADDR;
-const uintptr_t kDeviceLogBypassUartAddress = 0u;  // Use simulated UART for
+const uintptr_t kDeviceLogBypassUartAddress = TOP_CHIP_ROM_CTRL_ROM_BASE_ADDR + 4;
 #endif
 
 void device_fpga_version_print(void) {}

@@ -93,3 +93,81 @@ void base_log_internal_dv(const log_fields_t *log, uint32_t nargs, ...) {
   }
   va_end(args);
 }
+
+/**
+ * Logs `log` and the values that follow in an efficient, DV-testbench
+ * specific way, which bypasses the UART.
+ *
+ * @param format Format specifier string.
+ * @param log_offset Byte offset of the log_fields_t structure from the
+ *                   start of the .logs.fields section.
+ * @param nargs the number of arguments passed to the format string.
+ * @param ... format parameters matching the format string.
+ */
+void base_log_internal_dv_cheri(const char *format, uint32_t log_offset,
+                                uint32_t nargs, ...) {
+  mmio_region_t log_device = mmio_region_from_addr(kDeviceLogBypassUartAddress);
+  mmio_region_write32(log_device, 0x0, log_offset);
+
+  va_list args;
+  va_start(args, nargs);
+  for (int i = 0; i < nargs; ++i) {
+    // Locate the format specifier for this argument.
+    if (format) {
+      while (*format != '\0') {
+        if (*format == '%') {
+          if (format[1] != '%') {
+            break;
+          }
+          // Skip %% and continue parsing.
+          format++;
+        }
+        format++;
+      }
+    }
+    bool done = false;
+    if (format && *format == '%') {
+      // The logging code does not accept standard C-style format specififers;
+      // instead alignment and precision are not supported, and there are some
+      // non-standard extensions.
+      bool non_std = (*++format == '!');
+      if (non_std) {
+        format++;
+      }
+      while (*format >= '0' && *format <= '9') {
+        format++;
+      }
+      if (non_std) {
+        switch (*format) {
+          // These arguments are prefixed by a `size_t` byte count.
+          case 'x':
+          case 'y':
+          case 'X':
+          case 'Y': {
+            size_t n = va_arg(args, size_t);
+            void *ptr = va_arg(args, void *);
+            if (sizeof(size_t) > 4u) {
+              mmio_region_write32(log_device, 0x0, (uint32_t)n);
+              n >>= 32;
+            }
+            mmio_region_write32(log_device, 0x0, (uint32_t)n);
+            mmio_region_write32(log_device, 0x0, __builtin_cheri_address_get(ptr));
+            done = true;
+          }
+          break;
+        }
+      } else if (*format == 'p' || *format == 's') {
+        void *ptr = va_arg(args, void *);
+        mmio_region_write32(log_device, 0x0, __builtin_cheri_address_get(ptr));
+        done = true;
+      }
+      format++;
+    }
+    if (!done) {
+      // Most arguments are uint32_t quantities with the interpretation left
+      // up to the DV support.
+      mmio_region_write32(log_device, 0x0, va_arg(args, uint32_t));
+    }
+  }
+  va_end(args);
+}
