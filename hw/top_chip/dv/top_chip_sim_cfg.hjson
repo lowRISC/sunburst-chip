@@ -98,11 +98,12 @@
       uvm_test_seq: top_chip_dv_base_vseq
       run_opts: ["+ChipMemSRAM_image_file={proj_root}/sw/device/build/tests/usbdev_mixed_test.vmem"]
     }
-    {
-      name: usbdev_pincfg_test
-      uvm_test_seq: top_chip_dv_base_vseq
-      run_opts: ["+ChipMemSRAM_image_file={proj_root}/sw/device/build/tests/usbdev_pincfg_test.vmem"]
-    }
+    // TODO: Reinstate test when have a reset manager
+    // {
+    //   name: usbdev_pincfg_test
+    //   uvm_test_seq: top_chip_dv_base_vseq
+    //   run_opts: ["+ChipMemSRAM_image_file={proj_root}/sw/device/build/tests/usbdev_pincfg_test.vmem"]
+    // }
     {
       name: usbdev_pullup_test
       uvm_test_seq: top_chip_dv_base_vseq
@@ -149,7 +150,7 @@
       name: usbdev
       tests: [
         "top_usbdev_smoke", "usbdev_config_host_test", "usbdev_iso_test", "usbdev_mem_test",
-        "usbdev_mixed_test", "usbdev_pincfg_test", "usbdev_pullup_test", "usbdev_setuprx_test",
+        "usbdev_mixed_test", /*"usbdev_pincfg_test",*/ "usbdev_pullup_test", "usbdev_setuprx_test",
         "usbdev_stream_test", "usbdev_test", "usbdev_toggle_restore_test", "usbdev_vbus_test"
       ]
     }
