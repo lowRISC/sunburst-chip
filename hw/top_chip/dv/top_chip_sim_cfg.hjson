@@ -54,6 +54,16 @@
       run_opts: ["+ChipMemSRAM_image_file={proj_root}/scratch_sw/bare_metal/build/tests/test_runner.vmem"]
     }
     {
+      name: i2c_device_tx_rx_test
+      uvm_test_seq: top_chip_dv_i2c_device_tx_rx_vseq
+      run_opts: ["+ChipMemSRAM_image_file={proj_root}/sw/device/build/tests/i2c_device_tx_rx_test.vmem"]
+    }
+    {
+      name: i2c_host_tx_rx_test
+      uvm_test_seq: top_chip_dv_i2c_host_tx_rx_vseq
+      run_opts: ["+ChipMemSRAM_image_file={proj_root}/sw/device/build/tests/i2c_host_tx_rx_test.vmem"]
+    }
+    {
       name: pattgen_ios_test
       uvm_test_seq: top_chip_dv_pattgen_vseq
       run_opts: ["+ChipMemSRAM_image_file={proj_root}/sw/device/build/tests/pattgen_ios_test.vmem"]
@@ -140,7 +150,11 @@
   regressions: [
     {
       name: smoke
-      tests: ["top_chip_smoke", "pattgen_ios_test", "uart_smoketest", "top_usbdev_smoke"]
+      tests: ["top_chip_smoke", "i2c_host_tx_rx_test", "pattgen_ios_test", "uart_smoketest", "top_usbdev_smoke"]
+    }
+    {
+      name: i2c
+      tests: ["i2c_device_tx_rx_test", "i2c_host_tx_rx_test"]
     }
     {
       name: uart
