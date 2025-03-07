@@ -97,8 +97,22 @@ void base_log_internal_core(const log_fields_t *log, ...);
  * Implementation detail.
  */
 void base_log_internal_dv(const log_fields_t *log, uint32_t nargs, ...);
-
+/**
+ * Implementation detail.
+ */
+void base_log_internal_dv_cheri(const char *format, uint32_t log_offset,
+                                uint32_t nargs, ...);
+/**
+ * Implementation detail.
+ * OpenTitan mechanism for differentiating software images.
+ */
 extern char _dv_log_offset[];
+/**
+ * Implementation detail.
+ * Sunburst mechanism for identifying log messages in the presence of CHERIoT
+ * capability relocations.
+ */
+extern char _log_fields_start[];
 
 /**
  * A macro that wraps the `OT_FAIL_IF_64_BIT` macro, providing the name
@@ -138,13 +152,15 @@ extern char _dv_log_offset[];
        * the linker will dutifully discard.
        * Unfortunately, clang-format really mangles these
        * declarations, so we format them manually. */            \
-     /*
       __attribute__((section(".logs.fields")))                   \
       static const log_fields_t kLogFields =                     \
           LOG_MAKE_FIELDS_(severity, format, ##__VA_ARGS__);     \
-      base_log_internal_dv((const log_fields_t*)((char*)&kLogFields + (uintptr_t)&_dv_log_offset), \
-                           OT_VA_ARGS_COUNT(format, ##__VA_ARGS__), \
-                           ##__VA_ARGS__); */ /* clang-format on */ \
+      /* CHERI capability-aware implementation in place of the
+       * base_log_internal_dv() implementation. */               \
+      base_log_internal_dv_cheri(format,                         \
+                       (char*)&kLogFields - _log_fields_start,   \
+                       OT_VA_ARGS_COUNT(format, ##__VA_ARGS__),  \
+                       ##__VA_ARGS__); /* clang-format on */     \
     } else {                                                     \
       static const log_fields_t log_fields =                     \
           LOG_MAKE_FIELDS_(severity, format, ##__VA_ARGS__);     \

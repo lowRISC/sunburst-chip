@@ -6,6 +6,11 @@
 
 ENTRY(start)
 
+/**
+ * DV Log offset.
+ */
+_dv_log_offset = 0x10000;
+
 SECTIONS
 {
     /* Cannot yet separate code and data, so place everything in SRAM. */
@@ -25,18 +30,24 @@ SECTIONS
       *(.text .text.* .rodata .rodata.* .data.rel.ro);
       . = ALIGN(4);
       _text_end = .;
+      . = ALIGN(64);
+    }
+
+    /* Note: extract_sw_logs.py operates on the whole of this section and does not
+       consult the _start/_stop symbols presently, so avoid alignment directives. */
+    __cap_relocs : {
+      __start___cap_relocs = .;
+      *(__cap_relocs)
+      __stop___cap_relocs = .;
     }
 
     .data :
     {
       __DATA_BEGIN__ = .;
       . = ALIGN(64);
-      __start___cap_relocs = .;
-      *(__cap_relocs)
-      __stop___cap_relocs = .;
-      . = ALIGN(64);
       *(.data .data.*)
       *(.sdata .sdata.*)
+      . = ALIGN(64);
       *(.sbss .sbss.*)
       *(.bss .bss.*)
       . = ALIGN(4);
@@ -48,6 +59,12 @@ SECTIONS
        * the same section and GP set to midpoint of that section.
        */
       __global_pointer$ = __DATA_BEGIN__ + (__DATA_END__ - __DATA_BEGIN__) / 2;
+    }
+
+    .logs.fields 0 (INFO): {
+      _log_fields_start = .;
+      LONG(_dv_log_offset);
+      *(.logs.fields)
     }
 
     /*

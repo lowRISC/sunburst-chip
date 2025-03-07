@@ -24,16 +24,29 @@ from elftools.elf import elffile
 # address in the RAM. The value written is the address of the log_fields_t
 # struct constructed from the log. It has the following fields:
 # severity (int), 4 bytes:        0 (I), 1 (W), 2 (E), 3 (F)
+# - 4 bytes of alignment padding -
 # file_name (int, cap), 8 bytes:  Capability to file_name string.
 # Line no (int), 4 bytes:         Line number of the log message.
 # Nargs (int), 4 bytes:           Number of arguments the format string takes.
 # format (int, cap), 8 bytes:     Capability to log format string.
 #
-# Total size of log_fields_t: 20 bytes.
+# Total size of log_fields_t: 32 bytes.
 LOGS_FIELDS_SECTION = '.logs.fields'
-LOGS_FIELDS_SIZE = 20
+LOGS_FIELDS_SIZE = 32
 RODATA_SECTION = '.rodata'
 
+# A capability relocation consists of the following structure (CHERIoT platform):
+# capability_location, 8 bytes
+# object, 8 bytes
+# offset, 8 bytes
+# size, 8 bytes
+# permissions, 8 bytes
+#
+# Total size of capability relocation: 40 bytes.
+CAP_RELOC_SIZE = 20
+CAP_CACA = 0xcacacacacacacaca
+CAP_PERM_FUNC_RELOC = 1 << 31
+CAM_PERM_CONST_RELOC = 1 << 30
 
 def cleanup_newlines(string):
     '''Replaces newlines with a carriage return.
@@ -81,7 +94,6 @@ def cleanup_format(_format):
     _format = re.sub(r"%!?(-?\d*)r", r"%8h", _format)
     _format = re.sub(r"%([bcodhHs])", r"%0\1", _format)
     return cleanup_newlines(_format)
-
 
 def get_string_format_specifier_indices(_format):
     '''Returns the indices of string format specifiers %s in the format string.
@@ -181,6 +193,27 @@ def extract_sw_logs(elf_file, logs_fields_section):
     # Open the elf file.
     with open(elf_file, 'rb') as f:
         elf = elffile.ELFFile(f)
+
+        # Collect the relocations for global capabilities.
+        cap_reloc_map = {}
+        cap_relocs = elf.get_section_by_name(name="__cap_relocs")
+        if cap_relocs:
+            cap_relocs_size = int(cap_relocs.header['sh_size'])
+            cap_relocs_data = cap_relocs.data()
+            # Dump the capability relocations.
+            num_relocs = cap_relocs_size // CAP_RELOC_SIZE
+            # Iterate across the capabilities constructing a mapping
+            # from the capability that needs fixing up and its target.
+            for i in range(num_relocs):
+              start = i * CAP_RELOC_SIZE
+              end = start + CAP_RELOC_SIZE
+              cap_loc, obj, offset, size, permissions = struct.unpack(
+                  'IIIII', cap_relocs_data[start:end])
+              cap_reloc_map[cap_loc] = obj
+        else:
+            print("__cap_relocs not found")
+
+        logs_fields_base = 0
         ro_contents = []
         for section_idx in range(elf.num_sections()):
             section = elf.get_section(section_idx)
@@ -190,6 +223,7 @@ def extract_sw_logs(elf_file, logs_fields_section):
 
             # Ignore the logs fields section.
             if section.name == logs_fields_section:
+                logs_fields_base = int(section.header['sh_addr'])
                 continue
 
             # Ignore the debug sections.
@@ -220,8 +254,11 @@ def extract_sw_logs(elf_file, logs_fields_section):
                 logs_fields_section, elf_file))
             sys.exit(1)
 
-        header_size = 4
-        logs_offset, = struct.unpack('I', logs_data[0:header_size])
+        header_size = 8
+        logs_offset, = struct.unpack('L', logs_data[0:header_size])
+        # Presently the logging mechanism ignores the `dv_log_offset` from the
+        # .logs.fields section.
+        logs_offset = logs_fields_base
 
         # Dump the logs with fields.
         result = ""
@@ -230,17 +267,29 @@ def extract_sw_logs(elf_file, logs_fields_section):
             start = header_size + i * LOGS_FIELDS_SIZE
             end = start + LOGS_FIELDS_SIZE
             severity, file_addr, line, nargs, format_addr = struct.unpack(
-                'IIIII', logs_data[start:end])
+                'LLIIL', logs_data[start:end])
             result += "addr: {}\n".format(hex(logs_offset + start)[2:])
             result += "severity: {}\n".format(severity)
-            result += "file: {}\n".format(
-                prune_filename(get_str_at_addr(file_addr, addr_strings)))
+            file_addr_offset = start + 8
+            if file_addr_offset in cap_reloc_map:
+              file_addr = cap_reloc_map[file_addr_offset]
+            if file_addr == CAP_CACA:
+              result += "file: <Unknown>\n"
+            else:
+              result += "file: {}\n".format(
+                  prune_filename(get_str_at_addr(file_addr, addr_strings)))
             result += "line: {}\n".format(line)
             result += "nargs: {}\n".format(nargs)
-            fmt = cleanup_format(get_str_at_addr(format_addr, addr_strings))
-            result += "format: {}\n".format(fmt)
-            result += "str_arg_idx: {}\n".format(
-                get_string_format_specifier_indices(fmt))
+            format_addr_offset = end - 8
+            if format_addr_offset in cap_reloc_map:
+              format_addr = cap_reloc_map[format_addr_offset]
+            if format_addr == CAP_CACA:
+              result += "format: <Unknown>\n"
+            else:
+              fmt = cleanup_format(get_str_at_addr(format_addr, addr_strings))
+              result += "format: {}\n".format(fmt)
+              result += "str_arg_idx: {}\n".format(
+                  get_string_format_specifier_indices(fmt))
 
         return rodata, result
 
