@@ -16,7 +16,6 @@ foreach(CHECK ${CHECKS})
   add_custom_command(
     TARGET ${NAME} POST_BUILD
     COMMAND ${CMAKE_OBJCOPY} -O binary "$<TARGET_FILE:${NAME}>" "$<TARGET_FILE:${NAME}>.bin"
-    COMMAND ${CMAKE_SOURCE_DIR}/../../util/extract_sw_logs.py --elf-file "$<TARGET_FILE:${NAME}>" --logs-fields-section ".logs.fields" --name "${NAME}" --outdir "$<TARGET_FILE_DIR:${NAME}>"
     COMMAND srec_cat "$<TARGET_FILE:${NAME}>.bin" -binary -offset 0x0000 -byte-swap 4 -o "$<TARGET_FILE:${NAME}>.vmem" -vmem
     VERBATIM
   )

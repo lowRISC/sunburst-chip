@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 `define SYSTEM_HIER top_chip_asic_tb.u_dut.u_top_chip_system
+`define CPU_HIER `SYSTEM_HIER.u_core_ibex
 `define MEM_ARRAY_SUB gen_generic.u_impl_generic.mem
 
 `define SRAM_MEM_HIER `SYSTEM_HIER.u_sram.u_ram.`MEM_ARRAY_SUB

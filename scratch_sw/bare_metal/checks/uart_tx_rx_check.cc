@@ -56,7 +56,7 @@ extern "C" void entry_point(void *rwRoot) {
   uart = uart_ptr(root, BACKDOOR_VAR(kUartIdx));
 
   CHERI::Capability<volatile uint32_t> status = root.cast<volatile uint32_t>();
-  status.address() = 0x00100000;
+  status.address() = 0x811F0080;
   status.bounds() = 4;
 
   // Initialise UART and configure external agent testing at 1 Mbps

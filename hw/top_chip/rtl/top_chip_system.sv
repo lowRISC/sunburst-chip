@@ -184,10 +184,10 @@ module top_chip_system #(
     1'b0
   };
 
-  tlul_pkg::tl_h2d_t tl_rv_core_ibex__corei_h2d;
-  tlul_pkg::tl_d2h_t tl_rv_core_ibex__corei_d2h;
-  tlul_pkg::tl_h2d_t tl_rv_core_ibex__cored_h2d;
-  tlul_pkg::tl_d2h_t tl_rv_core_ibex__cored_d2h;
+  tlul_pkg::tl_h2d_t tl_core_ibex__corei_h2d;
+  tlul_pkg::tl_d2h_t tl_core_ibex__corei_d2h;
+  tlul_pkg::tl_h2d_t tl_core_ibex__cored_h2d;
+  tlul_pkg::tl_d2h_t tl_core_ibex__cored_d2h;
 
   tlul_pkg::tl_h2d_t tl_sram_h2d;
   tlul_pkg::tl_d2h_t tl_sram_d2h;
@@ -201,6 +201,8 @@ module top_chip_system #(
   tlul_pkg::tl_d2h_t tl_rv_plic_d2h;
   tlul_pkg::tl_h2d_t tl_peri_h2d;
   tlul_pkg::tl_d2h_t tl_peri_d2h;
+  tlul_pkg::tl_h2d_t tl_core_ibex__cfg_h2d;
+  tlul_pkg::tl_d2h_t tl_core_ibex__cfg_d2h;
 
   xbar_main u_xbar_main (
     .clk_sys_i,
@@ -209,24 +211,26 @@ module top_chip_system #(
     .rst_peri_ni,
 
     // Host interfaces
-    .tl_rv_core_ibex__corei_i(tl_rv_core_ibex__corei_h2d),
-    .tl_rv_core_ibex__corei_o(tl_rv_core_ibex__corei_d2h),
-    .tl_rv_core_ibex__cored_i(tl_rv_core_ibex__cored_h2d),
-    .tl_rv_core_ibex__cored_o(tl_rv_core_ibex__cored_d2h),
+    .tl_core_ibex__corei_i  (tl_core_ibex__corei_h2d),
+    .tl_core_ibex__corei_o  (tl_core_ibex__corei_d2h),
+    .tl_core_ibex__cored_i  (tl_core_ibex__cored_h2d),
+    .tl_core_ibex__cored_o  (tl_core_ibex__cored_d2h),
 
      // Device interfaces
-    .tl_sram_o          (tl_sram_h2d),
-    .tl_sram_i          (tl_sram_d2h),
-    .tl_rom_o           (tl_rom_h2d),
-    .tl_rom_i           (tl_rom_d2h),
-    .tl_revocation_ram_o(tl_revocation_ram_h2d),
-    .tl_revocation_ram_i(tl_revocation_ram_d2h),
-    .tl_rev_ctl_o       (tl_rev_ctl_h2d),
-    .tl_rev_ctl_i       (tl_rev_ctl_d2h),
-    .tl_rv_plic_o       (tl_rv_plic_h2d),
-    .tl_rv_plic_i       (tl_rv_plic_d2h),
-    .tl_peri_o          (tl_peri_h2d),
-    .tl_peri_i          (tl_peri_d2h),
+    .tl_sram_o            (tl_sram_h2d),
+    .tl_sram_i            (tl_sram_d2h),
+    .tl_rom_o             (tl_rom_h2d),
+    .tl_rom_i             (tl_rom_d2h),
+    .tl_revocation_ram_o  (tl_revocation_ram_h2d),
+    .tl_revocation_ram_i  (tl_revocation_ram_d2h),
+    .tl_rev_ctl_o         (tl_rev_ctl_h2d),
+    .tl_rev_ctl_i         (tl_rev_ctl_d2h),
+    .tl_core_ibex__cfg_o  (tl_core_ibex__cfg_h2d),
+    .tl_core_ibex__cfg_i  (tl_core_ibex__cfg_d2h),
+    .tl_rv_plic_o         (tl_rv_plic_h2d),
+    .tl_rv_plic_i         (tl_rv_plic_d2h),
+    .tl_peri_o            (tl_peri_h2d),
+    .tl_peri_i            (tl_peri_d2h),
 
     .scanmode_i
   );
@@ -235,10 +239,10 @@ module top_chip_system #(
     .clk_i (clk_sys_i),
     .rst_ni(rst_sys_ni),
 
-    .tl_corei_h2d_o(tl_rv_core_ibex__corei_h2d),
-    .tl_corei_d2h_i(tl_rv_core_ibex__corei_d2h),
-    .tl_cored_h2d_o(tl_rv_core_ibex__cored_h2d),
-    .tl_cored_d2h_i(tl_rv_core_ibex__cored_d2h),
+    .tl_corei_h2d_o(tl_core_ibex__corei_h2d),
+    .tl_corei_d2h_i(tl_core_ibex__corei_d2h),
+    .tl_cored_h2d_o(tl_core_ibex__cored_h2d),
+    .tl_cored_d2h_i(tl_core_ibex__cored_d2h),
 
     .tl_revocation_ram_h2d_i(tl_revocation_ram_h2d),
     .tl_revocation_ram_d2h_o(tl_revocation_ram_d2h),
@@ -255,6 +259,9 @@ module top_chip_system #(
     .irq_external_i(rv_plic_irq),
     .irq_fast_i    ('0),
     .irq_nm_i      (aon_timer_nmi_wdog_timer_bark_sync),
+
+    .cfg_tl_d_i    (tl_core_ibex__cfg_h2d),
+    .cfg_tl_d_o    (tl_core_ibex__cfg_d2h),
 
     .ram_2p_cfg_i
   );
@@ -273,12 +280,8 @@ module top_chip_system #(
     .ram_1p_cfg_i
   );
 
-  // TODO: Connect the sim_sram to a window in ibex core wrapper register
-  // interface (when it exists) instead of hijacking write to the ROM.
   rom #(
-    .AddrWidth(ROMAddrWidth),
-    .ErrOnWrite(1'b0) // To allow sim_sram to bind to the ROM tl_i port.
-                      // TODO: Remove when sim_sram is connected elsewhere.
+    .AddrWidth(ROMAddrWidth)
   ) u_rom (
     .clk_i (clk_sys_i),
     .rst_ni(rst_sys_ni),

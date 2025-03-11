@@ -7,8 +7,9 @@
 #include "sw/device/lib/arch/device.h"
 
 #include "hw/top_chip/sw/autogen/top_chip.h"
-// TODO: Decide what functionality we require in the core_ibex wrapper.
-//#include "rv_core_ibex_regs.h"
+// TODO: When core_ibex functionality is finalised, consider renaming the
+// software files and definitions.
+#include "rv_core_ibex_regs.h"
 #include "uart_regs.h"
 
 /**
@@ -58,7 +59,6 @@ const uint32_t kUartTxFifoCpuCycles = CALCULATE_UART_TX_FIFO_CPU_CYCLES(
 const uint32_t kAstCheckPollCpuCycles =
     CALCULATE_AST_CHECK_POLL_CPU_CYCLES(kClockFreqCpuHz);
 
-#if 0
 const uintptr_t kDeviceTestStatusAddress =
     TOP_CHIP_RV_CORE_IBEX_CFG_BASE_ADDR +
     RV_CORE_IBEX_DV_SIM_WINDOW_REG_OFFSET;
@@ -66,11 +66,5 @@ const uintptr_t kDeviceTestStatusAddress =
 const uintptr_t kDeviceLogBypassUartAddress =
     TOP_CHIP_RV_CORE_IBEX_CFG_BASE_ADDR +
     RV_CORE_IBEX_DV_SIM_WINDOW_REG_OFFSET + 0x04;
-#else
-// TODO: Although we do have sw test status monitoring and logging, these overlay
-// the ROM presently.
-const uintptr_t kDeviceTestStatusAddress = TOP_CHIP_ROM_CTRL_ROM_BASE_ADDR;
-const uintptr_t kDeviceLogBypassUartAddress = TOP_CHIP_ROM_CTRL_ROM_BASE_ADDR + 4;
-#endif
 
 void device_fpga_version_print(void) {}
