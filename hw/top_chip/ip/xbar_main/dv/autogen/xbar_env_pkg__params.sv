@@ -19,6 +19,9 @@ tl_device_t xbar_devices[$] = '{
     '{"rev_ctl", '{
         '{32'h00340000, 32'h00340fff}
     }},
+    '{"core_ibex__cfg", '{
+        '{32'h811f0000, 32'h811f0fff}
+    }},
     '{"rv_plic", '{
         '{32'h88000000, 32'h8bffffff}
     }},
@@ -28,15 +31,16 @@ tl_device_t xbar_devices[$] = '{
 
   // List of Xbar hosts
 tl_host_t xbar_hosts[$] = '{
-    '{"rv_core_ibex__corei", 0, '{
+    '{"core_ibex__corei", 0, '{
         "sram",
         "rom"}}
     ,
-    '{"rv_core_ibex__cored", 1, '{
+    '{"core_ibex__cored", 1, '{
         "sram",
         "rom",
         "revocation_ram",
         "rev_ctl",
+        "core_ibex__cfg",
         "rv_plic",
         "peri"}}
 };
