@@ -33,6 +33,14 @@ parameters:
     datatype: str
     paramtype: vlogdefine
     description: Primitives implementation to use, e.g. "prim_pkg::ImplGeneric".
+  VERILATOR_TEST_STATUS_ADDR:
+    datatype: int
+    paramtype: vlogdefine
+    description: Verilator specific address to write to, to report the test status. This value should be at a word offset in the unmapped address space.
+  RV_CORE_IBEX_SIM_SRAM:
+    datatype: bool
+    paramtype: vlogdefine
+    description: Disconnect the TL data output of rv_core_ibex so that we can attach the simulation SRAM.
 
 targets:
   default: &default_target
@@ -41,6 +49,9 @@ targets:
 
   sim:
     <<: *default_target
+    parameters:
+      - VERILATOR_TEST_STATUS_ADDR=0x811f0080
+      - RV_CORE_IBEX_SIM_SRAM=true
     default_tool: verilator
     filesets_append:
       - files_verilator
