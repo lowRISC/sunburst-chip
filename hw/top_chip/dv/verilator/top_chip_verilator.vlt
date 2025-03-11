@@ -4,6 +4,10 @@
 
 `verilator_config
 
+// This signal is disconnected to allow the sim_sram to respond to sw_status_if activity.
+// Purely a DV construction to report test progress and completion.
+lint_off -rule UNUSED -file "*core_ibex.sv" -match "*tl_win_d2h_int*"
+
 lint_off -file "*uartdpi.sv"
 
 // Bug seem in Verilator v5.020 where trace chandles produces a C++ compilation

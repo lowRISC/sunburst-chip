@@ -138,19 +138,21 @@ module top_chip_verilator (input logic clk_i, rst_ni);
     .rom_cfg_i   ('0)
   );
 
+  `define CORE_IBEX u_top_chip_system.u_core_ibex
+  `define SIM_SRAM_IF u_sim_sram.u_sim_sram_if
+
   // Instantiate simulator SRAM for SW DV special writes
-  // TODO: Connect the sim_sram to a window in ibex core wrapper register
-  // interface (when it exists) instead of hijacking write to the ROM.
   sim_sram u_sim_sram (
     .clk_i    (clk_sys),
     .rst_ni   (rst_sys_n),
-    .tl_in_i  (u_top_chip_system.u_rom.tl_i),
+    .tl_in_i  (tlul_pkg::tl_h2d_t'(`CORE_IBEX.u_tlul_req_buf.out_o)),
     .tl_in_o  (),
     .tl_out_o (),
     .tl_out_i ()
   );
 
-  `define SIM_SRAM_IF u_sim_sram.u_sim_sram_if
+  // Connect the sim SRAM directly inside rv_core_ibex.
+  assign `CORE_IBEX.cfg_tl_d_o = u_sim_sram.tl_in_o;
 
   // Connect the SW test status interface to the sim SRAM interface.
   sw_test_status_if u_sw_test_status_if (
@@ -165,7 +167,7 @@ module top_chip_verilator (input logic clk_i, rst_ni);
   // Set the start address of the simulation SRAM.
   // Use offset 0 within the sim SRAM for SW test status indication.
   initial begin
-    `SIM_SRAM_IF.start_addr = 'h00100000;
+    `SIM_SRAM_IF.start_addr = `VERILATOR_TEST_STATUS_ADDR;
     u_sw_test_status_if.sw_test_status_addr = `SIM_SRAM_IF.start_addr;
   end
 
