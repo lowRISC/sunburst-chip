@@ -271,12 +271,10 @@ module top_chip_asic_tb;
   end : gen_generic
 
   // Instantiate simulator SRAM for SW DV special writes
-  // TODO: Connect the sim_sram to a window in ibex core wrapper register
-  // interface (when it exists) instead of hijacking write to the ROM.
   sim_sram u_sim_sram (
     .clk_i    (u_dut.clk_sys),
     .rst_ni   (u_dut.rst_sys_n),
-    .tl_in_i  (u_dut.u_top_chip_system.u_rom.tl_i),
+    .tl_in_i  (tlul_pkg::tl_h2d_t'(`CPU_HIER.u_tlul_req_buf.out_o)),
     .tl_in_o  (),
     .tl_out_o (),
     .tl_out_i ()
@@ -306,6 +304,7 @@ module top_chip_asic_tb;
     `SIM_SRAM_IF.start_addr = SW_DV_START_ADDR;
     `SIM_SRAM_IF.u_sw_test_status_if.sw_test_status_addr = SW_DV_TEST_STATUS_ADDR;
     `SIM_SRAM_IF.u_sw_logger_if.sw_log_addr = SW_DV_LOG_ADDR;
+    force `CPU_HIER.u_tlul_rsp_buf.in_i = u_sim_sram.tl_in_o;
 
     sys_clk_if.set_active(1'b0, 1'b0);
     peri_clk_if.set_active(1'b0, 1'b0);

@@ -60,7 +60,7 @@ extern "C" void entry_point(void *rwRoot) {
   pattgen = pattgen_ptr(root);
 
   CHERI::Capability<volatile uint32_t> status = root.cast<volatile uint32_t>();
-  status.address() = 0x00100000;
+  status.address() = 0x811F0080;
   status.bounds() = 4;
 
   // TODO: Randomise use_interrupts somehow.

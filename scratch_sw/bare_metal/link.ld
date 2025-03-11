@@ -36,47 +36,6 @@ SECTIONS
         __global_pointer$ = __DATA_BEGIN__ + (__DATA_END__ - __DATA_BEGIN__) / 2;
     }
 
-
-    /*
-     * Start DV Sections
-     * The following sections are used by DV to implement logging in an
-     * alternate way, which enables simulation speed up by completely avoiding
-     * any string format processing or even the actual transmission of log data
-     * to a real peripheral.
-     *
-     * These sections are marked as dummy so that they can still be extracted
-     * using readelf or similar utilities. As such, the content in these sections
-     * is not relevant for the actual SW code and can be safely discarded.
-     */
-
-    /*
-     * DV Log offset.
-     *
-     * The value of _dv_log_offset has to be different to other boot stages.
-     *
-     * Note: The method of defining _dv_log_offset must avoid causing linking
-     *       errors when using a CHERI toolchain, even if it looks weird.
-     */
-    .logs.offset 0 (INFO) : {
-      _dv_log_offset = . + 0x10000;
-    }
-
-    /*
-     * The following section contains log fields constructed from the logs using
-     * the log_fields_t struct defined in sw/device/lib/runtime/log.h. The size of
-     * each log field is fixed - 20 bytes. To distinguish between the fields of
-     * different ELF files we add an offset to the address. We register that offset
-     * here as a header before the log fields.
-     */
-    .logs.fields 0 (INFO): {
-        LONG(_dv_log_offset);
-        *(.logs.fields)
-    }
-
-    /*
-     * End DV Sections
-     */
-
     /*
      * DWARF debug sections.
      * Symbols in the DWARF debugging sections (and other note sections) are

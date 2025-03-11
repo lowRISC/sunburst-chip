@@ -28,6 +28,10 @@ module core_ibex #(
   input  logic [14:0] irq_fast_i,
   input  logic        irq_nm_i,
 
+  // peripheral interface access
+  input  tlul_pkg::tl_h2d_t cfg_tl_d_i,
+  output tlul_pkg::tl_d2h_t cfg_tl_d_o,
+
   input prim_ram_2p_pkg::ram_2p_cfg_t ram_2p_cfg_i
 );
   localparam int unsigned RevTagDepth =
@@ -182,6 +186,53 @@ module core_ibex #(
 
     .tl_o(tl_cored_h2d_o),
     .tl_i(tl_cored_d2h_i)
+  );
+
+  /////////////////////////////////////
+  // The carved out space is for DV emulation purposes only
+  /////////////////////////////////////
+
+  import tlul_pkg::tl_h2d_t;
+  import tlul_pkg::tl_d2h_t;
+  localparam int TlH2DWidth = $bits(tl_h2d_t);
+  localparam int TlD2HWidth = $bits(tl_d2h_t);
+
+  logic [TlH2DWidth-1:0] tl_win_h2d_int;
+  logic [TlD2HWidth-1:0] tl_win_d2h_int;
+  tl_d2h_t tl_win_d2h_err_rsp;
+
+  prim_buf #(
+    .Width(TlH2DWidth)
+  ) u_tlul_req_buf (
+    .in_i(cfg_tl_d_i),
+    .out_o(tl_win_h2d_int)
+  );
+
+  prim_buf #(
+    .Width(TlD2HWidth)
+  ) u_tlul_rsp_buf (
+    .in_i(tl_win_d2h_err_rsp),
+    .out_o(tl_win_d2h_int)
+  );
+
+  // Interception point for connecting simulation SRAM by disconnecting the tl_d output. The
+  // disconnection is done only if `SYNTHESIS is NOT defined AND `RV_CORE_IBEX_SIM_SRAM is
+  // defined.
+  // This define is used only for verilator as verilator does not support forces.
+`ifdef RV_CORE_IBEX_SIM_SRAM
+`ifdef SYNTHESIS
+  // Induce a compilation error by instantiating a non-existent module.
+  illegal_preprocessor_branch_taken u_illegal_preprocessor_branch_taken();
+`endif
+`else
+  assign cfg_tl_d_o = tl_d2h_t'(tl_win_d2h_int);
+`endif
+
+  tlul_err_resp u_sim_win_rsp (
+    .clk_i,
+    .rst_ni,
+    .tl_h_i(tl_h2d_t'(tl_win_h2d_int)),
+    .tl_h_o(tl_win_d2h_err_rsp)
   );
 
   logic                       revocation_ram_req;
