@@ -11,6 +11,7 @@ package tl_main_pkg;
   localparam logic [31:0] ADDR_SPACE_REVOCATION_RAM = 32'h 00300000;
   localparam logic [31:0] ADDR_SPACE_REV_CTL        = 32'h 00340000;
   localparam logic [31:0] ADDR_SPACE_CORE_IBEX__CFG = 32'h 811f0000;
+  localparam logic [31:0] ADDR_SPACE_DBG_MEM        = 32'h b0000000;
   localparam logic [31:0] ADDR_SPACE_RV_PLIC        = 32'h 88000000;
   localparam logic [31:0] ADDR_SPACE_PERI           = 32'h 40000000;
 
@@ -19,11 +20,12 @@ package tl_main_pkg;
   localparam logic [31:0] ADDR_MASK_REVOCATION_RAM = 32'h 00001fff;
   localparam logic [31:0] ADDR_MASK_REV_CTL        = 32'h 00000fff;
   localparam logic [31:0] ADDR_MASK_CORE_IBEX__CFG = 32'h 00000fff;
+  localparam logic [31:0] ADDR_MASK_DBG_MEM        = 32'h 00000fff;
   localparam logic [31:0] ADDR_MASK_RV_PLIC        = 32'h 03ffffff;
   localparam logic [31:0] ADDR_MASK_PERI           = 32'h 3fffffff;
 
   localparam int N_HOST   = 3;
-  localparam int N_DEVICE = 7;
+  localparam int N_DEVICE = 8;
 
   typedef enum int {
     TlRom = 0,
@@ -31,8 +33,9 @@ package tl_main_pkg;
     TlRevocationRam = 2,
     TlRevCtl = 3,
     TlCoreIbexCfg = 4,
-    TlRvPlic = 5,
-    TlPeri = 6
+    TlDbgMem = 5,
+    TlRvPlic = 6,
+    TlPeri = 7
   } tl_device_e;
 
   typedef enum int {

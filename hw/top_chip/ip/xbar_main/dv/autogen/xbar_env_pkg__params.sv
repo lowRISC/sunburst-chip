@@ -22,6 +22,9 @@ tl_device_t xbar_devices[$] = '{
     '{"core_ibex__cfg", '{
         '{32'h811f0000, 32'h811f0fff}
     }},
+    '{"dbg_mem", '{
+        '{32'hb0000000, 32'hb0000fff}
+    }},
     '{"rv_plic", '{
         '{32'h88000000, 32'h8bffffff}
     }},
@@ -33,7 +36,8 @@ tl_device_t xbar_devices[$] = '{
 tl_host_t xbar_hosts[$] = '{
     '{"core_ibex__corei", 0, '{
         "sram",
-        "rom"}}
+        "rom",
+        "dbg_mem"}}
     ,
     '{"core_ibex__cored", 1, '{
         "sram",

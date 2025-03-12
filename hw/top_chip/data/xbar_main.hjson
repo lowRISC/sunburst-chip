@@ -96,6 +96,17 @@
         size_byte: "0x00001000",
       }],
     },
+    { name:     "dbg_mem", // Debug module fetch interface
+      type:     "device",
+      clock:    "clk_sys_i",
+      reset:    "rst_sys_ni",
+      xbar:     false,
+      pipeline: false,
+      addr_range: [{
+        base_addr: "0xB0000000",
+        size_byte: "0x00001000",
+      }],
+    },
     { name:  "rv_plic", // RISC-V platform interrupt controller
       type:  "device",
       clock: "clk_sys_i",
@@ -127,7 +138,7 @@
     },
   ],
   connections: {
-    core_ibex.corei: ["sram", "rom"],
+    core_ibex.corei: ["sram", "rom", "dbg_mem"],
     core_ibex.cored: ["sram", "rom",
                       "revocation_ram", "rev_ctl",
                       "core_ibex.cfg",
