@@ -257,7 +257,7 @@ module top_chip_system #(
   // Debug module top.
   rv_dm #(
     .AlertAsyncOn ( '0), // TODO: Do we need alerts? Shall we remove them all together?
-    .IdcodeValue  ( '0)  // TODO: jtag_id_pkg::RV_DM_JTAG_IDCODE )
+    .IdcodeValue  (jtag_id_pkg::RV_DM_JTAG_IDCODE)
   ) u_rv_dm (
     .clk_i                     (clk_sys_i      ),
     .clk_lc_i                  (clk_sys_i      ),
