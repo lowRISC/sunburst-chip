@@ -29,6 +29,9 @@ module core_ibex #(
   input  logic [14:0] irq_fast_i,
   input  logic        irq_nm_i,
 
+  input  logic        debug_req_i,
+  input  logic        ndmreset_req_i,
+  
   // peripheral interface access
   input  tlul_pkg::tl_h2d_t cfg_tl_d_i,
   output tlul_pkg::tl_d2h_t cfg_tl_d_o,
@@ -61,6 +64,9 @@ module core_ibex #(
   logic [15:0]               tsmap_addr;
   logic [top_pkg::TL_DW-1:0] tsmap_rdata;
 
+  logic rst_core_ni;
+  assign rst_core_ni = rst_ni & ~ndmreset_req_i;
+
   ibexc_top_tracing #(
     .DmHaltAddr     (DmHaltAddr),
     .DmExceptionAddr(DmExceptionAddr),
@@ -74,7 +80,7 @@ module core_ibex #(
     .RV32B          (RV32B)
   ) u_ibex_top_tracing (
     .clk_i (clk_i),
-    .rst_ni(rst_ni),
+    .rst_ni(rst_core_ni),
 
     .test_en_i  (1'b0),
     .scan_rst_ni(1'b1),
@@ -129,7 +135,7 @@ module core_ibex #(
     .scramble_nonce_i    ('0),
     .scramble_req_o      (),
 
-    .debug_req_i        (1'b0),
+    .debug_req_i        (debug_req_i),
     .crash_dump_o       (),
     .double_fault_seen_o(),
 

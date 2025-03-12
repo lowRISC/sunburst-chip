@@ -27,5 +27,6 @@ initial force dut.rst_peri_ni = rst_n;
 `CONNECT_TL_DEVICE_IF(revocation_ram, dut, clk_sys_i, rst_n)
 `CONNECT_TL_DEVICE_IF(rev_ctl, dut, clk_sys_i, rst_n)
 `CONNECT_TL_DEVICE_IF(core_ibex__cfg, dut, clk_sys_i, rst_n)
+`CONNECT_TL_DEVICE_IF(dbg_mem, dut, clk_sys_i, rst_n)
 `CONNECT_TL_DEVICE_IF(rv_plic, dut, clk_sys_i, rst_n)
 `CONNECT_TL_DEVICE_IF(peri, dut, clk_peri_i, rst_n)

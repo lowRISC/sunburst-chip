@@ -56,6 +56,12 @@ module xbar_main_bind;
     .h2d    (tl_core_ibex__cfg_o),
     .d2h    (tl_core_ibex__cfg_i)
   );
+  bind xbar_main tlul_assert #(.EndpointType("Host")) tlul_assert_device_dbg_mem (
+    .clk_i  (clk_sys_i),
+    .rst_ni (rst_sys_ni),
+    .h2d    (tl_dbg_mem_o),
+    .d2h    (tl_dbg_mem_i)
+  );
   bind xbar_main tlul_assert #(.EndpointType("Host")) tlul_assert_device_rv_plic (
     .clk_i  (clk_sys_i),
     .rst_ni (rst_sys_ni),
