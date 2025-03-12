@@ -23,6 +23,15 @@ module top_chip_verilator (input logic clk_i, rst_ni);
   assign rst_usb_n  = rst_ni;
   assign rst_aon_n  = rst_ni;
 
+  logic jtag_tck;
+  logic jtag_tms;
+  logic jtag_trst_n;
+  logic jtag_tdi;
+  logic jtag_tdo;
+/* verilator lint_off UNUSEDSIGNAL */
+  logic jtag_tdo_en;
+/* verilator lint_on UNUSEDSIGNAL */
+
   logic uart_sys_tx, uart_sys_tx_raw, uart_sys_tx_en, uart_sys_rx;
 
   // USBDEV
@@ -76,11 +85,12 @@ module top_chip_verilator (input logic clk_i, rst_ni);
     .cio_i2c1_scl_o   (),
     .cio_i2c1_scl_en_o(),
 
-    .cio_jtag_tck_i   ('0),
-    .cio_jtag_tms_i   ('0),
-    .cio_jtag_trst_ni ('0),
-    .cio_jtag_td_i    ('0),
-    .cio_jtag_td_o    (),
+    .cio_jtag_tck_i   (jtag_tck),
+    .cio_jtag_tms_i   (jtag_tms),
+    .cio_jtag_trst_ni (jtag_trst_n),
+    .cio_jtag_td_i    (jtag_tdi),
+    .cio_jtag_td_o    (jtag_tdo),
+    .cio_jtag_td_en_o (jtag_tdo_en),
 
     .cio_pattgen_pda0_tx_o    (),
     .cio_pattgen_pda0_tx_en_o (),
@@ -178,6 +188,18 @@ module top_chip_verilator (input logic clk_i, rst_ni);
   end
 
   assign uart_sys_tx = uart_sys_tx_raw & uart_sys_tx_en;
+
+  // Virtual JTAG
+  jtagdpi u_jtagdpi (
+    .clk_i      (clk_sys),
+    .rst_ni     (rst_sys_n),
+    .jtag_tck   (jtag_tck),
+    .jtag_tms   (jtag_tms),
+    .jtag_tdi   (jtag_tdi),
+    .jtag_tdo   (jtag_tdo), //TODO & jrag_tdo_en?
+    .jtag_trst_n(jtag_trst_n),
+    .jtag_srst_n(/*unused*/)
+  );
 
   // Virtual UART
   uartdpi #(

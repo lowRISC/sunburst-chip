@@ -36,3 +36,12 @@ lint_off -rule UNUSED -file "*usbdpi.sv" -match "*Bits of signal are not used*"
 lint_off -file "*sim_sram.sv"
 lint_off -file "*sim_sram_if.sv"
 lint_off -file "*sw_test_status_if.sv"
+
+// Unused signals in Debug Module
+lint_off -rule UNUSEDSIGNAL -file "*debug_module*"
+lint_off -rule WIDTHTRUNC -file "*dm_mem.sv"
+lint_off -rule WIDTHEXPAND -file "*dm_mem.sv"
+
+// TLUL with single outstanding request is purely combinational
+lint_off -rule UNUSEDSIGNAL -file "*tlul_adapter_host.sv" -match "*clk_i*"
+lint_off -rule UNUSEDSIGNAL -file "*tlul_adapter_host.sv" -match "*rst_ni*"
