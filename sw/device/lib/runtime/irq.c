@@ -14,9 +14,8 @@ void irq_set_vector_offset(uintptr_t address) {
   CSR_WRITE(CSR_REG_MTVEC, (uint32_t)address);
 }
 
-// Global interrupt enable function has been inlined to work around CHERIoT
-// interrupt-disabling backward sentries being used to return from functions.
-// See irq.h for inline definition of:
+// Global interrupt enable function has been converted to a macro.
+// See irq.h for explanation and macro definition equivalent to:
 // void irq_global_ctrl(bool en);
 
 void irq_external_ctrl(bool en) {
