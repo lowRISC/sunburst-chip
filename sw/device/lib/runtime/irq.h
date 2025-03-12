@@ -18,17 +18,22 @@
 void irq_set_vector_offset(uintptr_t address);
 
 /**
- * Enable / disable ibex globlal interrupts
+ * Enable / disable ibex global interrupts
+ *
+ * Sunburst - Converted func to macro to avoid interrupt-clearing side effects
+ *            of function returns as compiled by the CHERIoT toolchain.
+ *            For more info on the mechanics of interrupt-clearing backward
+ *            sentries, see "Sealed capabilities" in the CHERIoT ISA.
+ *
+ * Equivalent to: `void irq_global_ctrl(bool en)`
+ *
  */
-// Global interrupt enable function has been inlined to work around CHERIoT
-// interrupt-disabling backward sentries being used to return from functions.
-inline void irq_global_ctrl(bool en) {
-  if (en) {
-    CSR_SET_BITS(CSR_REG_MSTATUS, 0x8);
-  } else {
-    CSR_CLEAR_BITS(CSR_REG_MSTATUS, 0x8);
-  }
-}
+#define irq_global_ctrl(en)                \
+  if (en) {                                \
+    CSR_SET_BITS(CSR_REG_MSTATUS, 0x8);    \
+  } else {                                 \
+    CSR_CLEAR_BITS(CSR_REG_MSTATUS, 0x8);  \
+  }                                        \
 
 /**
  * Enable / disable ibex external interrupts
