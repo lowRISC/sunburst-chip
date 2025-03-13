@@ -15,7 +15,7 @@ $GEN_REGS sw/device/regs/rv_plic_regs.h hw/top_chip/ip_autogen/rv_plic/data/rv_p
 echo Generating register definitions for rv_timer IP block
 $GEN_REGS sw/device/regs/rv_timer_regs.h hw/vendor/lowrisc_ip/ip/rv_timer/data/rv_timer.hjson
 echo Generating register definitions for spi_host IP block
-$GEN_REGS sw/device/regs/spi_host_regs.h hw/vendor/lowrisc_ip/ip/spi_host/data/spi_host.hjson
+$GEN_REGS sw/device/regs/spi_host_regs.h hw/vendor/lowrisc_ip_main/ip/spi_host/data/spi_host.hjson
 echo Generating register definitions for uart IP block
 $GEN_REGS sw/device/regs/uart_regs.h hw/vendor/lowrisc_ip/ip/uart/data/uart.hjson
 echo Generating register definitions for usbdev IP block
