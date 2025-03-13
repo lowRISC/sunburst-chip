@@ -606,6 +606,9 @@ module top_chip_system #(
     .intr_error_o    (spi_host0_intr.error),
     .intr_spi_event_o(spi_host0_intr.spi_event),
 
+    // DMA signal
+    .lsio_trigger_o(),
+
     // Tilelink
     .tl_i(tl_spi_host0_h2d),
     .tl_o(tl_spi_host0_d2h),
@@ -630,6 +633,9 @@ module top_chip_system #(
     // Interrupt
     .intr_error_o    (spi_host1_intr.error),
     .intr_spi_event_o(spi_host1_intr.spi_event),
+
+    // DMA signal
+    .lsio_trigger_o(),
 
     // Tilelink
     .tl_i(tl_spi_host1_h2d),
