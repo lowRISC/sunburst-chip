@@ -328,7 +328,7 @@ hw/vendor/lowrisc_ip/util/dvsim/dvsim.py hw/vendor/lowrisc_ip_main/ip/pwm/dv/pwm
 # Run rv_timer regression
 hw/vendor/lowrisc_ip/util/dvsim/dvsim.py hw/vendor/lowrisc_ip/ip/rv_timer/dv/rv_timer_sim_cfg.hjson -i nightly --max-parallel 32 --tool xcelium
 # Run spi_host regression
-hw/vendor/lowrisc_ip/util/dvsim/dvsim.py hw/vendor/lowrisc_ip/ip/spi_host/dv/spi_host_sim_cfg.hjson -i nightly --max-parallel 32 --tool xcelium
+hw/vendor/lowrisc_ip/util/dvsim/dvsim.py hw/vendor/lowrisc_ip_main/ip/spi_host/dv/spi_host_sim_cfg.hjson -i nightly --max-parallel 32 --tool xcelium
 # Run uart regression
 hw/vendor/lowrisc_ip/util/dvsim/dvsim.py hw/vendor/lowrisc_ip/ip/uart/dv/uart_sim_cfg.hjson -i nightly --max-parallel 32 --tool xcelium
 # Run usbdev regression
