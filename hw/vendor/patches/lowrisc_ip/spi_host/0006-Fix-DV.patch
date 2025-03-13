@@ -1,8 +1,35 @@
+diff --git a/data/spi_host.hjson b/data/spi_host.hjson
+index 5de0670..fa1fe48 100644
+--- a/data/spi_host.hjson
++++ b/data/spi_host.hjson
+@@ -60,7 +60,7 @@
+       desc: "The number of active-low chip select (cs_n) lines to create.",
+       type: "int",
+       default: "1"
+-      local: "true",
++      local: "false",
+       expose: "true",
+     },
+     { name: "TxDepth",
+diff --git a/dv/env/seq_lib/spi_host_tx_rx_vseq.sv b/dv/env/seq_lib/spi_host_tx_rx_vseq.sv
+index 91d8776..0a12a2e 100644
+--- a/dv/env/seq_lib/spi_host_tx_rx_vseq.sv
++++ b/dv/env/seq_lib/spi_host_tx_rx_vseq.sv
+@@ -38,7 +38,8 @@ class spi_host_tx_rx_vseq extends spi_host_base_vseq;
+     spi_host_status_t status;
+ 
+     // Wait until not-empty before entering the forever loop.
+-    csr_spinwait(.ptr(ral.status.rxempty), .exp_data(1'b0), .backdoor(1));
++    // Sunburst - avoid backdoor, or may read a false zero in cycle after rst.
++    csr_spinwait(.ptr(ral.status.rxempty), .exp_data(1'b0), .verbosity(UVM_LOW));
+     forever begin : read_rxfifo_until_empty_and_inactive
+       do begin
+         // Add some delay here so other tb tasks can use the bus while we spin.
 diff --git a/dv/env/spi_host_env.sv b/dv/env/spi_host_env.sv
-index 85d64af..67274b2 100644
+index 97d0122..3b70a62 100644
 --- a/dv/env/spi_host_env.sv
 +++ b/dv/env/spi_host_env.sv
-@@ -22,10 +22,6 @@ class spi_host_env extends cip_base_env #(
+@@ -21,10 +21,6 @@ class spi_host_env extends cip_base_env #(
      m_spi_agent = spi_agent::type_id::create("m_spi_agent", this);
      uvm_config_db#(spi_agent_cfg)::set(this, "m_spi_agent*", "cfg", cfg.m_spi_agent_cfg);
      cfg.m_spi_agent_cfg.en_cov = cfg.en_cov;
@@ -14,10 +41,11 @@ index 85d64af..67274b2 100644
  
    function void connect_phase(uvm_phase phase);
 diff --git a/dv/env/spi_host_env_pkg.sv b/dv/env/spi_host_env_pkg.sv
-index c582cda..dfa6796 100644
+index 5d481e0..57443c5 100644
 --- a/dv/env/spi_host_env_pkg.sv
 +++ b/dv/env/spi_host_env_pkg.sv
-@@ -155,7 +155,7 @@ package spi_host_env_pkg;
+@@ -157,8 +157,8 @@ package spi_host_env_pkg;
+   } spi_host_intr_test_t;
  
    // alerts
 -  parameter uint NUM_ALERTS = 1;
@@ -28,7 +56,7 @@ index c582cda..dfa6796 100644
    // functions
  
 diff --git a/dv/spi_host_sim_cfg.hjson b/dv/spi_host_sim_cfg.hjson
-index c27bc3f..aca0d8c 100644
+index 7b702ae..6a94158 100644
 --- a/dv/spi_host_sim_cfg.hjson
 +++ b/dv/spi_host_sim_cfg.hjson
 @@ -25,16 +25,16 @@
@@ -47,7 +75,7 @@ index c27bc3f..aca0d8c 100644
 +                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/csr_tests.hjson",
 +                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/intr_test.hjson",
 +                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/mem_tests.hjson",
-+                //"{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/alert_test.hjson",
++                //"{proj_root}/hw/dv/tools/dvsim/tests/alert_test.hjson",
 +                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/intr_test.hjson",
 +                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/sec_cm_tests.hjson",
                  //"{proj_root}/hw/dv/tools/dvsim/tests/stress_tests.hjson", // TODO(#18886): enable for V3
@@ -56,40 +84,8 @@ index c27bc3f..aca0d8c 100644
  
    // Add additional tops for simulation.
    sim_tops: ["spi_host_bind", "sec_cm_prim_onehot_check_bind"]
-diff --git a/dv/sva/spi_host_data_stable_sva.sv b/dv/sva/spi_host_data_stable_sva.sv
-index f95d495..9ee85f1 100644
---- a/dv/sva/spi_host_data_stable_sva.sv
-+++ b/dv/sva/spi_host_data_stable_sva.sv
-@@ -8,8 +8,7 @@ module spi_host_data_stable_sva (
-   input logic [spi_host_reg_pkg::NumCS-1:0]                 cio_csb_o,
-   input logic [3:0]                                         cio_sd_i,
-   input logic [3:0]                                         cio_sd_en_o,
--  input spi_host_reg_pkg::spi_host_reg2hw_configopts_mreg_t configopts,
--  input spi_device_pkg::passthrough_req_t                   passthrough_i
-+  input spi_host_reg_pkg::spi_host_reg2hw_configopts_mreg_t configopts
-  );
- 
-   // Check to ensure cio_sd_o[i] stays stable for a whole clock cycle
-@@ -45,7 +44,7 @@ module spi_host_data_stable_sva (
-      .signal2check_i (cio_sd_i),
-      .sampled_negedge_enable (sampled_negedge_enable),
-      .sampled_posedge_enable (sampled_posedge_enable),
--     .passthrough_en (passthrough_i.passthrough_en)
-+     .passthrough_en (1'b0)
-      );
- 
-   whole_cycle_data_stable_signal_checker #(.VECTOR_WIDTH(4))
-@@ -56,7 +55,7 @@ module spi_host_data_stable_sva (
-      .signal2check_i (cio_sd_en_o),
-      .sampled_negedge_enable (sampled_negedge_enable),
-      .sampled_posedge_enable (sampled_posedge_enable),
--     .passthrough_en (passthrough_i.passthrough_en)
-+     .passthrough_en (1'b0)
-      );
- 
- 
 diff --git a/dv/tb.sv b/dv/tb.sv
-index dc4f409..4b9a89b 100644
+index eab7549..b7bd5b8 100644
 --- a/dv/tb.sv
 +++ b/dv/tb.sv
 @@ -12,9 +12,6 @@ module tb;
@@ -102,13 +98,13 @@ index dc4f409..4b9a89b 100644
    // macro includes
    `include "uvm_macros.svh"
    `include "dv_macros.svh"
-@@ -36,18 +33,17 @@ module tb;
+@@ -36,15 +33,11 @@ module tb;
    logic                         intr_error;
    logic                         intr_event;
  
 -  passthrough_req_t             passthrough_i;
 -  passthrough_rsp_t             passthrough_o;
- 
+-
    // interfaces
    clk_rst_if   clk_rst_if(.clk(clk), .rst_n(rst_n));
    pins_if #(NUM_MAX_INTERRUPTS) intr_if(.pins(interrupts));
@@ -118,12 +114,7 @@ index dc4f409..4b9a89b 100644
  
    `DV_ALERT_IF_CONNECT()
  
-+  assign alert_tx = '0;
-+
-   // dut
-   spi_host dut (
-     .clk_i                (clk),
-@@ -56,9 +52,6 @@ module tb;
+@@ -58,9 +51,6 @@ module tb;
      // tl i/f
      .tl_i                 (tl_if.h2d),
      .tl_o                 (tl_if.d2h),
@@ -133,7 +124,7 @@ index dc4f409..4b9a89b 100644
      // spi i/o
      .cio_sck_o            (cio_sck_o),
      .cio_sck_en_o         (cio_sck_en_o),
-@@ -67,31 +60,12 @@ module tb;
+@@ -69,31 +59,12 @@ module tb;
      .cio_sd_o             (cio_sd_o),
      .cio_sd_en_o          (cio_sd_en_o),
      .cio_sd_i             (cio_sd_i),
@@ -162,11 +153,11 @@ index dc4f409..4b9a89b 100644
 -  assign spi_passthrough_if.cio_sd_o     = cio_sd_o;
 -
 -  assign cio_sd_i = spi_passthrough_if.passthrough_en ? spi_passthrough_if.cio_sd_i : si_pulldown;
-+  assign cio_sd_i =  si_pulldown;
++  assign cio_sd_i = si_pulldown;
  
    // configure spi_if i/o
    assign spi_if.sck = (cio_sck_en_o) ? cio_sck_o : 1'bz;
-@@ -115,22 +89,9 @@ module tb;
+@@ -117,22 +88,10 @@ module tb;
      clk_rst_if.set_active();
      uvm_config_db#(virtual clk_rst_if)::set(null, "*.env", "clk_rst_vif", clk_rst_if);
      uvm_config_db#(intr_vif)::set(null, "*.env", "intr_vif", intr_if);
@@ -177,7 +168,7 @@ index dc4f409..4b9a89b 100644
      $timeformat(-12, 0, " ps", 12);
      run_test();
    end
--
+ 
 -  `ASSERT(Sck_A,   passthrough_i.passthrough_en -> passthrough_i.sck == cio_sck_o, clk, !rst_n)
 -  `ASSERT(Sck_En_A,passthrough_i.passthrough_en -> passthrough_i.sck_en == cio_sck_en_o,
 -          clk, !rst_n)
@@ -189,16 +180,3 @@ index dc4f409..4b9a89b 100644
 -  `ASSERT(Sd_I_A,  passthrough_i.passthrough_en -> passthrough_o.s == cio_sd_i, clk, !rst_n)
 -
  endmodule
-diff --git a/dv/env/seq_lib/spi_host_base_vseq.sv b/dv/env/seq_lib/spi_host_base_vseq.sv
-index e6dfc5f..90c3b33 100644
---- a/dv/env/seq_lib/spi_host_base_vseq.sv
-+++ b/dv/env/seq_lib/spi_host_base_vseq.sv
-@@ -114,7 +114,7 @@ class spi_host_base_vseq extends cip_base_vseq #(
-       end
-       [cfg.seq_cfg.host_spi_middle_clkdiv+1 : 16'hFFF] : cfg.csr_spinwait_timeout_ns *= 5;
-       [16'hFFF+1 : cfg.seq_cfg.host_spi_max_clkdiv] : cfg.csr_spinwait_timeout_ns *= 10;
--      default : `uvm_fatal(`gfn, $sformatf("spi_config_regs.clkdiv[0]=0x%0x is out range"))
-+      default : `uvm_fatal(`gfn, $sformatf("spi_config_regs.clkdiv[0]=0x%0x is out range", spi_config_regs.clkdiv[0]))
-     endcase
-   endfunction
- 

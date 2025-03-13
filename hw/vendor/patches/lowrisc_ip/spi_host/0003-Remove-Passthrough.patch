@@ -1,8 +1,261 @@
+diff --git a/data/spi_host.hjson b/data/spi_host.hjson
+index df04204..79cddd3 100644
+--- a/data/spi_host.hjson
++++ b/data/spi_host.hjson
+@@ -34,13 +34,6 @@
+     { protocol: "tlul", direction: "device", racl_support: true }
+   ],
+   inter_signal_list: [
+-    { struct:  "passthrough",
+-      package: "spi_device_pkg",
+-      type:    "req_rsp",
+-      name:    "passthrough",
+-      act:     "rsp",
+-      width:   "1"
+-    }
+     { struct: "logic",
+       type:   "uni",
+       name:   "lsio_trigger",
+@@ -146,11 +139,6 @@
+         The SPI host block can talk to serial NOR flash devices.
+       '''
+     },
+-    { name: "SPIHOST.USECASE.PASSTHROUGH",
+-      desc: '''
+-        The SPI host block can work together with a device to create a pass through.
+-      '''
+-    },
+     { name: "SPIHOST.RATE.STANDARD",
+       desc: '''
+         Host can operate in standard SPI data rate.
+diff --git a/data/spi_host_testplan.hjson b/data/spi_host_testplan.hjson
+index 8258828..7275037 100644
+--- a/data/spi_host_testplan.hjson
++++ b/data/spi_host_testplan.hjson
+@@ -121,19 +121,6 @@
+       stage: V2
+       tests: ["spi_host_sw_reset"]
+     }
+-    {
+-      name: passthrough_mode
+-      desc: '''
+-            - Verify the function of spi_host in passthrough_mode
+-
+-            Stimulus:
+-              - Enable Passthrough Mode
+-            Checking:
+-              - Ensure Host to Device and Device to Host paths are switched to Passthrough ports
+-      '''
+-      stage: V2
+-      tests: ["spi_host_passthrough_mode"]
+-    }
+     {
+       name: cpol_cpha
+       desc: '''
+@@ -402,15 +389,5 @@
+               i.e first segment in standard mode, followed by segments in dual or quad mode
+             '''
+     }
+-    {
+-      name: passthrough_cg
+-      desc: '''
+-            Check that the pass through data is transmitted instead of the data in the tx fifo.
+-
+-            - Cover that passthrough is activated when a normal transaction is in progress.
+-            - Cover that data on the passthrough interface is ignored while passthroug disabled.
+-
+-            '''
+-    }
+   ]
+ }
+diff --git a/doc/interfaces.md b/doc/interfaces.md
+index 22054db..47b7a52 100644
+--- a/doc/interfaces.md
++++ b/doc/interfaces.md
+@@ -19,10 +19,7 @@ Referring to the [Comportable guideline for peripheral device functionality](htt
+ 
+ | Port Name     | Package::Struct               | Type    | Act   |   Width | Description                                                                                                                                    |
+ |:--------------|:------------------------------|:--------|:------|--------:|:-----------------------------------------------------------------------------------------------------------------------------------------------|
+-| passthrough   | spi_device_pkg::passthrough   | req_rsp | rsp   |       1 |                                                                                                                                                |
+ | lsio_trigger  | logic                         | uni     | req   |       1 | Self-clearing status trigger for the DMA. Set when RX or TX FIFOs are past their configured watermarks matching watermark interrupt behaviour. |
+-| racl_policies | top_racl_pkg::racl_policy_vec | uni     | rcv   |       1 | Incoming RACL policy vector from a racl_ctrl instance. The policy selection vector (parameter) selects the policy for each register.           |
+-| racl_error    | top_racl_pkg::racl_error_log  | uni     | req   |       1 | RACL error log information of this module.                                                                                                     |
+ | tl            | tlul_pkg::tl                  | req_rsp | rsp   |       1 |                                                                                                                                                |
+ 
+ ## Interrupts
+diff --git a/doc/theory_of_operation.md b/doc/theory_of_operation.md
+index f4e08c6..62a5a6b 100644
+--- a/doc/theory_of_operation.md
++++ b/doc/theory_of_operation.md
+@@ -381,9 +381,6 @@ Each `CSB` line can be routed either to a single peripheral or to a daisy-chain
+ Whenever a segment description is written to the [`COMMAND`](registers.md#command) register, the  [`CSID`](registers.md#csid) is sent along with [`COMMAND`](registers.md#command) and the `CONFIGOPTS` multi-register corresponding to [`CSID`](registers.md#csid)  to indicate which device is meant to receive the command.
+ The SPI_HOST core typically then manages the details of asserting and deasserting the proper `CSB` line, subject to the timing parameters expressed in [`CONFIGOPTS.CSNLEAD`](registers.md#configopts), [`CONFIGOPTS.CSNTRAIL`](registers.md#configopts), and [`CONFIGOPTS.CSNIDLE`](registers.md#configopts).
+ 
+-If [Pass-through mode](#pass-through-mode) is enabled then the `CSB` lines are controlled by *neither* the SPI_HOST hardware nor the firmware register.
+-In Pass-though mode, control of the `CSB` lines passes directly to the inter-module port, `passthrough_i.csb`.
+-
+ ### Back-to-back Segments
+ 
+ The command interface can allows for any number of segments in a given command.
+@@ -538,14 +535,6 @@ If such transactions ever occur, they trigger an "Invalid Access" error event, w
+ The RX FIFO has no special provisions for packing received data in any unaligned fashion.
+ Depending on the `ByteOrder` parameter, the first byte received is always packed into either the most- or least-significant byte read from the [`RXDATA`](registers.md#rxdata) memory window.
+ 
+-
+-## Pass-through Mode
+-
+-The SPI_HOST IP also supports a special "Pass-through" mode, which allows for the direct control of the serial interface by another block (namely SPI_DEVICE).
+-This feature is entirely controlled by intermodule signals `passthrough_i` and `passthrough_o`, which control a set of multiplexers.
+-If `passthrough_i.passthrough_en` is asserted the SPI_HOST peripheral bus signals reflect the corresponding signals in the `passthrough_i` structure.
+-Otherwise, the peripheral signals are controlled by the SPI_HOST FSM and the internal shift register.
+-
+ ## Interrupt Aggregation
+ 
+ In order to reduce the total number of interrupts in the system, the SPI_HOST has only two interrupt lines: `error` and `spi_event`.
+@@ -652,8 +641,6 @@ To use this reset, assert [`CONTROL.SW_RST`](registers.md#control), and then wai
+ 
+ ![](../doc/spi_host_block_diagram.svg)
+ 
+-![](../doc/spi_host_passthrough.svg)
+-
+ ## Component Overview
+ 
+ The SPI_HOST FSM parses the software command segments and orchestrates the proper transmission of data through its control of the [shift register](#shift-register).
+diff --git a/dv/env/seq_lib/spi_host_vseq_list.sv b/dv/env/seq_lib/spi_host_vseq_list.sv
+index f7baa7a..e17bb3d 100644
+--- a/dv/env/seq_lib/spi_host_vseq_list.sv
++++ b/dv/env/seq_lib/spi_host_vseq_list.sv
+@@ -15,6 +15,5 @@
+ `include "spi_host_status_stall_vseq.sv"
+ `include "spi_host_idlecsbactive_vseq.sv"
+ `include "spi_host_stress_all_vseq.sv"
+-`include "spi_host_passthrough_mode_vseq.sv"
+ `include "spi_host_common_vseq.sv"
+ `include "spi_host_spien_vseq.sv"
+diff --git a/dv/env/spi_host_env.core b/dv/env/spi_host_env.core
+index 6c757ab..877e3b9 100644
+--- a/dv/env/spi_host_env.core
++++ b/dv/env/spi_host_env.core
+@@ -13,7 +13,6 @@ filesets:
+       - lowrisc:ip:spi_host
+     files:
+       - spi_host_env_pkg.sv
+-      - spi_passthrough_if.sv
+       - spi_host_seq_cfg.sv: {is_include_file: true}
+       - spi_host_env_cfg.sv: {is_include_file: true}
+       - spi_host_env_cov.sv: {is_include_file: true}
+@@ -37,7 +36,6 @@ filesets:
+       - seq_lib/spi_host_status_stall_vseq.sv: {is_include_file: true}
+       - seq_lib/spi_host_idlecsbactive_vseq.sv: {is_include_file: true}
+       - seq_lib/spi_host_stress_all_vseq.sv: {is_include_file: true}
+-      - seq_lib/spi_host_passthrough_mode_vseq.sv: {is_include_file: true}
+       - seq_lib/spi_host_spien_vseq.sv: {is_include_file: true}
+     file_type: systemVerilogSource
+ 
+diff --git a/dv/env/spi_host_env.sv b/dv/env/spi_host_env.sv
+index 85d64af..97d0122 100644
+--- a/dv/env/spi_host_env.sv
++++ b/dv/env/spi_host_env.sv
+@@ -12,7 +12,6 @@ class spi_host_env extends cip_base_env #(
+   `uvm_component_new
+ 
+   spi_agent m_spi_agent;
+-  virtual spi_passthrough_if spi_passthrough_vif;
+ 
+   function void build_phase(uvm_phase phase);
+     int clk_core_freq_mhz;
+diff --git a/dv/env/spi_host_env_cfg.sv b/dv/env/spi_host_env_cfg.sv
+index 003b18b..c64beed 100644
+--- a/dv/env/spi_host_env_cfg.sv
++++ b/dv/env/spi_host_env_cfg.sv
+@@ -13,8 +13,6 @@ class spi_host_env_cfg extends cip_base_env_cfg #(.RAL_T(spi_host_reg_block));
+   // agent cfgs
+   spi_agent_cfg  m_spi_agent_cfg;
+ 
+-  virtual spi_passthrough_if spi_passthrough_vif;
+-
+   // number of dummy cycles in a dummy segment
+   rand int    num_dummy;
+   int         max_dummy_cycles = 16;
+diff --git a/dv/spi_host_sim_cfg.hjson b/dv/spi_host_sim_cfg.hjson
+index c27bc3f..7b702ae 100644
+--- a/dv/spi_host_sim_cfg.hjson
++++ b/dv/spi_host_sim_cfg.hjson
+@@ -91,11 +91,6 @@
+       uvm_test_seq: spi_host_event_vseq
+       run_opts: ["+en_scb=0", "+test_timeout_ns=1_000_000_000"]
+     }
+-    {
+-      name: spi_host_passthrough_mode
+-      uvm_test_seq: spi_host_passthrough_mode_vseq
+-      run_opts: ["+en_scb=0"]
+-    }
+     {
+       name: spi_host_status_stall
+       uvm_test_seq: spi_host_status_stall_vseq
+diff --git a/dv/sva/spi_host_bind.sv b/dv/sva/spi_host_bind.sv
+index 45d536b..37150d6 100644
+--- a/dv/sva/spi_host_bind.sv
++++ b/dv/sva/spi_host_bind.sv
+@@ -28,8 +28,7 @@ module spi_host_bind;
+     .cio_csb_o,
+     .cio_sd_i,
+     .cio_sd_en_o,
+-    .configopts(reg2hw.configopts),
+-    .passthrough_i
++    .configopts(reg2hw.configopts)
+   );
+ 
+ endmodule
+diff --git a/dv/sva/spi_host_data_stable_sva.sv b/dv/sva/spi_host_data_stable_sva.sv
+index 955360b..78f2bcc 100644
+--- a/dv/sva/spi_host_data_stable_sva.sv
++++ b/dv/sva/spi_host_data_stable_sva.sv
+@@ -12,8 +12,7 @@ module spi_host_data_stable_sva #(
+   input logic [NumCS-1:0]                                  cio_csb_o,
+   input logic [3:0]                                        cio_sd_i,
+   input logic [3:0]                                        cio_sd_en_o,
+-  input spi_host_reg_pkg::spi_host_reg2hw_configopts_reg_t configopts,
+-  input spi_device_pkg::passthrough_req_t                  passthrough_i
++  input spi_host_reg_pkg::spi_host_reg2hw_configopts_reg_t configopts
+  );
+ 
+   // Check to ensure cio_sd_o[i] stays stable for a whole clock cycle
+@@ -47,8 +46,7 @@ module spi_host_data_stable_sva #(
+      .csb_o (csbs),
+      .signal2check_i (cio_sd_i),
+      .sampled_negedge_enable (sampled_negedge_enable),
+-     .sampled_posedge_enable (sampled_posedge_enable),
+-     .passthrough_en (passthrough_i.passthrough_en)
++     .sampled_posedge_enable (sampled_posedge_enable)
+      );
+ 
+   whole_cycle_data_stable_signal_checker #(.VECTOR_WIDTH(4))
+@@ -58,8 +56,7 @@ module spi_host_data_stable_sva #(
+      .csb_o (csbs),
+      .signal2check_i (cio_sd_en_o),
+      .sampled_negedge_enable (sampled_negedge_enable),
+-     .sampled_posedge_enable (sampled_posedge_enable),
+-     .passthrough_en (passthrough_i.passthrough_en)
++     .sampled_posedge_enable (sampled_posedge_enable)
+      );
+ 
+ 
+@@ -73,8 +70,7 @@ module whole_cycle_data_stable_signal_checker #( parameter int VECTOR_WIDTH = 4
+  input logic                    csb_o,
+  input logic [VECTOR_WIDTH-1:0] signal2check_i,
+  input logic                    sampled_negedge_enable,
+- input logic                    sampled_posedge_enable,
+- input logic                    passthrough_en
++ input logic                    sampled_posedge_enable
+  );
+ 
+ 
 diff --git a/rtl/spi_host.sv b/rtl/spi_host.sv
-index d38c486..a121f1d 100644
+index c836ace..d6a0401 100644
 --- a/rtl/spi_host.sv
 +++ b/rtl/spi_host.sv
-@@ -25,10 +25,6 @@ module spi_host import spi_host_reg_pkg::*; (
+@@ -38,10 +38,6 @@ module spi_host
    output logic [3:0]       cio_sd_en_o,
    input        [3:0]       cio_sd_i,
  
@@ -10,10 +263,10 @@ index d38c486..a121f1d 100644
 -  input  spi_device_pkg::passthrough_req_t passthrough_i,
 -  output spi_device_pkg::passthrough_rsp_t passthrough_o,
 -
+   output logic             lsio_trigger_o,
+ 
    output logic             intr_error_o,
-   output logic             intr_spi_event_o
- );
-@@ -64,62 +60,13 @@ module spi_host import spi_host_reg_pkg::*; (
+@@ -106,62 +102,13 @@ module spi_host
  
    assign sd_en     = output_en ? sd_en_core : 4'h0;
  
@@ -83,7 +336,7 @@ index d38c486..a121f1d 100644
    assign sd_i            = cio_sd_i;
  
    assign hw2reg.status.byteorder.d  = ByteOrder;
-@@ -553,15 +553,8 @@ module spi_host import spi_host_reg_pkg::*; (
+@@ -607,18 +554,10 @@ module spi_host
    `ASSERT_KNOWN(CioSckEnKnownO_A, cio_sck_en_o)
    `ASSERT_KNOWN(CioCsbKnownO_A, cio_csb_o)
    `ASSERT_KNOWN(CioCsbEnKnownO_A, cio_csb_en_o)
@@ -94,6 +347,9 @@ index d38c486..a121f1d 100644
    `ASSERT_KNOWN(CioSdEnKnownO_A, cio_sd_en_o)
    `ASSERT_KNOWN(IntrSpiEventKnownO_A, intr_spi_event_o)
    `ASSERT_KNOWN(IntrErrorKnownO_A, intr_error_o)
+   `ASSERT_KNOWN(LsioTriggerKnown_A, lsio_trigger_o)
+   `ASSERT_KNOWN(RaclErrorValidKnown_A, racl_error_o.valid)
+-
 -
 -  // passthrough_o.s is passed through to spi_device, it may contain unknown data,
 -  // but the unknown data won't be used based on the SPI protocol.
@@ -101,14 +357,14 @@ index d38c486..a121f1d 100644
 -  `ASSERT(PassthroughConn_A, passthrough_o.s === cio_sd_i)
  endmodule : spi_host
 diff --git a/spi_host.core b/spi_host.core
-index db52aeb..664aa13 100644
+index f3e5cc1..8f28ff9 100644
 --- a/spi_host.core
 +++ b/spi_host.core
-@@ -12,7 +12,6 @@ filesets:
-       - lowrisc:prim:all
+@@ -13,7 +13,6 @@ filesets:
        - lowrisc:prim:flop_en
+       - lowrisc:prim:racl_error_arb
        - lowrisc:ip:tlul
 -      - lowrisc:ip:spi_device_pkg
+       - lowrisc:systems:top_racl_pkg
      files:
        - rtl/spi_host_reg_pkg.sv
-       - rtl/spi_host_cmd_pkg.sv

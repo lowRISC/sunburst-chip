@@ -1,34 +1,32 @@
 diff --git a/rtl/spi_host.sv b/rtl/spi_host.sv
-index f6cb3b1204..d38c486a29 100644
+index f53bb6b..c836ace 100644
 --- a/rtl/spi_host.sv
 +++ b/rtl/spi_host.sv
-@@ -50,8 +50,7 @@ module spi_host import spi_host_reg_pkg::*; (
-     .tl_win_o   (fifo_win_h2d),
-     .tl_win_i   (fifo_win_d2h),
+@@ -91,7 +91,6 @@ module spi_host
+     .tl_win_i         ( fifo_win_d2h           ),
      .reg2hw,
--    .hw2reg,
--    .intg_err_o (0)
-+    .hw2reg
+     .hw2reg,
+-    .intg_err_o       ( 0                      ),
+     .racl_policies_i  ( racl_policies_i        ),
+     .racl_error_o     ( racl_error[0]          )
    );
- 
-   logic             sck;
 diff --git a/rtl/spi_host_reg_top.sv b/rtl/spi_host_reg_top.sv
-index 75ce27dc22..f1e1749f00 100644
+index b1360b2..dbaba05 100644
 --- a/rtl/spi_host_reg_top.sv
 +++ b/rtl/spi_host_reg_top.sv
-@@ -18,10 +18,7 @@ module spi_host_reg_top (
+@@ -28,10 +28,7 @@ module spi_host_reg_top
  
-   // To HW
-   output spi_host_reg_pkg::spi_host_reg2hw_t reg2hw, // Write
--  input  spi_host_reg_pkg::spi_host_hw2reg_t hw2reg, // Read
+   // RACL interface
+   input  top_racl_pkg::racl_policy_vec_t racl_policies_i,
+-  output top_racl_pkg::racl_error_log_t  racl_error_o,
 -
 -  // Integrity check errors
 -  output logic intg_err_o
-+  input  spi_host_reg_pkg::spi_host_hw2reg_t hw2reg  // Read
++  output top_racl_pkg::racl_error_log_t  racl_error_o
  );
  
    import spi_host_reg_pkg::* ;
-@@ -47,40 +44,6 @@ module spi_host_reg_top (
+@@ -57,40 +54,6 @@ module spi_host_reg_top
    tlul_pkg::tl_h2d_t tl_reg_h2d;
    tlul_pkg::tl_d2h_t tl_reg_d2h;
  
@@ -69,7 +67,7 @@ index 75ce27dc22..f1e1749f00 100644
    // outgoing integrity generation
    tlul_pkg::tl_d2h_t tl_o_pre;
    tlul_rsp_intg_gen #(
-@@ -131,11 +131,6 @@ module spi_host_reg_top (
+@@ -144,11 +107,6 @@ module spi_host_reg_top
          tl_i.a_address[AW-1:0] inside {[40:43]} ? 2'd1 :
          // Default set to register
          2'd2;
@@ -81,7 +79,7 @@ index 75ce27dc22..f1e1749f00 100644
    end
  
    tlul_adapter_reg #(
-@@ -168,7 +131,7 @@ module spi_host_reg_top (
+@@ -179,7 +137,7 @@ module spi_host_reg_top
    // cdc oversampling signals
  
    assign reg_rdata = reg_rdata_next ;
@@ -90,7 +88,7 @@ index 75ce27dc22..f1e1749f00 100644
  
    // Define SW related signals
    // Format: <reg>_<field>_{wd|we|qs}
-@@ -1844,23 +1807,6 @@ module spi_host_reg_top (
+@@ -1906,23 +1864,6 @@ module spi_host_reg_top
  
    assign event_enable_idle_wd = reg_wdata[5];
  

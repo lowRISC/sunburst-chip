@@ -1,21 +1,45 @@
+diff --git a/data/spi_host.hjson b/data/spi_host.hjson
+index 56c4002..df04204 100644
+--- a/data/spi_host.hjson
++++ b/data/spi_host.hjson
+@@ -133,9 +133,10 @@
+     }
+   ],
+   alert_list: [
+-    { name: "fatal_fault",
++    { name: "recov_none",
+       desc: '''
+-      This fatal alert is triggered when a fatal TL-UL bus integrity fault is detected.
++      Fake alert just so the register isn't removed
++      (which would shift subsequent addresses).
+       '''
+     }
+   ],
+diff --git a/doc/interfaces.md b/doc/interfaces.md
+index 85c4fc2..22054db 100644
+--- a/doc/interfaces.md
++++ b/doc/interfaces.md
+@@ -36,7 +36,6 @@ Referring to the [Comportable guideline for peripheral device functionality](htt
+ 
+ | Alert Name   | Description                                                                       |
+ |:-------------|:----------------------------------------------------------------------------------|
+-| fatal_fault  | This fatal alert is triggered when a fatal TL-UL bus integrity fault is detected. |
+ 
+ ## Security Countermeasures
+ 
 diff --git a/rtl/spi_host.sv b/rtl/spi_host.sv
-index 8408cb0543..f6cb3b1204 100644
+index 86efbfb..f53bb6b 100644
 --- a/rtl/spi_host.sv
 +++ b/rtl/spi_host.sv
-@@ -8,11 +8,7 @@
- 
- `include "prim_assert.sv"
- 
--module spi_host
--  import spi_host_reg_pkg::*;
--#(
--  parameter logic [NumAlerts-1:0] AlertAsyncOn = {NumAlerts{1'b1}}
--) (
-+module spi_host import spi_host_reg_pkg::*; (
-   input              clk_i,
-   input              rst_ni,
- 
-@@ -20,10 +16,6 @@ module spi_host
+@@ -11,7 +11,6 @@
+ module spi_host
+   import spi_host_reg_pkg::*;
+ #(
+-  parameter logic [NumAlerts-1:0]           AlertAsyncOn              = {NumAlerts{1'b1}},
+   parameter int unsigned                    NumCS                     = 1,
+   parameter bit                             EnableRacl                = 1'b0,
+   parameter bit                             RaclErrorRsp              = EnableRacl,
+@@ -26,10 +25,6 @@ module spi_host
    input              tlul_pkg::tl_h2d_t tl_i,
    output             tlul_pkg::tl_d2h_t tl_o,
  
@@ -23,24 +47,26 @@ index 8408cb0543..f6cb3b1204 100644
 -  input  prim_alert_pkg::alert_rx_t [NumAlerts-1:0] alert_rx_i,
 -  output prim_alert_pkg::alert_tx_t [NumAlerts-1:0] alert_tx_o,
 -
-   // SPI Interface
-   output logic             cio_sck_o,
-   output logic             cio_sck_en_o,
-@@ -50,7 +42,6 @@ module spi_host
+   // RACL interface
+   input  top_racl_pkg::racl_policy_vec_t racl_policies_i,
+   output top_racl_pkg::racl_error_log_t  racl_error_o,
+@@ -83,7 +78,6 @@ module spi_host
    tlul_pkg::tl_d2h_t fifo_win_d2h [2];
  
    // Register module
 -  logic [NumAlerts-1:0] alert_test, alerts;
-   spi_host_reg_top u_reg (
-     .clk_i,
-     .rst_ni,
-@@ -60,32 +51,9 @@ module spi_host
-     .tl_win_i   (fifo_win_d2h),
+   spi_host_reg_top #(
+     .EnableRacl       ( EnableRacl       ),
+     .RaclErrorRsp     ( RaclErrorRsp     ),
+@@ -97,34 +91,11 @@ module spi_host
+     .tl_win_i         ( fifo_win_d2h           ),
      .reg2hw,
      .hw2reg,
 -    // SEC_CM: BUS.INTEGRITY
--    .intg_err_o (alerts[0])
-+    .intg_err_o (0)
+-    .intg_err_o       ( alerts[0]              ),
++    .intg_err_o       ( 0                      ),
+     .racl_policies_i  ( racl_policies_i        ),
+     .racl_error_o     ( racl_error[0]          )
    );
  
 -  // Alerts
@@ -68,7 +94,7 @@ index 8408cb0543..f6cb3b1204 100644
    logic             sck;
    logic [NumCS-1:0] csb;
    logic [3:0]       sd_out;
-@@ -582,7 +550,6 @@ module spi_host
+@@ -633,7 +604,6 @@ module spi_host
  
    `ASSERT_KNOWN(TlDValidKnownO_A, tl_o.d_valid)
    `ASSERT_KNOWN(TlAReadyKnownO_A, tl_o.a_ready)
@@ -76,7 +102,7 @@ index 8408cb0543..f6cb3b1204 100644
    `ASSERT_KNOWN(CioSckKnownO_A, cio_sck_o)
    `ASSERT_KNOWN(CioSckEnKnownO_A, cio_sck_en_o)
    `ASSERT_KNOWN(CioCsbKnownO_A, cio_csb_o)
-@@ -598,7 +565,4 @@ module spi_host
+@@ -652,7 +622,4 @@ module spi_host
    // but the unknown data won't be used based on the SPI protocol.
    // Hence, instead of checking known data, here does a connectivity check.
    `ASSERT(PassthroughConn_A, passthrough_o.s === cio_sd_i)
