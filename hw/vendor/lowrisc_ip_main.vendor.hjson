@@ -13,6 +13,8 @@
     }
 
     mapping: [
-        {from: "hw/ip/pwm", to: "ip/pwm", patch_dir: "pwm"},
+        {from: "hw/ip/pwm",      to: "ip/pwm",      patch_dir: "pwm"},
+        {from: "hw/ip/spi_host", to: "ip/spi_host", patch_dir: "spi_host"},
+
     ]
 }
