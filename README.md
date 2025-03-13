@@ -469,6 +469,18 @@ To **change the revision or the selection** being vendored, adjust the relevant 
 A branch name can be specified instead of a specific revision in order to make the vendor script automatically pull the latest revision when run.
 In such cases, the revision can be overridden using the `-Dupstream.rev=...` command line argument for patching without pulling newer versions.
 
+### Creating patches
+
+Modifying vendored code using patch files keeps the Sunburst-Chip-specific modifications cleanly separate from the base code and ensures they are not lost when re-vendoring.
+
+Patch files can be created using `git`, although the filepaths inside will need adjusting.
+Here is an example flow for the `spi_host`:
+
+```sh
+# Create a vendoring patch from unstaged local changes to `spi_host`
+git diff -- hw/vendor/lowrisc_ip_main/ip/spi_host/ | sed 's|hw/vendor/lowrisc_ip_main/ip/spi_host/||g' > hw/vendor/patches/lowrisc_ip/spi_host/0001-Remove-Alerts.patch
+```
+
 ## Porting OpenTitan IP
 
 Modifying and integrating OpenTitan IP blocks and associated code is unfortunately not as easy as simply copying (or rather vendoring) it in, particularly for top-level verification.
