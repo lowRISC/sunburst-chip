@@ -295,10 +295,8 @@ The full regression (called nightly) for each of the blocks can be run using Xce
 hw/vendor/lowrisc_ip/util/dvsim/dvsim.py hw/vendor/lowrisc_ip/ip/aon_timer/dv/aon_timer_sim_cfg.hjson -i nightly --max-parallel 32 --tool xcelium
 # Run gpio regression
 hw/vendor/lowrisc_ip/util/dvsim/dvsim.py hw/vendor/lowrisc_ip/ip/gpio/dv/gpio_sim_cfg.hjson -i nightly --max-parallel 32 --tool xcelium
-# Run i2c smoke regression
-# Note: The full I2C regression is experiencing timeouts which is being tracked here: https://github.com/lowRISC/sunburst-chip/issues/42
-# The command below just executes the smoke test for now.
-hw/vendor/lowrisc_ip/util/dvsim/dvsim.py hw/vendor/lowrisc_ip/ip/i2c/dv/i2c_sim_cfg.hjson -i smoke --max-parallel 32 --tool xcelium
+# Run i2c regression
+hw/vendor/lowrisc_ip/util/dvsim/dvsim.py hw/vendor/lowrisc_ip/ip/i2c/dv/i2c_sim_cfg.hjson -i nightly --max-parallel 32 --tool xcelium
 # Run pattgen regression
 hw/vendor/lowrisc_ip/util/dvsim/dvsim.py hw/vendor/lowrisc_ip/ip/pattgen/dv/pattgen_sim_cfg.hjson -i nightly --max-parallel 32 --tool xcelium
 # Run pwm regression
