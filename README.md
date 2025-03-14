@@ -19,7 +19,8 @@ Major sections below include:
 - [Block-level Xcelium simulation](#block-level-xcelium-simulation)
 - [Sonata XL development board](#sonata-xl-development-board)
 - [Vendoring](#vendoring)
-- [Porting](#porting)
+- [Porting OpenTitan IP](#porting-opentitan-ip)
+- [Porting Other IP](#porting-other-ip)
 - [Licence](#licence)
 
 ## Overview
@@ -468,14 +469,23 @@ To **change the revision or the selection** being vendored, adjust the relevant 
 A branch name can be specified instead of a specific revision in order to make the vendor script automatically pull the latest revision when run.
 In such cases, the revision can be overridden using the `-Dupstream.rev=...` command line argument for patching without pulling newer versions.
 
-## Porting
+## Porting OpenTitan IP
 
-Modifying and integrating the imported blocks and associated code is often more involved than simply vendoring it in, particularly for top-level verification.
+Modifying and integrating OpenTitan IP blocks and associated code is unfortunately not as easy as simply copying (or rather vendoring) it in, particularly for top-level verification.
 Porting top-level DV elements such as UVM agents, virtual sequences (vseq), and test software for an OpenTitan block can take days to weeks depending on the complexity.
-Factors include the complexity of the top-level DV for that block, applicable differences between OpenTitan and Sunburst Chip (e.g. PLIC interrupt granularity), and familiarity with the two projects.
+Factors include the complexity of the top-level DV for that block, applicable differences between OpenTitan and Sunburst Chip, and familiarity with the two projects.
+Applicable differences from OpenTitan to Sunburst Chip currently include:
+
+- reduced PLIC interrupt granularity (per cause -> per block),
+- simplification of top-level DV environment and base classes,
+- removal of security hardening such as Alerts and TL-UL bus Integrity checking,
+- current lack of pinmux, and
+- current lack of clock or reset managers (also means no sleep modes).
 
 Here are some notes on common steps required when porting top-level DV for a block from OpenTitan to Sunburst Chip:
 
+- RTL patches (already done for blocks present)
+  - Create vendoring patches to remove: Alerts, Integrity checks (on inputs at least), adjust DV code in *hw/* to match Alert removal and new filepaths, and any other block-specific changes required.
 - UVM agent integration (for I/O blocks)
   - Add and connect to the DUT the appropriate virtual interface (such as `spi_if`) in the testbench *hw/top_chip/dv/tb/tb.sv* for export using `uvm_config_db`.
     - This may require adding an enable signal if the DUT connections need to be shared with a DPI model.
@@ -508,6 +518,72 @@ Here are some notes on common steps required when porting top-level DV for a blo
   - Rework interrupt code (if any) to account for the PLIC only having one interrupt per block rather than per cause in each block.
   - Move macro-ified `irq_global_ctrl()` call (if any) to be inside `test_main()` rather than any sub-function to avoid interrupt-clearing side effects resulting from function returns compiled by the CHERIoT toolchain.
     - For information of the mechanics of interrupt-disabling backward sentries, see the "Sealed capabilities" section of the CHERIoT ISA.
+
+## Porting Other IP
+
+Integrating non-OpenTitan IP blocks is a less well defined process due to the unknown origin and style.
+Using an OpenTitan block as an example case may help, depending on the situation.
+For I/O peripherals, the two main aspects that will probably require the most integration effort are connecting the internal register interface and creating an I/O agent for verifying the external interface.
+
+### Internal TL-UL
+
+Sunburst Chip and OpenTitan use the [SiFive TileLink Uncached Lightweight (TL-UL) bus](https://static.dev.sifive.com/docs/tilelink/tilelink-spec-1.7-draft.pdf) for internal interconnect.
+Here is a brief comparison of TL-UL to other buses as quoted from the [OpenTitan TL-UL documentation](https://opentitan.org/book/hw/ip/tlul/index.html#description):
+
+> TL-UL is a lightweight bus that combines the point-to-point split-transaction features of the powerful TileLink (or AMBA AXI) 5-channel bus without the high pin-count overhead.
+> It is intended to be about on par of pincount with APB but with the transaction performance of AXI-4, modulo the following assumptions.
+>
+> - Only one request (read or write) per cycle
+> - Only one response (read or write) per cycle
+> - No burst transactions
+
+[OpenTitan's TL-UL](https://opentitan.org/book/hw/ip/tlul/index.html) is also augmented with `a_user` and `d_user` side-channels used for Integrity checking.
+This integrity checking is not required in Sunburst Chip, though redundant fragments of logic may remain in places.
+
+Sunburst Chip follows OpenTitan in using the terms "host" / "device" instead of the fraught terms "master" / "slave".
+
+The TL-UL crossbars `xbar_main` and `xbar_peri` in Sunburst Chip are currently generated using [tlgen](https://opentitan.org/book/util/tlgen/index.html).
+
+The OpenTitan register generation tools [reggen/regtool](https://opentitan.org/book/util/reggen/index.html) are not currently in use in Sunburst Chip.
+
+#### Creating TL-UL adapters
+
+A requirement for integrating most IP blocks into Sunburst Chip is that they have a TL-UL interface, whether natively or using an adapter.
+**TL-UL bus primitives** are provided in the [lowRISC IP library](hw/vendor/lowrisc_ip/ip/tlul) to help with this.
+Key primitives for adding a TL-UL interface to an IP block include:
+
+- [`tlul_adapter_host`](hw/vendor/lowrisc_ip/ip/tlul/rtl/tlul_adapter_host.sv)
+  - converts between TL-UL and a generic req/grant/rvalid memory host interface
+- [`tlul_adapter_sram`](hw/vendor/lowrisc_ip/ip/tlul/rtl/tlul_adapter_sram.sv)
+  - converts between TL-UL and a generic req/grant/rvalid memory device interface
+- [`tlul_adapter_reg`](hw/vendor/lowrisc_ip/ip/tlul/rtl/tlul_adapter_reg.sv)
+  - converts between TL-UL and a generic ren/wen/busy register device interface
+- [`tlul_fifo_async`](hw/vendor/lowrisc_ip/ip/tlul/rtl/tlul_fifo_async.sv)
+  - connects TL-UL interfaces either side of a Clock Domain Crossing (CDC)
+
+An example of using one of these primitives to connect a non-OpenTitan block to a TL-UL bus exists in [Sonata system](https://lowrisc.github.io/sonata-system/), also part of the Sunburst Project.
+Sonata system is designed for the [Sonata board](https://github.com/newaetech/sonata-pcb), an FPGA-based development board.
+The FPGA in question, a Xilinx/AMD Artix 7 A50T, features an [XADC](https://docs.amd.com/r/en-US/ug480_7Series_XADC) Analog to Digital Converter hard-IP block with a Dynamic Reconfiguration Port (DRP) for register access.
+Some manner of connecting the XADC DRP interface to the system TL-UL bus was desired to allow runtime configuration and measurement.
+Of the lowRISC TL-UL primitives, `tlul_adapter_sram` was identified as being most like the DRP interface on the non-TL side.
+This primitive was combined with some custom request rejection logic to create [`xadc_adapter`](https://github.com/lowRISC/sonata-system/blob/main/rtl/ip/xadc/rtl/xadc_adapter.sv) to translate TL-UL for this DRP device.
+This adapter and a Vivado-generated XADC instantiation (with many parameters) were combined in the [`xadc`](https://github.com/lowRISC/sonata-system/blob/main/rtl/ip/xadc/rtl/xadc.sv) wrapper.
+This allowed the XADC to be accessed like any other peripheral without having to write vast amounts of TL-UL conversion logic.
+
+An example of adapting an IP block *without* using one of the lowRISC TL-UL adapter primitives can also be found in the Sonata system HyperRAM controller.
+The HyperRAM device itself is an onboard memory module that uses the HyperBus interface.
+[OpenHBMC](https://github.com/OVGN/OpenHBMC) is an open-source HyperBus controller IP suitable for use with the FPGA on the Sonata board, but it features an AXI4 bus for host communications rather than TL-UL.
+The [`hbmc_tl_top`](https://github.com/lowRISC/sonata-system/blob/main/rtl/ip/hyperram/rtl/hbmc_tl_top.sv) module, derived from [`hbmc_axi_top`](https://github.com/OVGN/OpenHBMC/blob/master/OpenHBMC/hdl/hbmc_axi_top.v), provides a TL-UL interface rather than an AXI4 interface by tweaking the logic and using some smaller primitives.
+This approach may not be as clean as using an adapter, but it is more targetted and may require fewer logic/memory resources.
+It also may provide better performance, which for an interface to program/data memory is quite important.
+
+### External I/O
+
+When it comes to monitoring/driving the external interface of I/O peripherals, there are technically two approaches used in OpenTitan: UVM agents, and DPI models.
+At present, only the `usbdev` block uses a DPI-model for verification (as well as logging).
+Non-`usbdev` OpenTitan I/O peripherals interact with UVM agents for verification, though there is also a UART DPI model for logging purposes.
+Other approaches are always an option if a way can be found to integrate them with the existing verification environment.
+Which approach to choose if writing DV from scratch may depend on your previous experience and any existing resources.
 
 ## Licence
 
