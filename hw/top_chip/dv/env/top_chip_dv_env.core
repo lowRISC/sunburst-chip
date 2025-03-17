@@ -17,6 +17,7 @@ filesets:
       - lowrisc:dv:spi_agent
       - lowrisc:dv:pattgen_agent
       - lowrisc:dv:uart_agent
+      - lowrisc:dv:jtag_agent
       - lowrisc:dv:pins_if
       - lowrisc:dv:common_ifs
     files:
