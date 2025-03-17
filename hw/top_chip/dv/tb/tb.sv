@@ -147,7 +147,7 @@ module top_chip_asic_tb;
     .IO59,
     .IO60,
     .IO61,
-    
+
     .USB_P,
     .USB_N
   );
@@ -236,6 +236,14 @@ module top_chip_asic_tb;
   assign uart_if[0].uart_tx = uart_if[0].enable ? IO49 : 1'bz;
   assign IO50 = uart_if[1].uart_rx;
   assign uart_if[1].uart_tx = IO51;
+
+  // JTAG Interface
+  jtag_if jtag_if();
+  assign IO57 = jtag_if.tck;
+  assign IO58 = jtag_if.tms;
+  assign IO59 = jtag_if.trst_n;
+  assign IO60 = jtag_if.tdi;
+  assign jtag_if.tdo = IO61;
 
   // ------ Memory ------
 
@@ -350,6 +358,7 @@ module top_chip_asic_tb;
     // Feed certain I/O signals to matching agents for vseq-specific driving/checking
     uvm_config_db#(virtual pins_if#(NGpioPins))::set(null, "*", "gpio_pins_vif", gpio_pins_if);
     uvm_config_db#(virtual pattgen_if)::set(null, "*.env.m_pattgen_agent*", "vif", pattgen_if);
+    uvm_config_db#(virtual jtag_if)::set(null, "*.env.m_jtag_agent*", "vif", jtag_if);
 
     run_test();
   end
