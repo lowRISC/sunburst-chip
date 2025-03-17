@@ -1,0 +1,29 @@
+From 42dda9a2442a7ed3a66e5ef30719e585b67cb0b2 Mon Sep 17 00:00:00 2001
+From: Samuel Riedel <sriedel@lowrisc.org>
+Date: Mon, 17 Mar 2025 13:06:00 +0100
+Subject: [PATCH 3/8] Update rv_dm to match capability-enabled tlul
+
+---
+ rtl/rv_dm.sv | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/rtl/rv_dm.sv b/rtl/rv_dm.sv
+index 0600010..41dabc8 100644
+--- a/rtl/rv_dm.sv
++++ b/rtl/rv_dm.sv
+@@ -396,10 +396,12 @@ module rv_dm
+     .addr_i       (host_add),
+     .we_i         (host_we),
+     .wdata_i      (host_wdata),
++    .wdata_cap_i  ('0),
+     .wdata_intg_i ('0),
+     .be_i         (host_be),
+     .valid_o      (host_r_valid),
+     .rdata_o      (host_r_rdata),
++    .rdata_cap_o  (), // TODO Should this be connected to the debug module eventually? Currently not supported by the CHERIoT debug module
+     .rdata_intg_o (),
+     .err_o        (host_r_err),
+     // Note: This bus integrity error is not connected to the alert due to a few reasons:
+-- 
+2.34.1
+

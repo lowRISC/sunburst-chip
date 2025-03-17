@@ -396,10 +396,12 @@ module rv_dm
     .addr_i       (host_add),
     .we_i         (host_we),
     .wdata_i      (host_wdata),
+    .wdata_cap_i  ('0),
     .wdata_intg_i ('0),
     .be_i         (host_be),
     .valid_o      (host_r_valid),
     .rdata_o      (host_r_rdata),
+    .rdata_cap_o  (), // TODO Should this be connected to the debug module eventually? Currently not supported by the CHERIoT debug module
     .rdata_intg_o (),
     .err_o        (host_r_err),
     // Note: This bus integrity error is not connected to the alert due to a few reasons:
