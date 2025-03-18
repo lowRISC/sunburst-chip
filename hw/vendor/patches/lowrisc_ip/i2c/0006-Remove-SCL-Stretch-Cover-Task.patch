@@ -1,0 +1,44 @@
+diff --git a/dv/env/i2c_scoreboard.sv b/dv/env/i2c_scoreboard.sv
+index d6da2d9..f18f437 100644
+--- a/dv/env/i2c_scoreboard.sv
++++ b/dv/env/i2c_scoreboard.sv
+@@ -159,7 +159,6 @@ class i2c_scoreboard extends cip_base_scoreboard #(
+   task run_phase(uvm_phase phase);
+     super.run_phase(phase);
+ 
+-    if (cfg.en_cov) collect_scl_stretch_cg();
+ 
+     case (cfg.m_i2c_agent_cfg.if_mode)
+       //-----------------------------------------------
+@@ -467,31 +466,6 @@ class i2c_scoreboard extends cip_base_scoreboard #(
+   endtask
+ 
+   // Task to sample the i2c_scl_stretch_cg based on the interrupts and FIFO status
+-  task collect_scl_stretch_cg();
+-    fork
+-      forever begin
+-        uint acqlvl, txlvl;
+-        bit timeout_ctrl_en;
+-        fork
+-          wait(cfg.intr_vif.pins[StretchTimeout]);
+-          wait(cfg.intr_vif.pins[TxStretch]);
+-          wait(cfg.intr_vif.pins[AcqStretch]);
+-        join_any
+-        csr_rd(.ptr(ral.target_fifo_status.acqlvl), .value(acqlvl), .backdoor(UVM_BACKDOOR));
+-        csr_rd(.ptr(ral.target_fifo_status.txlvl), .value(txlvl), .backdoor(UVM_BACKDOOR));
+-        cov.scl_stretch_cg.sample(
+-          .host_mode(`gmv(ral.ctrl.enablehost)),
+-          .intr_stretch_timeout(cfg.intr_vif.pins[StretchTimeout]),
+-          .host_timeout_ctrl_en(`gmv(ral.timeout_ctrl.en)),
+-          .intr_tx_stretch(cfg.intr_vif.pins[TxStretch]),
+-          .intr_acq_stretch(cfg.intr_vif.pins[AcqStretch]),
+-          .acq_fifo_size(acqlvl),
+-          .tx_fifo_size(txlvl)
+-        );
+-        cfg.clk_rst_vif.wait_clks(1);
+-      end
+-    join_none
+-  endtask: collect_scl_stretch_cg
+ 
+   // Compare seq_items for write transactions
+   // OBS: captured byte-by-byte upon reading the ACQFIFO
