@@ -1,0 +1,140 @@
+From 6611bc11420597d5ba5dfe4bdcfa396d1f522153 Mon Sep 17 00:00:00 2001
+From: Samuel Riedel <sriedel@lowrisc.org>
+Date: Thu, 20 Mar 2025 21:39:11 +0000
+Subject: [PATCH 2/2] Regenerate the debug ROM
+
+---
+ debug_rom/Makefile       |  4 ++--
+ debug_rom/debug_rom.dump | 10 +++++-----
+ debug_rom/debug_rom.h    | 10 +++++-----
+ debug_rom/debug_rom.sv   |  8 ++++----
+ debug_rom/gen_rom.py     |  6 +++++-
+ 5 files changed, 21 insertions(+), 17 deletions(-)
+
+diff --git a/debug_rom/Makefile b/debug_rom/Makefile
+index 3ea9da8..f8f6b8f 100644
+--- a/debug_rom/Makefile
++++ b/debug_rom/Makefile
+@@ -1,7 +1,7 @@
+ # See LICENSE.SiFive for license details
+ 
+-// Conversion to CHERIoT Ibex ISA from RISC-V
+-//   Copyright SCI Semiconductor 2025
++#  Conversion to CHERIoT Ibex ISA from RISC-V
++#  Copyright SCI Semiconductor 2025
+ 
+ debug_rom = debug_rom.sv debug_rom.dump
+ 
+diff --git a/debug_rom/debug_rom.dump b/debug_rom/debug_rom.dump
+index a227224..8a65d92 100644
+--- a/debug_rom/debug_rom.dump
++++ b/debug_rom/debug_rom.dump
+@@ -38,20 +38,20 @@ Disassembly of section .text:
+      854: 17 05 00 00  	auipcc	ca0, 0
+      858: 13 55 c5 00  	srli	a0, a0, 12
+      85c: 13 15 c5 00  	slli	a0, a0, 12
+-     860: 23 26 05 10  	csw	zero, 268(ca0)
++     860: 23 2c 05 10  	csw	zero, 280(ca0)
+      864: 5b 05 a0 03  	cspecialr	ca0, 26
+      868: 5b 04 90 03  	cspecialr	cs0, 25
+-     86c: 73 00 10 00  	ebreak	
++     86c: 73 00 10 00  	ebreak
+ 
+ 00000870 <going>:
+-     870: 23 22 05 10  	csw	zero, 260(ca0)
++     870: 23 24 05 10  	csw	zero, 264(ca0)
+      874: 5b 05 a0 03  	cspecialr	ca0, 26
+      878: 5b 04 90 03  	cspecialr	cs0, 25
+      87c: 6f f0 5f a8  	j	0x300 <whereto>
+ 
+ 00000880 <_resume>:
+      880: 73 24 40 f1  	csrr	s0, mhartid
+-     884: 23 24 85 10  	csw	s0, 264(ca0)
++     884: 23 28 85 10  	csw	s0, 272(ca0)
+      888: 5b 05 a0 03  	cspecialr	ca0, 26
+      88c: 5b 04 90 03  	cspecialr	cs0, 25
+-     890: 73 00 20 7b  	dret	
++     890: 73 00 20 7b  	dret
+diff --git a/debug_rom/debug_rom.h b/debug_rom/debug_rom.h
+index 5950d84..f94bafc 100644
+--- a/debug_rom/debug_rom.h
++++ b/debug_rom/debug_rom.h
+@@ -1,6 +1,6 @@
+ // Auto-generated code
+ 
+-const int reset_vec_size = 40;
++const int reset_vec_size = 38;
+ 
+ uint32_t reset_vec[reset_vec_size] = {
+     0x00c0006f,
+@@ -22,21 +22,21 @@ uint32_t reset_vec[reset_vec_size] = {
+     0x00a40433,
+     0x40044403,
+     0x00247413,
+-    0xfa0418e3,
++    0xfa041ce3,
+     0xfd5ff06f,
+     0x00000517,
+     0x00c55513,
+     0x00c51513,
+-    0x10052623,
++    0x10052c23,
+     0x03a0055b,
+     0x0390045b,
+     0x00100073,
+-    0x10052223,
++    0x10052423,
+     0x03a0055b,
+     0x0390045b,
+     0xa85ff06f,
+     0xf1402473,
+-    0x10852423,
++    0x10852823,
+     0x03a0055b,
+     0x0390045b,
+     0x7b200073,
+diff --git a/debug_rom/debug_rom.sv b/debug_rom/debug_rom.sv
+index ab42f40..ed3c125 100644
+--- a/debug_rom/debug_rom.sv
++++ b/debug_rom/debug_rom.sv
+@@ -1,4 +1,4 @@
+-/* 
++/*
+  * Conversion to CHERIoT Ibex ISA from RISC-V
+  *   Copyright SCI Semiconductor 2025
+  *
+@@ -32,11 +32,11 @@ module debug_rom (
+   assign mem = {
+     64'h00000000_7b200073,
+     64'h0390045b_03a0055b,
+-    64'h10852423_f1402473,
++    64'h10852823_f1402473,
+     64'ha85ff06f_0390045b,
+-    64'h03a0055b_10052223,
++    64'h03a0055b_10052423,
+     64'h00100073_0390045b,
+-    64'h03a0055b_10052623,
++    64'h03a0055b_10052c23,
+     64'h00c51513_00c55513,
+     64'h00000517_fd5ff06f,
+     64'hfa041ce3_00247413,
+diff --git a/debug_rom/gen_rom.py b/debug_rom/gen_rom.py
+index 54387a1..a9dafe6 100755
+--- a/debug_rom/gen_rom.py
++++ b/debug_rom/gen_rom.py
+@@ -22,7 +22,11 @@ if not os.path.isfile(file):
+ filename = os.path.splitext(file)[0]
+ 
+ license = """\
+-/* Copyright 2018 ETH Zurich and University of Bologna.
++/*
++ * Conversion to CHERIoT Ibex ISA from RISC-V
++ *   Copyright SCI Semiconductor 2025
++ *
++ * Copyright 2018 ETH Zurich and University of Bologna.
+  * Copyright and related rights are licensed under the Solderpad Hardware
+  * License, Version 0.51 (the "License"); you may not use this file except in
+  * compliance with the License.  You may obtain a copy of the License at
+-- 
+2.34.1
+
