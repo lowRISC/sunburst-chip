@@ -42,6 +42,7 @@ tl_host_t xbar_hosts[$] = '{
     '{"core_ibex__cored", 1, '{
         "sram",
         "rom",
+        "dbg_mem",
         "revocation_ram",
         "rev_ctl",
         "core_ibex__cfg",

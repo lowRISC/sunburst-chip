@@ -139,7 +139,7 @@
   ],
   connections: {
     core_ibex.corei: ["sram", "rom", "dbg_mem"],
-    core_ibex.cored: ["sram", "rom",
+    core_ibex.cored: ["sram", "rom", "dbg_mem",
                       "revocation_ram", "rev_ctl",
                       "core_ibex.cfg",
                       "rv_plic", "peri"]
