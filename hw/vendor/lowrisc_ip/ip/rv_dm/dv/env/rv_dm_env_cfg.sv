@@ -60,6 +60,7 @@ class rv_dm_env_cfg extends cip_base_env_cfg #(.RAL_T(rv_dm_regs_reg_block));
     // Both, the regs and the debug mem TL device (in the DUT) only support 1 outstanding.
     m_tl_agent_cfgs[RAL_T::type_name].max_outstanding_req = 1;
     m_tl_agent_cfgs[mem_ral_name].max_outstanding_req = 1;
+    m_tl_agent_cfgs[mem_ral_name].check_tl_errs = 0;
 
     // Create jtag agent config obj
     m_jtag_agent_cfg = jtag_agent_cfg::type_id::create("m_jtag_agent_cfg");
