@@ -1,0 +1,40 @@
+From c0f5d22fd37d06c1fe8b4584a1ce9d185fb8454a Mon Sep 17 00:00:00 2001
+From: Samuel Riedel <sriedel@lowrisc.org>
+Date: Thu, 20 Mar 2025 21:40:58 +0000
+Subject: [PATCH 4/8] Disable TLUL integrity on the debug module's SBA bus
+
+---
+ rtl/rv_dm.sv | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/rtl/rv_dm.sv b/rtl/rv_dm.sv
+index 41dabc8..3f0c6c2 100644
+--- a/rtl/rv_dm.sv
++++ b/rtl/rv_dm.sv
+@@ -385,8 +385,8 @@ module rv_dm
+ 
+   tlul_adapter_host #(
+     .MAX_REQS(1),
+-    .EnableDataIntgGen(1),
+-    .EnableRspDataIntgCheck(1)
++    .EnableDataIntgGen(0),
++    .EnableRspDataIntgCheck(0)
+   ) tl_adapter_host_sba (
+     .clk_i,
+     .rst_ni,
+@@ -525,9 +525,9 @@ module rv_dm
+   assign en_ifetch = mubi4_bool_to_mubi(lc_tx_test_true_strict(lc_hw_debug_en_gated[LcEnFetch]));
+ 
+   tlul_adapter_reg #(
+-    .CmdIntgCheck     (1),
+-    .EnableRspIntgGen (1),
+-    .EnableDataIntgGen(1),
++    .CmdIntgCheck     (0),
++    .EnableRspIntgGen (0),
++    .EnableDataIntgGen(0),
+     .RegAw            (MemAw),
+     .RegDw            (BusWidth),
+     .AccessLatency    (1)
+-- 
+2.34.1
+

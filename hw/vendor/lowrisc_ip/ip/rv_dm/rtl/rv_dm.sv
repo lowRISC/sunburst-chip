@@ -385,8 +385,8 @@ module rv_dm
 
   tlul_adapter_host #(
     .MAX_REQS(1),
-    .EnableDataIntgGen(1),
-    .EnableRspDataIntgCheck(1)
+    .EnableDataIntgGen(0),
+    .EnableRspDataIntgCheck(0)
   ) tl_adapter_host_sba (
     .clk_i,
     .rst_ni,
@@ -525,9 +525,9 @@ module rv_dm
   assign en_ifetch = mubi4_bool_to_mubi(lc_tx_test_true_strict(lc_hw_debug_en_gated[LcEnFetch]));
 
   tlul_adapter_reg #(
-    .CmdIntgCheck     (1),
-    .EnableRspIntgGen (1),
-    .EnableDataIntgGen(1),
+    .CmdIntgCheck     (0),
+    .EnableRspIntgGen (0),
+    .EnableDataIntgGen(0),
     .RegAw            (MemAw),
     .RegDw            (BusWidth),
     .AccessLatency    (1)
