@@ -1,4 +1,4 @@
-/* 
+/*
  * Conversion to CHERIoT Ibex ISA from RISC-V
  *   Copyright SCI Semiconductor 2025
  *
@@ -32,11 +32,11 @@ module debug_rom (
   assign mem = {
     64'h00000000_7b200073,
     64'h0390045b_03a0055b,
-    64'h10852423_f1402473,
+    64'h10852823_f1402473,
     64'ha85ff06f_0390045b,
-    64'h03a0055b_10052223,
+    64'h03a0055b_10052423,
     64'h00100073_0390045b,
-    64'h03a0055b_10052623,
+    64'h03a0055b_10052c23,
     64'h00c51513_00c55513,
     64'h00000517_fd5ff06f,
     64'hfa041ce3_00247413,
