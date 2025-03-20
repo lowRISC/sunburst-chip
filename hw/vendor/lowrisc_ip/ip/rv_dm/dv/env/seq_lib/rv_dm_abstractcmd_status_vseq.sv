@@ -8,8 +8,8 @@ class rv_dm_abstractcmd_status_vseq extends rv_dm_base_vseq;
 
   // The expected contents of the debug ROM that we will read through the abstract command
   // interface.
-  bit [31:0] exp_debug_rom[10] = { 'h7b351073, 'h00000517, 'h00c55513, 'h00c51513, 'h7b241073,
-                                   'h38052403, 'h00041073, 'h7b202473, 'h7b302573, 'h00100073 };
+  bit [31:0] exp_debug_rom[10] = { 'h03a5005b, 'h00000517, 'h00c55513, 'h00c51513, 'h0394005b,
+                                   'h38052403, 'h00041073, 'h0390045b, 'h03a0055b, 'h00100073 };
   task body();
     uvm_reg_data_t r_data;
     request_halt();
