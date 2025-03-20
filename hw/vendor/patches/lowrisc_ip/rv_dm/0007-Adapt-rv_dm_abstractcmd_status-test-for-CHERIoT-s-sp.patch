@@ -1,0 +1,32 @@
+From ccf854dc114677d5ecdf29a904afa770e1785d22 Mon Sep 17 00:00:00 2001
+From: Samuel Riedel <sriedel@lowrisc.org>
+Date: Thu, 20 Mar 2025 21:51:54 +0000
+Subject: [PATCH 7/8] Adapt `rv_dm_abstractcmd_status` test for CHERIoT's
+ special csrr/w
+
+In CHERIoT, the csrr and csrw to the scratch registers change. See the
+dm_pkg.sv for the new spec_csr_e OPCODES and cspecialw/cspecialr
+function to access them. This commit changes the expected accesses to
+the scratch registers through the abstract command interface.
+---
+ dv/env/seq_lib/rv_dm_abstractcmd_status_vseq.sv | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/dv/env/seq_lib/rv_dm_abstractcmd_status_vseq.sv b/dv/env/seq_lib/rv_dm_abstractcmd_status_vseq.sv
+index d4ca2e5..fda674a 100644
+--- a/dv/env/seq_lib/rv_dm_abstractcmd_status_vseq.sv
++++ b/dv/env/seq_lib/rv_dm_abstractcmd_status_vseq.sv
+@@ -8,8 +8,8 @@ class rv_dm_abstractcmd_status_vseq extends rv_dm_base_vseq;
+ 
+   // The expected contents of the debug ROM that we will read through the abstract command
+   // interface.
+-  bit [31:0] exp_debug_rom[10] = { 'h7b351073, 'h00000517, 'h00c55513, 'h00c51513, 'h7b241073,
+-                                   'h38052403, 'h00041073, 'h7b202473, 'h7b302573, 'h00100073 };
++  bit [31:0] exp_debug_rom[10] = { 'h03a5005b, 'h00000517, 'h00c55513, 'h00c51513, 'h0394005b,
++                                   'h38052403, 'h00041073, 'h0390045b, 'h03a0055b, 'h00100073 };
+   task body();
+     uvm_reg_data_t r_data;
+     request_halt();
+-- 
+2.34.1
+
