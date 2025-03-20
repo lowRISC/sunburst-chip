@@ -8,13 +8,18 @@ class rv_dm_rom_read_access_vseq extends rv_dm_base_vseq;
 
   task body();
     string         path;
+    string         rom_size_path;
+    int            rom_size;
     bit [31:0]     lower_mem_val;
     bit [31:0]     upper_mem_val;
     uvm_reg_data_t mem_val;
     uvm_reg_data_t rom_data;
 
+    rom_size_path = "tb.dut.u_dm_top.i_dm_mem.gen_rom_snd_scratch.i_debug_rom.RomSize";
+
     repeat (2) begin
-      for (int i = 0; i < 20; i++) begin
+      `DV_CHECK(uvm_hdl_read(rom_size_path, rom_size));
+      for (int i = 0; i < rom_size; i++) begin
         path = $sformatf("tb.dut.u_dm_top.i_dm_mem.gen_rom_snd_scratch.i_debug_rom.mem[%0d]", i);
         `DV_CHECK(uvm_hdl_read(path, rom_data))
         mem_rd(.ptr(tl_mem_ral.rom), .offset(i*2), .data(lower_mem_val));

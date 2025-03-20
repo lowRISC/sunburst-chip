@@ -1,0 +1,39 @@
+From 8e53f7260ef52a83163222c35a78996a44da9fff Mon Sep 17 00:00:00 2001
+From: Samuel Riedel <sriedel@lowrisc.org>
+Date: Thu, 20 Mar 2025 21:47:29 +0000
+Subject: [PATCH 6/8] Fix hard-coded parameter in `rv_dm_rom_read_access`
+
+This test assumed a fixed RomSize. The test now takes the RomSize from
+the source code to ensure no out-of-bound accesses and that the entire
+ROM is tested.
+---
+ dv/env/seq_lib/rv_dm_rom_read_access_vseq.sv | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/dv/env/seq_lib/rv_dm_rom_read_access_vseq.sv b/dv/env/seq_lib/rv_dm_rom_read_access_vseq.sv
+index eb1c7b2..6dbe722 100644
+--- a/dv/env/seq_lib/rv_dm_rom_read_access_vseq.sv
++++ b/dv/env/seq_lib/rv_dm_rom_read_access_vseq.sv
+@@ -8,13 +8,18 @@ class rv_dm_rom_read_access_vseq extends rv_dm_base_vseq;
+ 
+   task body();
+     string         path;
++    string         rom_size_path;
++    int            rom_size;
+     bit [31:0]     lower_mem_val;
+     bit [31:0]     upper_mem_val;
+     uvm_reg_data_t mem_val;
+     uvm_reg_data_t rom_data;
+ 
++    rom_size_path = "tb.dut.u_dm_top.i_dm_mem.gen_rom_snd_scratch.i_debug_rom.RomSize";
++
+     repeat (2) begin
+-      for (int i = 0; i < 20; i++) begin
++      `DV_CHECK(uvm_hdl_read(rom_size_path, rom_size));
++      for (int i = 0; i < rom_size; i++) begin
+         path = $sformatf("tb.dut.u_dm_top.i_dm_mem.gen_rom_snd_scratch.i_debug_rom.mem[%0d]", i);
+         `DV_CHECK(uvm_hdl_read(path, rom_data))
+         mem_rd(.ptr(tl_mem_ral.rom), .offset(i*2), .data(lower_mem_val));
+-- 
+2.34.1
+
