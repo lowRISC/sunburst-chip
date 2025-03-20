@@ -1,0 +1,25 @@
+From d3f2bdfcf41c4fbe11abb7cb0e2dd1f6ac778d4c Mon Sep 17 00:00:00 2001
+From: Samuel Riedel <sriedel@lowrisc.org>
+Date: Thu, 20 Mar 2025 21:54:37 +0000
+Subject: [PATCH 5/8] Disable the integrity checks on all rv_dm tests
+
+In Sunburst, the buses do not use integrity features.
+---
+ dv/env/rv_dm_env_cfg.sv | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/dv/env/rv_dm_env_cfg.sv b/dv/env/rv_dm_env_cfg.sv
+index e93b9ac..e8defb6 100644
+--- a/dv/env/rv_dm_env_cfg.sv
++++ b/dv/env/rv_dm_env_cfg.sv
+@@ -60,6 +60,7 @@ class rv_dm_env_cfg extends cip_base_env_cfg #(.RAL_T(rv_dm_regs_reg_block));
+     // Both, the regs and the debug mem TL device (in the DUT) only support 1 outstanding.
+     m_tl_agent_cfgs[RAL_T::type_name].max_outstanding_req = 1;
+     m_tl_agent_cfgs[mem_ral_name].max_outstanding_req = 1;
++    m_tl_agent_cfgs[mem_ral_name].check_tl_errs = 0;
+ 
+     // Create jtag agent config obj
+     m_jtag_agent_cfg = jtag_agent_cfg::type_id::create("m_jtag_agent_cfg");
+-- 
+2.34.1
+
