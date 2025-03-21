@@ -1,0 +1,44 @@
+From bc2412e135706c14814b20d8f898812119d8d0aa Mon Sep 17 00:00:00 2001
+From: Samuel Riedel <sriedel@lowrisc.org>
+Date: Fri, 21 Mar 2025 10:38:05 +0000
+Subject: [PATCH 1/2] Fix SCISemi debug module's core file
+
+---
+ scisemi_ip_riscv_dbg.core | 18 +++---------------
+ 1 file changed, 3 insertions(+), 15 deletions(-)
+
+diff --git a/scisemi_ip_riscv_dbg.core b/scisemi_ip_riscv_dbg.core
+index 138e911..a773af2 100644
+--- a/scisemi_ip_riscv_dbg.core
++++ b/scisemi_ip_riscv_dbg.core
+@@ -19,24 +19,12 @@ filesets:
+       - src/dm_mem.sv
+       - src/dmi_cdc.sv
+       - src/dmi_jtag.sv
+-    file_type: systemVerilogSource
+-
+-  files_vivado:
+-    files:
+-      - src/dmi_bscane_tap.sv
+-    file_type: systemVerilogSource
+-
+-  files_verilator:
+-    depend:
+-      # common waivers
+-      - lowrisc:lint:common
+-    files:
+-      - src/dmi_jtag_tap.sv
++      - "!tool_vivado ? (src/dmi_jtag_tap.sv)"
++      - "tool_vivado ? (src/dmi_bscane_tap.sv)"
++      - src/dm_top.sv
+     file_type: systemVerilogSource
+ 
+ targets:
+   default:
+     filesets:
+       - files_src
+-      - tool_verilator ? (files_verilator)
+-      - tool_vivado ? (files_vivado)
+-- 
+2.34.1
+
