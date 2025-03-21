@@ -19,24 +19,12 @@ filesets:
       - src/dm_mem.sv
       - src/dmi_cdc.sv
       - src/dmi_jtag.sv
-    file_type: systemVerilogSource
-
-  files_vivado:
-    files:
-      - src/dmi_bscane_tap.sv
-    file_type: systemVerilogSource
-
-  files_verilator:
-    depend:
-      # common waivers
-      - lowrisc:lint:common
-    files:
-      - src/dmi_jtag_tap.sv
+      - "!tool_vivado ? (src/dmi_jtag_tap.sv)"
+      - "tool_vivado ? (src/dmi_bscane_tap.sv)"
+      - src/dm_top.sv
     file_type: systemVerilogSource
 
 targets:
   default:
     filesets:
       - files_src
-      - tool_verilator ? (files_verilator)
-      - tool_vivado ? (files_vivado)
