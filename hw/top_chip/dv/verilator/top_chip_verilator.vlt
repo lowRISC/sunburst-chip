@@ -8,6 +8,10 @@
 // Purely a DV construction to report test progress and completion.
 lint_off -rule UNUSED -file "*core_ibex.sv" -match "*tl_win_d2h_int*"
 
+// Many width issues have been introduced upstream. These should be fixed there but are relatively harmless.
+lint_off -rule WIDTHEXPAND -file "*/rtl/cheri_pkg.sv"
+lint_off -rule WIDTHTRUNC -file "*/rtl/cheri_pkg.sv"
+
 lint_off -file "*uartdpi.sv"
 
 // Bug seem in Verilator v5.020 where trace chandles produces a C++ compilation
