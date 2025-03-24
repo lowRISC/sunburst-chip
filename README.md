@@ -190,7 +190,7 @@ The **`smoke` regression test set** can be built and run under Xcelium using the
 # Run from the project root directory.
 # NOTE: test software must have already been built beforehand and Xcelium
 #       must be available on your path.
-./hw/vendor/lowrisc_ip/util/dvsim/dvsim.py ./hw/top_chip/dv/top_chip_sim_cfg.hjson -i smoke
+hw/vendor/lowrisc_ip/util/dvsim/dvsim.py hw/top_chip/dv/top_chip_sim_cfg.hjson -i smoke
 ```
 
 **Single tests** can be specified in the same way, such as `usbdev_vbus_test`:
@@ -200,7 +200,7 @@ The **`smoke` regression test set** can be built and run under Xcelium using the
 # Run from the project root directory.
 # NOTE: test software must have already been built beforehand and Xcelium
 #       must be available on your path.
-./hw/vendor/lowrisc_ip/util/dvsim/dvsim.py ./hw/top_chip/dv/top_chip_sim_cfg.hjson -i usbdev_vbus_test
+hw/vendor/lowrisc_ip/util/dvsim/dvsim.py hw/top_chip/dv/top_chip_sim_cfg.hjson -i usbdev_vbus_test
 ```
 
 You can **increase the number of times each test is run** using the `-rx <multiplier>` option.
@@ -213,7 +213,7 @@ For example, `... -i smoke -rx 10` to run the `smoke` regression set 10 times.
 # Run from the project root directory.
 # NOTE: test software must have already been built beforehand and Xcelium
 #       must be available on your path.
-./hw/vendor/lowrisc_ip/util/dvsim/dvsim.py ./hw/top_chip/dv/top_chip_sim_cfg.hjson -i all -rx 10
+hw/vendor/lowrisc_ip/util/dvsim/dvsim.py hw/top_chip/dv/top_chip_sim_cfg.hjson -i all -rx 10
 ```
 
 ### Output
@@ -272,7 +272,7 @@ Programs can be run with the resulting executable using the following command:
 # Run from the project root directory.
 # NOTE: test software must have already been built beforehand.
 build/lowrisc_sunburst_top_chip_verilator_0/sim-verilator/Vtop_chip_verilator \
-  -E ./sw/device/build/tests/usbdev_vbus_test
+  -E sw/device/build/tests/usbdev_vbus_test
 ```
 
 ### Output

@@ -4,6 +4,7 @@ module core_ibex #(
   parameter bit               DbgTriggerEn    = 1'b1,
   parameter int unsigned      DbgHwBreakNum   = 2,
   parameter int unsigned      MHPMCounterNum  = 0,
+  parameter bit               RV32E           = 1,
   parameter ibex_pkg::rv32b_e RV32B           = ibex_pkg::RV32BOTEarlGrey
 ) (
   input clk_i,
@@ -69,6 +70,7 @@ module core_ibex #(
     .HeapBase       (tl_main_pkg::ADDR_SPACE_SRAM),
     .TSMapBase      (tl_main_pkg::ADDR_SPACE_REVOCATION_RAM),
     .TSMapSize      (RevTagDepth),
+    .RV32E          (RV32E),
     .RV32B          (RV32B)
   ) u_ibex_top_tracing (
     .clk_i (clk_i),
