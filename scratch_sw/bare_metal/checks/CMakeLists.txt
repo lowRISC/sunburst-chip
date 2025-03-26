@@ -1,4 +1,5 @@
 set(CHECKS
+  blink.cc
   chip_check.cc
   pattgen_check.cc
   uart_smoke_check.cc

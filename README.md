@@ -384,7 +384,7 @@ A Sunburst Chip bitstream for Sonata XL can be built using FuseSoC and Vivado us
 # Run from the project root directory.
 # NOTE: Vivado must be available on your path.
 fusesoc --cores-root=. run --target=synth --setup --build lowrisc:sunburst:top_chip_sonata_xl \
-  --SRAMInitFile=$PWD/scratch_sw/bare_metal/build/checks/chip_check.vmem
+  --SRAMInitFile=$PWD/scratch_sw/bare_metal/build/checks/blink.vmem
 ```
 
 ### Load

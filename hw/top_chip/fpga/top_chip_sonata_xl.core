@@ -38,14 +38,14 @@ filesets:
 parameters:
   # XXX: This parameter needs to be absolute, or relative to the *.runs/synth_1
   # directory. It's best to pass it as absolute path when invoking fusesoc, e.g.
-  # --SRAMInitFile=$PWD/scratch_sw/bare_metal/build/checks/chip_check.vmem
+  # --SRAMInitFile=$PWD/scratch_sw/bare_metal/build/checks/blink.vmem
   # XXX: The VMEM file should be added to the sources of the Vivado project to
   # make the Vivado dependency tracking work. However this requires changes to
   # fusesoc first.
   SRAMInitFile:
     datatype: str
     description: SRAM initialization file in vmem hex format
-    default: "../../../../../scratch_sw/bare_metal/build/checks/chip_check.vmem"
+    default: "../../../../../scratch_sw/bare_metal/build/checks/blink.vmem"
     paramtype: vlogparam
 
   # For value definition, please see ip/prim/rtl/prim_pkg.sv
