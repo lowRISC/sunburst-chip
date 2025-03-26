@@ -7,12 +7,13 @@
 module cheri_ex import cheri_pkg::*; #(
   parameter bit          WritebackStage = 1'b0,
   parameter bit          MemCapFmt      = 1'b0,
-  parameter int unsigned HeapBase       = '0,
-  parameter int unsigned TSMapBase      = '0,
-  parameter int unsigned TSMapSize      = '0,
+  parameter int unsigned HeapBase       = 32'h2001_0000,
+  parameter int unsigned TSMapBase      = 32'h2002_f000,
+  parameter int unsigned TSMapSize      = 1024,
   parameter bit          CheriPPLBC     = 1'b1,
   parameter bit          CheriSBND2     = 1'b0,
-  parameter bit          CheriStkZ      = 1'b1
+  parameter bit          CheriStkZ      = 1'b1,
+  parameter bit          CheriCapIT8    = 1'b0
 )(
    // Clock and Reset
   input  logic          clk_i,
@@ -59,7 +60,6 @@ module cheri_ex import cheri_pkg::*; #(
   input  logic          instr_is_rv32lsu_i,
   input  logic          instr_is_compressed_i,
   input  logic [11:0]   cheri_imm12_i,
-  input  logic [13:0]   cheri_imm14_i,
   input  logic [19:0]   cheri_imm20_i,
   input  logic [20:0]   cheri_imm21_i,
   input  logic  [4:0]   cheri_cs2_dec_i,       // cs2 used for CSR address
@@ -80,7 +80,6 @@ module cheri_ex import cheri_pkg::*; #(
   output logic          lsu_req_o,
   output logic          lsu_cheri_err_o,
   output logic          lsu_is_cap_o,
-  output logic          lsu_is_intl_o,
   output logic  [3:0]   lsu_lc_clrperm_o,
   output logic          lsu_we_o,
   output logic [31:0]   lsu_addr_o,
@@ -88,13 +87,12 @@ module cheri_ex import cheri_pkg::*; #(
   output logic [32:0]   lsu_wdata_o,
   output reg_cap_t      lsu_wcap_o,
   output logic          lsu_sign_ext_o,
+  output logic          cpu_stall_by_stkz_o,
+  output logic          cpu_grant_to_stkz_o,
 
   input  logic          addr_incr_req_i,
   input  logic [31:0]   addr_last_i,
   input  logic          lsu_req_done_i,
-  input  logic          lsu_req_done_intl_i,
-  input  logic          lsu_resp_valid_intl_i,
-  input  logic          lsu_resp_err_intl_i,
   input  logic [32:0]   lsu_rdata_i,
   input  reg_cap_t      lsu_rcap_i,
 
@@ -160,7 +158,6 @@ module cheri_ex import cheri_pkg::*; #(
   reg_cap_t      cheri_lsu_wcap;
   logic          cheri_lsu_err;
   logic          cheri_lsu_is_cap;
-  logic          cheri_lsu_is_intl;
 
   logic [31:0]   rf_rdata_a, rf_rdata_ng_a;
   logic [31:0]   rf_rdata_b, rf_rdata_ng_b;
@@ -173,7 +170,6 @@ module cheri_ex import cheri_pkg::*; #(
   reg_cap_t      csc_wcap;
 
   logic          is_load_cap, is_store_cap, is_cap;
-  logic          is_intl, is_lbc;
 
   logic          addr_bound_vio;
   logic          perm_vio, perm_vio_slc;
@@ -187,18 +183,6 @@ module cheri_ex import cheri_pkg::*; #(
   logic  [31:0]  cs1_imm;
   logic  [31:0]  addr_result;
 
-  logic          intl_lsu_req;
-  logic          unused_intl_lsu_we;
-  logic [31:0]   intl_lsu_addr;
-  logic [32:0]   intl_lsu_wdata;
-  reg_cap_t      intl_lsu_wcap;
-  logic          intl_lsu_is_cap;
-
-  logic          clbc_done;
-  logic          clbc_err;
-  logic  [31:0]  clbc_data_q;
-  reg_cap_t      clbc_cap_q;
-  logic          clbc_revoked;
 
   logic          cheri_rf_we_raw, branch_req_raw, branch_req_spec_raw;
   logic          csr_set_mie_raw, csr_clr_mie_raw;
@@ -212,9 +196,8 @@ module cheri_ex import cheri_pkg::*; #(
   logic          lc_cglg, lc_csdlm, lc_ctag;
   logic  [31:0]  pc_id_nxt;
 
-  full_cap_t     setaddr1_outcap, setbounds_outcap;
+  full_cap_t     setaddr1_outcap, setbounds_outcap, setbounds_rndn_outcap;
   logic  [15:0]  cheri_wb_err_info_q, cheri_wb_err_info_d;
-  logic  [11:0]  cheri_ex_err_info_q, cheri_ex_err_info_d;
   logic          set_bounds_done;
 
   logic   [4:0]  cheri_err_cause, rv32_err_cause;
@@ -324,7 +307,7 @@ module cheri_ex import cheri_pkg::*; #(
     unique case (1'b1)
       cheri_operator_i[CGET_PERM]:
         begin
-          result_data_o       = {19'h0, rf_fullcap_a.perms};
+          result_data_o       = {20'h0, rf_fullcap_a.perms};
           result_cap_o        = NULL_REG_CAP;   // zerout the cap msw
           cheri_rf_we_raw     = 1'b1;
           cheri_ex_valid_raw  = 1'b1;
@@ -374,8 +357,10 @@ module cheri_ex import cheri_pkg::*; #(
       cheri_operator_i[CGET_HIGH]:
         begin
           logic [65:0] tmp66;
-          tmp66 = MemCapFmt ? reg2mem_fmt1(rf_rcap_a, rf_rdata_a) : 
-                              {reg2memcap_fmt0(rf_rcap_a), 1'b0, rf_rdata_a[31:0]};
+          tmp66 = MemCapFmt ? (CheriCapIT8 ? reg2mem_it8_fmt1(rf_rcap_a, rf_rdata_a) : 
+                                             reg2mem_fmt1(rf_rcap_a, rf_rdata_a)) :
+                              (CheriCapIT8 ? {reg2memcap_it8_fmt0(rf_rcap_a), 1'b0, rf_rdata_a[31:0]} :
+                                             {reg2memcap_fmt0(rf_rcap_a), 1'b0, rf_rdata_a[31:0]});
           result_data_o       = tmp66[64:33];
           result_cap_o        = NULL_REG_CAP;
           cheri_rf_we_raw     = 1'b1;
@@ -400,11 +385,15 @@ module cheri_ex import cheri_pkg::*; #(
         end
       cheri_operator_i[CAND_PERM]:         // cd <-- cs1; cd.perm <-- cd.perm & rs2
         begin
+          logic [PERMS_W-1:0] pmask;
           result_data_o      = rf_rdata_a;
           tfcap              = rf_fullcap_a;
           tfcap.perms        = tfcap.perms & rf_rdata_b[PERMS_W-1:0];
           tfcap.cperms       = compress_perms(tfcap.perms, tfcap.cperms[5:4]);
-          tfcap.valid        = tfcap.valid & ~is_cap_sealed(rf_fullcap_a);
+          // for sealed caps, clear tag unless perm mask (excluding GL) == all '1'
+          pmask              = rf_rdata_b[PERMS_W-1:0];
+          pmask[PERM_GL]     = 1'b1;
+          tfcap.valid        = tfcap.valid & (~is_cap_sealed(rf_fullcap_a) | (&pmask));
           result_cap_o       = full2regcap(tfcap);
           cheri_rf_we_raw    = 1'b1;
           cheri_ex_valid_raw = 1'b1;
@@ -413,7 +402,8 @@ module cheri_ex import cheri_pkg::*; #(
         begin
           // this only works for memcap_fmt0 for now QQQ
           result_data_o      = rf_rdata_a;
-          result_cap_o       = mem2regcap_fmt0({1'b0, rf_rdata_b}, {1'b0, rf_rdata_a}, 4'h0);
+          result_cap_o       = CheriCapIT8 ? mem2regcap_it8_fmt0({1'b0, rf_rdata_b}, {1'b0, rf_rdata_a}, 4'h0) :
+                                             mem2regcap_fmt0({1'b0, rf_rdata_b}, {1'b0, rf_rdata_a}, 4'h0);
           cheri_rf_we_raw    = 1'b1;
           cheri_ex_valid_raw = 1'b1;
         end
@@ -440,11 +430,11 @@ module cheri_ex import cheri_pkg::*; #(
           cheri_ex_valid_raw   = 1'b1;
         end
       (cheri_operator_i[CSET_BOUNDS] | cheri_operator_i[CSET_BOUNDS_IMM] | cheri_operator_i[CSET_BOUNDS_EX] |
-       cheri_operator_i[CRRL] | cheri_operator_i[CRAM]):
+       cheri_operator_i[CRRL] | cheri_operator_i[CRAM] | cheri_operator_i[CSET_BOUNDS_RNDN]):
         begin                  // cd <-- cs1; cd.base <-- cs1.address, cd.len <-- rs2 or imm12
           logic instr_fault;
 
-          tfcap            = setbounds_outcap;
+          tfcap            = cheri_operator_i[CSET_BOUNDS_RNDN] ? setbounds_rndn_outcap : setbounds_outcap;
           tfcap.valid      = tfcap.valid & ~is_cap_sealed(rf_fullcap_a);
 
           if (cheri_operator_i[CRRL]) begin
@@ -461,7 +451,7 @@ module cheri_ex import cheri_pkg::*; #(
           cheri_ex_valid_raw = set_bounds_done;
           instr_fault        = csr_dbg_tclr_fault_i & rf_fullcap_a.valid & ~result_cap_o.valid &
                              (cheri_operator_i[CSET_BOUNDS] | cheri_operator_i[CSET_BOUNDS_IMM] |
-                              cheri_operator_i[CSET_BOUNDS_EX]);
+                              cheri_operator_i[CSET_BOUNDS_EX] | cheri_operator_i[CSET_BOUNDS_RNDN]);
           cheri_rf_we_raw    = ~instr_fault;
           cheri_wb_err_raw   = instr_fault;
         end
@@ -508,21 +498,12 @@ module cheri_ex import cheri_pkg::*; #(
           lc_csdlm             = ~rf_fullcap_a.perms[PERM_LM];
           lc_ctag              = ~rf_fullcap_a.perms[PERM_MC];
 
-          if (CheriPPLBC | ~cheri_tsafe_en_i) begin
-            result_data_o        = 32'h0;
-            result_cap_o         = NULL_REG_CAP;
-            cheri_rf_we_raw      = 1'b0;
-            cheri_ex_valid_raw   = 1'b1;             // lsu_req_done is factored in by id_stage
-            cheri_ex_err_raw     = 1'b0;             // acc err passed to LSU and processed later in WB
-            rf_trsv_en_o         = CheriPPLBC & cheri_tsafe_en_i & lsu_req_done_i;
-          end else begin
-            result_data_o        = clbc_data_q;
-            result_cap_o         = clbc_cap_q;
-            result_cap_o.valid   = ~clbc_revoked & clbc_cap_q.valid;
-            cheri_rf_we_raw      = clbc_done & ~(clbc_err | cheri_lsu_err);
-            cheri_ex_valid_raw   = clbc_done;
-            cheri_ex_err_raw     = clbc_err | cheri_lsu_err;
-          end
+          result_data_o        = 32'h0;
+          result_cap_o         = NULL_REG_CAP;
+          cheri_rf_we_raw      = 1'b0;
+          cheri_ex_valid_raw   = 1'b1;             // lsu_req_done is factored in by id_stage
+          cheri_ex_err_raw     = 1'b0;             // acc err passed to LSU and processed later in WB
+          rf_trsv_en_o         = CheriPPLBC & cheri_tsafe_en_i & lsu_req_done_i;
         end
       cheri_operator_i[CSTORE_CAP]:
         begin
@@ -607,7 +588,9 @@ module cheri_ex import cheri_pkg::*; #(
           //  if branch prediction works)
           result_data_o        = pc_id_nxt;
           seal_type            = csr_mstatus_mie_i ? OTYPE_SENTRY_IE_BKWD : OTYPE_SENTRY_ID_BKWD;
-          tfcap                = seal_cap(setaddr1_outcap, seal_type);
+          //tfcap                = seal_cap(setaddr1_outcap, seal_type);
+          tfcap                = (rf_waddr_i == 5'h1) ? seal_cap(setaddr1_outcap, seal_type) : 
+                                                        setaddr1_outcap;
           result_cap_o         = full2regcap(tfcap);
 
           // problem with instr_fault: the pcc_cap.valid check causing timing issue on instr_addr_o
@@ -642,8 +625,6 @@ module cheri_ex import cheri_pkg::*; #(
   assign is_store_cap = cheri_operator_i[CSTORE_CAP];
 
   assign is_cap   = cheri_operator_i[CLOAD_CAP] | cheri_operator_i[CSTORE_CAP];
-  assign is_lbc   = cheri_operator_i[CLOAD_CAP] & cheri_tsafe_en_i & ~CheriPPLBC;
-  assign is_intl  = is_lbc;   // for now this is the only case
 
   // muxing between "normal cheri LSU requests (clc/csc) and CLBC
 
@@ -651,24 +632,21 @@ module cheri_ex import cheri_pkg::*; #(
     // assert LSU req until instruction is retired (req_done from LSU)
     // note if the previous instr is also a load/store, cheri_exec_id won't be asserted 
     // till WB is ready (lsu_resp for the previous isntr)
-    assign cheri_lsu_req      = is_intl ? intl_lsu_req : is_cap & cheri_exec_id_i;
+    assign cheri_lsu_req      = is_cap & cheri_exec_id_i;
   end else begin
     // no WB stage, only assert req in the first_cycle phase of the instruction
     // (consistent with the RV32 load/store instructions)
     // Here instruction won't complete till lsu_resp_valid in this case, 
     // keeping lsu_req asserted causes problem as LSU sees it as a new request
-    assign cheri_lsu_req      = is_intl ? intl_lsu_req : is_cap & cheri_exec_id_i & instr_first_cycle_i;
+    assign cheri_lsu_req      = is_cap & cheri_exec_id_i & instr_first_cycle_i;
   end
 
-  assign cheri_lsu_we       = is_intl ? 1'b0 : is_store_cap;
-  assign cheri_lsu_addr     = (is_intl ? intl_lsu_addr : cs1_addr_plusimm) + {29'h0, addr_incr_req_i, 2'b00};
-  assign cheri_lsu_is_cap   = is_intl ? intl_lsu_is_cap : is_cap;
-  assign cheri_lsu_is_intl  = is_intl;
+  assign cheri_lsu_we       = is_store_cap;
+  assign cheri_lsu_addr     = cs1_addr_plusimm + {29'h0, addr_incr_req_i, 2'b00};
+  assign cheri_lsu_is_cap   = is_cap;
 
-  assign cheri_lsu_wdata    = is_intl ? intl_lsu_wdata :
-                              (is_store_cap ? {csc_wcap.valid, rf_rdata_b} : 33'h0);
-  assign cheri_lsu_wcap     = is_intl ? intl_lsu_wcap :
-                              (is_store_cap  ? csc_wcap : NULL_REG_CAP);
+  assign cheri_lsu_wdata    = is_store_cap ? {csc_wcap.valid, rf_rdata_b} : 33'h0;
+  assign cheri_lsu_wcap     = is_store_cap  ? csc_wcap : NULL_REG_CAP;
 
   // RS1/CS1+offset is
   //  keep this separate to help timing on the memory interface
@@ -747,7 +725,7 @@ module cheri_ex import cheri_pkg::*; #(
     full_cap_t   tfcap3;
 
     // set_bounds
-    if (cheri_operator_i[CSET_BOUNDS]) begin
+    if (cheri_operator_i[CSET_BOUNDS] | cheri_operator_i[CSET_BOUNDS_RNDN]) begin
       newlen    = rf_rdata_b;
       req_exact = 1'b0;
       tfcap3 = rf_fullcap_a;
@@ -774,9 +752,13 @@ module cheri_ex import cheri_pkg::*; #(
       tmp_addr  = 0;
     end
 
-    bound_req1 = prep_bound_req (tmp_addr, newlen);
+    bound_req1 = CheriCapIT8 ? prep_bound_req_it8 (tfcap3, tmp_addr, newlen) :
+                               prep_bound_req (tfcap3, tmp_addr, newlen);
 
     setbounds_outcap = set_bounds(tfcap3, tmp_addr, bound_req1, req_exact);
+
+    setbounds_rndn_outcap = CheriCapIT8 ? set_bounds_rndn_it8(tfcap3, tmp_addr, bound_req1) :
+                                          set_bounds_rndn(tfcap3, tmp_addr, bound_req1);
   end
 
   assign set_bounds_done = 1'b1;
@@ -862,10 +844,14 @@ module cheri_ex import cheri_pkg::*; #(
     logic        top_vio, base_vio, top_equal;
     logic        cs2_bad_type;
     logic        cs1_otype_0, cs1_otype_1, cs1_otype_45, cs1_otype_23;
+    logic        cs2_otype_45;
 
     // generate the address used to check top bound violation
-    if (cheri_operator_i[CSEAL] | cheri_operator_i[CUNSEAL])
+    if (cheri_operator_i[CSEAL])
       base_chkaddr = rf_rdata_b;           // cs2.address
+    else if (cheri_operator_i[CUNSEAL])
+      // inCapBounds(cs2_val, zero_extend(cs1_val.otype), 1)
+      base_chkaddr =  {28'h0, decode_otype(rf_fullcap_a.otype, rf_fullcap_a.perms[PERM_EX])};  
     else if (cheri_operator_i[CIS_SUBSET])
       base_chkaddr = rf_fullcap_b.base32;  // cs2.base32
     else   // CLC/CSC
@@ -911,11 +897,14 @@ module cheri_ex import cheri_pkg::*; #(
     cs2_bad_type = 1'b0;
     illegal_scr_addr = 1'b0;
 
-    cs1_otype_0  =  (rf_fullcap_a.otype == 3'h0);
-    cs1_otype_1  =  (rf_fullcap_a.otype == 3'h1);
-    cs1_otype_45 = (rf_fullcap_a.otype == 3'h4) || (rf_fullcap_a.otype == 3'h5);
-    cs1_otype_23 = (rf_fullcap_a.otype == 3'h2) || (rf_fullcap_a.otype == 3'h3);
+    // otype_1: forward sentry; otype_23: forward inherit sentry; otype_45: backward sentry; 
+    cs1_otype_0  = (rf_fullcap_a.otype == 3'h0);
+    cs1_otype_1  = rf_fullcap_a.perms[PERM_EX] & (rf_fullcap_a.otype == 3'h1);  // fwd sentry
+    cs1_otype_45 = rf_fullcap_a.perms[PERM_EX] & ((rf_fullcap_a.otype == 3'h4) || (rf_fullcap_a.otype == 3'h5)); 
+    cs1_otype_23 = rf_fullcap_a.perms[PERM_EX] & ((rf_fullcap_a.otype == 3'h2) || (rf_fullcap_a.otype == 3'h3));
  
+    cs2_otype_45 = rf_fullcap_b.perms[PERM_EX] & ((rf_fullcap_b.otype == 3'h4) || (rf_fullcap_b.otype == 3'h5)); 
+
     // note cseal/unseal/cis_subject doesn't generate exceptions, 
     // so for all exceptions, violations can always be attributed to cs1, thus no need to further split
     // exceptions based on source operands.
@@ -929,21 +918,21 @@ module cheri_ex import cheri_pkg::*; #(
       perm_vio_vec[PVIO_SEAL]  = is_cap_sealed(rf_fullcap_a);
       perm_vio_vec[PVIO_SD]    = ~rf_fullcap_a.perms[PERM_SD];
       perm_vio_vec[PVIO_SC]    = (~rf_fullcap_a.perms[PERM_MC] && rf_fullcap_b.valid);
-      perm_vio_vec[PVIO_ALIGN] = (cheri_ls_chkaddr[2:0] != 0); 
-      perm_vio_slc             = ~rf_fullcap_a.perms[PERM_SL] && rf_fullcap_b.valid && ~rf_fullcap_b.perms[PERM_GL];
+      perm_vio_vec[PVIO_ALIGN] = (cheri_ls_chkaddr[2:0] != 0);
+      perm_vio_slc             = ~rf_fullcap_a.perms[PERM_SL] && rf_fullcap_b.valid && 
+                                (~rf_fullcap_b.perms[PERM_GL]) ;
     end else if (cheri_operator_i[CSEAL]) begin
       cs2_bad_type = rf_fullcap_a.perms[PERM_EX] ? 
-                     ((rf_rdata_b[31:3]!=0)||(rf_rdata_b[2:0]==0)||(rf_rdata_b[2:0]==3'h4)||(rf_rdata_b[2:0]==3'h5)) : 
+                     ((rf_rdata_b[31:3]!=0)||(rf_rdata_b[2:0]==0)) : 
                      ((|rf_rdata_b[31:4]) || (rf_rdata_b[3:0] <= 8));
       // cs2.addr check : ex: 0-7, non-ex: 9-15
-      perm_vio_vec[PVIO_TAG]   = ~rf_fullcap_a.valid || ~rf_fullcap_b.valid;
+      perm_vio_vec[PVIO_TAG]   = ~rf_fullcap_b.valid;
       perm_vio_vec[PVIO_SEAL]  = is_cap_sealed(rf_fullcap_a) || is_cap_sealed(rf_fullcap_b) || 
                                   (~rf_fullcap_b.perms[PERM_SE]) || cs2_bad_type;
     end else if (cheri_operator_i[CUNSEAL]) begin
-      perm_vio_vec[PVIO_TAG]   = ~rf_fullcap_a.valid || ~rf_fullcap_b.valid; 
+      perm_vio_vec[PVIO_TAG]   = ~rf_fullcap_b.valid; 
       perm_vio_vec[PVIO_SEAL]  = (~is_cap_sealed(rf_fullcap_a)) || is_cap_sealed(rf_fullcap_b) ||
-                                   (rf_rdata_b != {28'h0, decode_otype(rf_fullcap_a.otype, rf_fullcap_a.perms[PERM_EX])}) ||
-                                   (~rf_fullcap_b.perms[PERM_US]);
+                                 (~rf_fullcap_b.perms[PERM_US]);
     end else if (cheri_operator_i[CJALR]) begin
       perm_vio_vec[PVIO_TAG]   = ~rf_fullcap_a.valid;
       perm_vio_vec[PVIO_SEAL]  = (is_cap_sealed(rf_fullcap_a) && (cheri_imm12_i != 0)) ||
@@ -974,7 +963,7 @@ module cheri_ex import cheri_pkg::*; #(
   // report to csr as mtval
   logic ls_addr_misaligned_only;
 
-  assign cheri_ex_err_info_o = cheri_ex_err_info_q;
+  assign cheri_ex_err_info_o = 12'h0;           // no ex stage cheri error currently
   assign cheri_wb_err_info_o = cheri_wb_err_info_q;
 
   assign cheri_wb_err_d      = cheri_wb_err_raw & cheri_exec_id_i & cheri_ex_valid_raw & ~debug_mode_i;
@@ -997,15 +986,6 @@ module cheri_ex import cheri_pkg::*; #(
     
     ls_addr_misaligned_only = perm_vio_vec[PVIO_ALIGN] && (perm_vio_vec[PVIO_ALIGN-1:0] == 0) && ~addr_bound_vio_ext;
     
-    if (cheri_exec_id_i & ~CheriPPLBC & cheri_tsafe_en_i & is_load_cap & cheri_lsu_err)  
-      // 2-stage ppl load/store, error treated as EX error, cheri CLC check error
-      cheri_ex_err_info_d = {2'b00, rf_raddr_a_i, cheri_err_cause};
-    else if (cheri_exec_id_i & ~CheriPPLBC & cheri_tsafe_en_i & is_load_cap & clbc_err)  
-      // 2-stage ppl load/store, error treated as EX error, memory error
-      cheri_ex_err_info_d = {2'b00, rf_raddr_a_i, 5'h1f};    
-    else 
-      cheri_ex_err_info_d = cheri_ex_err_info_q;
-
     // cheri_wb_err_raw is already qualified by instr
     // bit 15:13: reserved
     // bit 12: illegal_scr_addr
@@ -1031,7 +1011,6 @@ module cheri_ex import cheri_pkg::*; #(
     if (!rst_ni) begin
       cheri_wb_err_q      <= 1'b0;
       cheri_wb_err_info_q <= 'h0;
-      cheri_ex_err_info_q <= 'h0;
     end else begin
       // Simple flop here works since
       //  -- cheri_wb_err is gated by cheri_exec_id/ex_valid
@@ -1040,138 +1019,17 @@ module cheri_ex import cheri_pkg::*; #(
       //  -- faulted non-load/store instruction can only stay 1 cycle in wb_stage
       cheri_wb_err_q      <= cheri_wb_err_d; 
       cheri_wb_err_info_q <= cheri_wb_err_info_d;
-      cheri_ex_err_info_q <= cheri_ex_err_info_d;
-    end
-  end
-
-  // CLBC load barrier function, not pipelined
-  if (~CheriPPLBC) begin
-    typedef enum logic [2:0] {INTL_IDLE, CLBC_WAIT_LSU1, CLBC_WAIT_RESP1, CLBC_MAP_REQ,
-                              CLBC_WAIT_RESP2, CLBC_DONE
-                             } intl_fsm_t;
-    intl_fsm_t   intl_fsm_d, intl_fsm_q;
-    full_cap_t   clbc_fullcap;
-    logic [31:0] ts_map_ptr;
-    logic [31:0] ts_map_addr;
-    logic  [4:0] ts_map_bitpos;    // bit index in a 32-bit word
-    logic        clbc_map_ok;
-    logic [31:0] clbc_map_q;
-    logic        clbc_err_q;
-
-    assign clbc_revoked    = clbc_map_ok && clbc_map_q[ts_map_bitpos] & cheri_tsafe_en_i;
-    assign unused_intl_lsu_we    = 1'b0;
-    assign intl_lsu_wdata = 33'h0;
-    assign intl_lsu_wcap  = NULL_REG_CAP;
-
-    assign clbc_err      = clbc_err_q;
-    assign clbc_fullcap  = reg2fullcap(clbc_cap_q, clbc_data_q);
-    assign ts_map_ptr    = (clbc_fullcap.base32 - HeapBase) >> 3;     // 8B granularity
-    assign ts_map_addr   = TSMapBase + {ts_map_ptr[31:5], 2'b00};
-    assign ts_map_bitpos = ts_map_ptr[4:0];
-    assign clbc_map_ok   = clbc_fullcap.valid && (clbc_fullcap.base32 >= HeapBase) &&
-                           (ts_map_addr >= TSMapBase) && (ts_map_addr < TSMapTop);
-
-    always_comb begin
-      intl_fsm_d  = intl_fsm_q;
-
-      if (~cheri_exec_id_i) begin  // make sure we return to IDLE if unexpected err
-        intl_fsm_d  = INTL_IDLE;
-      end else begin
-        case (intl_fsm_q)
-          INTL_IDLE:
-            // we are loading a cap so req_done won't come till later
-            if (is_lbc && cheri_exec_id_i && ~cheri_lsu_err) intl_fsm_d = CLBC_WAIT_LSU1;
-            else if (is_lbc && cheri_exec_id_i) intl_fsm_d = CLBC_DONE;
-          CLBC_WAIT_LSU1:
-            if (lsu_req_done_intl_i) intl_fsm_d = CLBC_WAIT_RESP1;
-          CLBC_WAIT_RESP1:
-            if (lsu_resp_valid_intl_i) intl_fsm_d = CLBC_MAP_REQ;
-          CLBC_MAP_REQ:
-            begin
-              if (~clbc_map_ok) intl_fsm_d = CLBC_DONE;
-              else if (lsu_req_done_intl_i) intl_fsm_d = CLBC_WAIT_RESP2;
-            end
-          CLBC_WAIT_RESP2:
-            if (lsu_resp_valid_intl_i) intl_fsm_d = CLBC_DONE;
-          CLBC_DONE:
-            intl_fsm_d = INTL_IDLE;
-          default:;
-        endcase
-      end
-
-      intl_lsu_req = 1'b0;
-      if ((intl_fsm_q == INTL_IDLE) && is_lbc && cheri_exec_id_i && ~cheri_lsu_err)
-        intl_lsu_req = 1'b1;
-      else if ((intl_fsm_q == CLBC_MAP_REQ) && clbc_map_ok)
-        intl_lsu_req = 1'b1;
-
-      intl_lsu_addr = cs1_addr_plusimm;
-      if (intl_fsm_q == CLBC_MAP_REQ)  intl_lsu_addr = ts_map_addr;
-
-      clbc_done = 1'b0;
-      if (intl_fsm_q == CLBC_DONE)  clbc_done = 1'b1;
-
-      intl_lsu_is_cap = 1'b1;
-      if (intl_fsm_q == CLBC_MAP_REQ)  intl_lsu_is_cap = 1'b0;
-    end
-
-    always_ff @(posedge clk_i or negedge rst_ni) begin
-      if (!rst_ni) begin
-        intl_fsm_q  <= INTL_IDLE;
-        clbc_data_q <= 32'h0;
-        clbc_cap_q  <= NULL_REG_CAP;
-        clbc_err_q  <= 1'b0;
-        clbc_map_q  <= 32'h0;
-      end else begin
-        intl_fsm_q <= intl_fsm_d;
-
-        // note we are not using lsu_rdata_valid_i there (not guaranteed in error condition)
-        if ((intl_fsm_q == CLBC_WAIT_RESP1) && lsu_resp_valid_intl_i) begin
-          clbc_data_q <= lsu_resp_err_intl_i ? 33'h0 : lsu_rdata_i;
-          clbc_cap_q  <= lsu_resp_err_intl_i ? NULL_REG_CAP :lsu_rcap_i;
-          clbc_err_q  <= lsu_resp_err_intl_i;
-          clbc_map_q  <= 32'h0;
-        end else if ((intl_fsm_q == CLBC_WAIT_RESP2) && lsu_resp_valid_intl_i) begin
-          clbc_err_q  <= clbc_err_q | lsu_resp_err_intl_i;
-          clbc_map_q  <= lsu_resp_err_intl_i ? 32'h0 : lsu_rdata_i;
-        end
-
-      end
-    end
-  end else begin  // CheriPPLBC
-    assign intl_lsu_req    = 1'b0;
-    assign intl_lsu_is_cap = 1'b0;
-    assign intl_lsu_addr   = 32'h0;
-    assign unused_intl_lsu_we = 1'b0;
-    assign intl_lsu_wdata  = 33'h0;
-    assign intl_lsu_wcap   = NULL_REG_CAP;
-    assign clbc_done = 1'b0;
-    assign clbc_err = 1'b0;
-    assign clbc_revoked = 1'b1;
-
-    always_ff @(posedge clk_i) begin
-      clbc_data_q <= 32'h0;
-      clbc_cap_q <= NULL_REG_CAP;
     end
   end
 
   //
   // muxing in cheri LSU signals with the rv32 signals
   //
-logic cpu_stkz_stall0, cpu_stkz_stall1;
-logic cpu_stkz_err;
-
-if (CheriStkZ) begin
-  // load/store takes 1 cycle when stkz_active
-  assign lsu_req_o         = ~cpu_stkz_stall0 & (instr_is_cheri_i ? cheri_lsu_req : rv32_lsu_req_i);
-  assign cpu_lsu_dec_o     = ~cpu_stkz_stall1 & ((instr_is_cheri_i && is_cap) | instr_is_rv32lsu_i);  
-end else begin
   assign lsu_req_o         = (instr_is_cheri_i ? cheri_lsu_req : rv32_lsu_req_i);
   assign cpu_lsu_dec_o     = ((instr_is_cheri_i && is_cap) | instr_is_rv32lsu_i);  
 
-end
 
-  assign cpu_lsu_cheri_err = cpu_stkz_err | (instr_is_cheri_i ? cheri_lsu_err : rv32_lsu_err); 
+  assign cpu_lsu_cheri_err = instr_is_cheri_i ? cheri_lsu_err : rv32_lsu_err; 
   assign cpu_lsu_addr      = instr_is_cheri_i ? cheri_lsu_addr : rv32_lsu_addr_i;
   assign cpu_lsu_we        = instr_is_cheri_i ? cheri_lsu_we : rv32_lsu_we_i;
   assign cpu_lsu_wdata     = instr_is_cheri_i ? cheri_lsu_wdata : {1'b0, rv32_lsu_wdata_i};
@@ -1185,7 +1043,6 @@ end
   assign lsu_wdata_o       = ~lsu_tbre_sel_i ? cpu_lsu_wdata : tbre_lsu_wdata_i;
   assign lsu_is_cap_o      = ~lsu_tbre_sel_i ? cpu_lsu_is_cap : tbre_lsu_is_cap_i;
 
-  assign lsu_is_intl_o     = ~lsu_tbre_sel_i & instr_is_cheri_i & cheri_lsu_is_intl;
   assign lsu_lc_clrperm_o  = (~lsu_tbre_sel_i & instr_is_cheri_i) ? cheri_lsu_lc_clrperm : 0;
   assign lsu_type_o        = (~lsu_tbre_sel_i & ~instr_is_cheri_i) ? rv32_lsu_type_i : 2'b00;
   assign lsu_wcap_o        = (~lsu_tbre_sel_i & instr_is_cheri_i) ? cheri_lsu_wcap    : NULL_REG_CAP;
@@ -1228,10 +1085,10 @@ end
   //
 
   if (CheriStkZ) begin
-    logic lsu_addr_in_range, stkz_stall_q;
+    logic lsu_addr_in_stkz_range, stkz_stall_q;
 
-    assign lsu_addr_in_range = (cpu_lsu_addr[31:4] >= stkz_base_i[31:4]) && 
-                               (cpu_lsu_addr[31:2] < stkz_ptr_i[31:2]);
+    assign lsu_addr_in_stkz_range = cpu_lsu_dec_o && (cpu_lsu_addr[31:4] >= stkz_base_i[31:4]) && 
+                                    (cpu_lsu_addr[31:2] < stkz_ptr_i[31:2]);
 
     // cpu_lsu_dec_o is meant to be an early hint to help LSU to generate mux selects for 
     // address/ctrl/wdata (eventually to help timing on those output ports)
@@ -1247,52 +1104,46 @@ end
     //   -- Also, since the cpu_lsu_addr only increments (clc/csc/unaligned) and stkz address
     //      only decrements, if lsu_addr_in_range = 0 for the 1st word, it will stay 0 for 2nd 
     //   -- Need to ensure stkz design meet those requirements
-    assign cpu_stkz_stall0 = (instr_first_cycle_i & stkz_active_i & lsu_addr_in_range) | stkz_stall_q; 
-    assign cpu_stkz_stall1 = ~instr_first_cycle_i & stkz_stall_q;
+    assign cpu_stall_by_stkz_o = stkz_active_i & lsu_addr_in_stkz_range; 
+    assign cpu_grant_to_stkz_o  = ~instr_first_cycle_i & stkz_stall_q;
 
     always_ff @(posedge clk_i or negedge rst_ni) begin
       if (!rst_ni) begin
         stkz_stall_q <= 1'b0;
-        cpu_stkz_err <= 1'b0;
       end else begin
-        stkz_stall_q <= stkz_active_i & lsu_addr_in_range;
-        if (lsu_req_done_i)
-          cpu_stkz_err <= 1'b0;
-        else if (stkz_abort_i & lsu_addr_in_range & (cheri_lsu_req | rv32_lsu_req_i))
-          cpu_stkz_err <= 1'b1;
+        stkz_stall_q <= stkz_active_i & lsu_addr_in_stkz_range;
       end
     end
 
   end else begin
-    assign cpu_stkz_stall0 = 1'b0;
-    assign cpu_stkz_stall1 = 1'b0;
-    assign cpu_stkz_err    = 1'b0;
+    assign cpu_stall_by_stkz_o = 1'b0;
+    assign cpu_grant_to_stkz_o = 1'b0;
   end
 
   //
   // debug signal for FPGA only
   //
   logic [15:0] dbg_status;
-  logic [67:0] dbg_cs1_vec, dbg_cs2_vec, dbg_cd_vec;
+  logic [66:0] dbg_cs1_vec, dbg_cs2_vec, dbg_cd_vec;
 
   assign dbg_status = {4'h0,
                        instr_is_rv32lsu_i, rv32_lsu_req_i, rv32_lsu_we_i,  rv32_lsu_err,
                        cheri_exec_id_i, cheri_lsu_err, rf_fullcap_a.valid, result_cap_o.valid,
                        addr_bound_vio, perm_vio, addr_bound_vio_rv32, perm_vio_rv32};
 
-  assign dbg_cs1_vec = {rf_fullcap_a.top_cor, rf_fullcap_a.base_cor, // 67:64
+  assign dbg_cs1_vec = {rf_fullcap_a.top_cor, rf_fullcap_a.base_cor, // 66:64
                         rf_fullcap_a.exp,                            // 63:59
                         rf_fullcap_a.top, rf_fullcap_a.base,         // 58:41
                         rf_fullcap_a.otype, rf_fullcap_a.cperms,     // 40:32
                         rf_rdata_a};                                 // 31:0
 
-  assign dbg_cs2_vec = {rf_fullcap_b.top_cor, rf_fullcap_b.base_cor, // 67:64
+  assign dbg_cs2_vec = {rf_fullcap_b.top_cor, rf_fullcap_b.base_cor, // 66:64
                         rf_fullcap_b.exp,                            // 63:59
                         rf_fullcap_b.top, rf_fullcap_b.base,         // 58:41
                         rf_fullcap_b.otype, rf_fullcap_b.cperms,     // 40:32
                         rf_rdata_b};                                 // 31:0
 
-  assign dbg_cd_vec = {result_cap_o.top_cor, result_cap_o.base_cor,  // 67:64
+  assign dbg_cd_vec = {result_cap_o.top_cor, result_cap_o.base_cor,  // 66:64
                         result_cap_o.exp,                            // 63:59
                         result_cap_o.top, result_cap_o.base,         // 58:41
                         result_cap_o.otype, result_cap_o.cperms,     // 40:32

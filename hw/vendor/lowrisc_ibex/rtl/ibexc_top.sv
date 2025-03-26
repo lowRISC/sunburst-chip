@@ -27,6 +27,7 @@ module ibexc_top import ibex_pkg::*; import cheri_pkg::*; #(
   parameter int unsigned MHPMCounterWidth = 40,
   parameter bit          RV32E            = 1'b0,
   parameter rv32b_e      RV32B            = RV32BNone,
+  parameter rv32m_e      RV32M            = RV32MFast, 
   parameter bit          WritebackStage   = 1'b1,
   parameter bit          BranchPredictor  = 1'b0,
   parameter bit          SecureIbex       = 1'b0,   // placeholder for TB compatbility
@@ -38,9 +39,11 @@ module ibexc_top import ibex_pkg::*; import cheri_pkg::*; #(
   parameter bit          MemCapFmt        = 1'b0,
   parameter bit          CheriPPLBC       = 1'b1,
   parameter bit          CheriSBND2       = 1'b0,
-  parameter bit          CheriTBRE        = 1'b0,
+  parameter bit          CheriTBRE        = 1'b1,
+  parameter bit          CheriStkZ        = 1'b1,
   parameter int unsigned MMRegDinW        = 128,
   parameter int unsigned MMRegDoutW       = 64,
+  parameter bit          CheriCapIT8      = 1'b0,
   parameter bit          ICache           = 1'b0
 ) (
   // Clock and Reset
@@ -257,8 +260,8 @@ module ibexc_top import ibex_pkg::*; import cheri_pkg::*; #(
     .MHPMCounterNum   (MHPMCounterNum  ),
     .MHPMCounterWidth (MHPMCounterWidth),
     .RV32E            (RV32E),
-    .RV32M            (RV32MFast),
-    .RV32B            (RV32BNone),
+    .RV32M            (RV32M),
+    .RV32B            (RV32B),
     .BranchTargetALU  (1'b1),
     .ICache           (ICache),
     .ICacheECC        (1'b0),
@@ -287,8 +290,10 @@ module ibexc_top import ibex_pkg::*; import cheri_pkg::*; #(
     .CheriPPLBC       (CheriPPLBC),
     .CheriSBND2       (CheriSBND2),
     .CheriTBRE        (CheriTBRE),
+    .CheriStkZ        (CheriStkZ),
     .MMRegDinW        (MMRegDinW),
-    .MMRegDoutW       (MMRegDoutW)
+    .MMRegDoutW       (MMRegDoutW),
+    .CheriCapIT8      (CheriCapIT8)
   ) u_ibex_core (
     .clk_i      (clk),
     .rst_ni     (rst_ni),
@@ -447,7 +452,7 @@ module ibexc_top import ibex_pkg::*; import cheri_pkg::*; #(
   end else begin
     cheri_regfile #(
       .NREGS(32),
-      .NCAPS(32),
+      .NCAPS(16),
       .CheriPPLBC(CheriPPLBC)
     ) register_file_i (
       .clk_i         (clk),

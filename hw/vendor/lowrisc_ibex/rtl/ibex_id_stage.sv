@@ -147,6 +147,7 @@ module ibex_id_stage import cheri_pkg::*; #(
 
   // Debug Signal
   output logic                      debug_mode_o,
+  output logic                      debug_mode_entering_o,
   output ibex_pkg::dbg_cause_e      debug_cause_o,
   output logic                      debug_csr_save_o,
   input  logic                      debug_req_i,
@@ -202,7 +203,6 @@ module ibex_id_stage import cheri_pkg::*; #(
   output logic                      instr_is_cheri_id_o,
   output logic                      instr_is_rv32lsu_id_o,
   output logic [11:0]               cheri_imm12_o,
-  output logic [13:0]               cheri_imm14_o,
   output logic [19:0]               cheri_imm20_o,
   output logic [20:0]               cheri_imm21_o,
   output logic [OPDW-1:0]           cheri_operator_o,
@@ -275,6 +275,7 @@ module ibex_id_stage import cheri_pkg::*; #(
   logic        rf_we_dec, rf_we_raw;
   logic        rf_ren_a, rf_ren_b;
   logic        rf_ren_a_dec, rf_ren_b_dec;
+  logic        rf_we_or_load;
 
   // Read enables should only be asserted for valid and legal instructions
   assign rf_ren_a = instr_valid_i & ~instr_fetch_err_i & ~illegal_insn_o & rf_ren_a_dec;
@@ -327,6 +328,7 @@ module ibex_id_stage import cheri_pkg::*; #(
   logic [31:0] alu_operand_b;
 
   logic        stall_cheri_trvk;
+  logic        instr_is_legal_cheri;
 
   /////////////
   // LSU Mux //
@@ -511,6 +513,7 @@ module ibex_id_stage import cheri_pkg::*; #(
     // register file
     .rf_wdata_sel_o(rf_wdata_sel),
     .rf_we_o       (rf_we_dec),
+    .rf_we_or_load_o(rf_we_or_load),
 
     .rf_raddr_a_o(rf_raddr_a_o),
     .rf_raddr_b_o(rf_raddr_b_o),
@@ -550,8 +553,8 @@ module ibex_id_stage import cheri_pkg::*; #(
 
     // cheri signals
     .instr_is_cheri_o   (instr_is_cheri_id_o),
+    .instr_is_legal_cheri_o (instr_is_legal_cheri),
     .cheri_imm12_o      (cheri_imm12_o),
-    .cheri_imm14_o      (cheri_imm14_o),
     .cheri_imm20_o      (cheri_imm20_o),
     .cheri_imm21_o      (cheri_imm21_o),
     .cheri_operator_o   (cheri_operator_o),
@@ -684,14 +687,15 @@ module ibex_id_stage import cheri_pkg::*; #(
     .csr_pcc_perm_sr_i    (csr_pcc_perm_sr_i),
 
     // Debug Signal
-    .debug_mode_o       (debug_mode_o),
-    .debug_cause_o      (debug_cause_o),
-    .debug_csr_save_o   (debug_csr_save_o),
-    .debug_req_i        (debug_req_i),
-    .debug_single_step_i(debug_single_step_i),
-    .debug_ebreakm_i    (debug_ebreakm_i),
-    .debug_ebreaku_i    (debug_ebreaku_i),
-    .trigger_match_i    (trigger_match_i),
+    .debug_mode_o         (debug_mode_o),
+    .debug_mode_entering_o(debug_mode_entering_o),
+    .debug_cause_o        (debug_cause_o),
+    .debug_csr_save_o     (debug_csr_save_o),
+    .debug_req_i          (debug_req_i),
+    .debug_single_step_i  (debug_single_step_i),
+    .debug_ebreakm_i      (debug_ebreakm_i),
+    .debug_ebreaku_i      (debug_ebreaku_i),
+    .trigger_match_i      (trigger_match_i),
 
     .stall_id_i(stall_id),
     .stall_wb_i(stall_wb),
@@ -1050,11 +1054,13 @@ module ibex_id_stage import cheri_pkg::*; #(
                                   ~stall_ld_hz       &
                                   ~stall_cheri_trvk;
 
+    /* verilator lint_off UNOPTFLAT */
     assign instr_executing = instr_valid_i              &
                              ~instr_kill                &
                              ~stall_ld_hz               &
                              ~stall_cheri_trvk          &
                              ~outstanding_memory_access;
+    /* verilator lint_on UNOPTFLAT */
 
     // allowing a cheri instruction to start execution - valid instruction not stalled by WB/hz
     // note we can't use_instr_kill here since it includes id_exception (cherr_ex_err), which causes a
@@ -1062,7 +1068,7 @@ module ibex_id_stage import cheri_pkg::*; #(
 
     assign cheri_exec_id_o = cheri_pmode_i & instr_valid_i &
                             ~instr_fetch_err_i         &
-                            instr_is_cheri_id_o        &
+                            instr_is_legal_cheri       &
                             controller_run             &
                             ~wb_exception              &
                             ~stall_ld_hz               &
@@ -1113,14 +1119,14 @@ module ibex_id_stage import cheri_pkg::*; #(
 
     assign stall_ld_hz = outstanding_load_wb_i & (rf_rd_a_hz | rf_rd_b_hz);
 
-    logic rf_we_valid;
-    assign rf_we_valid = rf_we_dec & instr_valid_i & ~instr_fetch_err_i;
+    logic rf_we_or_load_valid;
+    assign rf_we_or_load_valid = rf_we_or_load & instr_valid_i & ~instr_fetch_err_i & ~illegal_insn_o;
    
 
     assign stall_cheri_trvk = (CHERIoTEn & cheri_pmode_i & CheriPPLBC) ? 
                                ((rf_ren_a && ~rf_reg_rdy_i[rf_raddr_a_o]) |
                                 (rf_ren_b && ~rf_reg_rdy_i[rf_raddr_b_o]) |
-                                (rf_we_valid && ~rf_reg_rdy_i[rf_waddr_id_o])) :
+                                (rf_we_or_load_valid && ~rf_reg_rdy_i[rf_waddr_id_o])) :
                                1'b0;
 
     assign instr_type_wb_o = ~lsu_req_dec ? WB_INSTR_OTHER :
