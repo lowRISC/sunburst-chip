@@ -25,7 +25,7 @@ Major sections below include:
 
 ## Overview
 
-Sunburst Chip combines the CHERIoT Ibex core with a useful selection of peripherals (amongst other bits) from the open-source [OpenTitan](https://github.com/lowRISC/opentitan) project, along with some bits from the open-source [Sonata](https://github.com/lowRISC/sonata-system) project.
+Sunburst Chip combines the CHERIoT Ibex core with a useful selection of peripherals (among other bits) from the open-source [OpenTitan](https://github.com/lowRISC/opentitan) project, along with some bits from the open-source [Sonata](https://github.com/lowRISC/sonata-system) project.
 The [OpenTitan Documentation](https://opentitan.org/book) is a good reference for these peripherals.
 They have been imported and patched using a vendoring process defined by files in the vendor sub-directory and enacted by [vendor.py](util/vendor.py).
 Note when reading OpenTitan documentation that some OpenTitan-specific features such as alerts and integrity generation have been stripped out for Sunburst Chip using the vendoring patch mechanism.
@@ -46,7 +46,7 @@ There are three methods of exercising the design as a whole:
 These each use a different top-level module.
 Each top-level instantiates the common system (or a module that does), but connects it to a different support environment.
 
-![A diagram showing how tb instantiates top_chip_asic which instantiates top_chip_system, whereas top_chip_verilator and top_chip_sonata_xl instantiate top_chip_system directly](sc-tops.svg)
+![A diagram showing how the testbench instantiates top_chip_asic which instantiates top_chip_system, whereas top_chip_verilator and top_chip_sonata_xl instantiate top_chip_system directly](sc-tops.svg)
 
 The **Xcelium DV testbench** [*tb.sv*](hw/top_chip/dv/tb/tb.sv) is the only one to instantiate the ASIC-style [*top_chip_asic.sv*](hw/top_chip/rtl/top_chip_asic.sv) which itself instantiates the common system.
 The **Verilator testbench** is light-weight by comparison, lacking UVM environment and using simpler connections to the system, but keeping some interfaces for test-status and logging output.
@@ -438,7 +438,7 @@ cp sonata-xl.bit.slot1.uf2 "/media/$USER/SONATA/"
 
 UART logging output can be received from the FTDI UART-to-USB interface.
 This typically appears at `/dev/ttyUSB2`.
-The default baud rate for test software is 1.5 Mbaud.
+The default baud rate for test software is 1.5 MBd.
 
 An example terminal utility is `picocom`, which can be used with the following command:
 
@@ -542,7 +542,7 @@ Sunburst Chip and OpenTitan use the [SiFive TileLink Uncached Lightweight (TL-UL
 Here is a brief comparison of TL-UL to other buses as quoted from the [OpenTitan TL-UL documentation](https://opentitan.org/book/hw/ip/tlul/index.html#description):
 
 > TL-UL is a lightweight bus that combines the point-to-point split-transaction features of the powerful TileLink (or AMBA AXI) 5-channel bus without the high pin-count overhead.
-> It is intended to be about on par of pincount with APB but with the transaction performance of AXI-4, modulo the following assumptions.
+> It is intended to be about on par of pin count with APB but with the transaction performance of AXI-4, modulo the following assumptions.
 >
 > - Only one request (read or write) per cycle
 > - Only one response (read or write) per cycle
@@ -585,7 +585,7 @@ An example of adapting an IP block *without* using one of the lowRISC TL-UL adap
 The HyperRAM device itself is an onboard memory module that uses the HyperBus interface.
 [OpenHBMC](https://github.com/OVGN/OpenHBMC) is an open-source HyperBus controller IP suitable for use with the FPGA on the Sonata board, but it features an AXI4 bus for host communications rather than TL-UL.
 The [`hbmc_tl_top`](https://github.com/lowRISC/sonata-system/blob/main/rtl/ip/hyperram/rtl/hbmc_tl_top.sv) module, derived from [`hbmc_axi_top`](https://github.com/OVGN/OpenHBMC/blob/master/OpenHBMC/hdl/hbmc_axi_top.v), provides a TL-UL interface rather than an AXI4 interface by tweaking the logic and using some smaller primitives.
-This approach may not be as clean as using an adapter, but it is more targetted and may require fewer logic/memory resources.
+This approach may not be as clean as using an adapter, but it is more targeted and may require fewer logic/memory resources.
 It also may provide better performance, which for an interface to program/data memory is quite important.
 
 ### External I/O
