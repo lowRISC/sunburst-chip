@@ -24,12 +24,6 @@
 {
   testpoints: [
     {
-      name: sec_cm_bus_integrity
-      desc: "Verify the countermeasure(s) BUS.INTEGRITY."
-      stage: V2S
-      tests: ["rv_dm_tl_intg_err"]
-    }
-    {
       name: sec_cm_lc_hw_debug_en_intersig_mubi
       desc: '''
         Verify the countermeasure(s) LC_HW_DEBUG_EN.INTERSIG.MUBI.

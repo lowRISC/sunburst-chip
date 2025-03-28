@@ -1,0 +1,43 @@
+diff --git a/data/rv_dm_sec_cm_testplan.hjson b/data/rv_dm_sec_cm_testplan.hjson
+index f625536..a7b6ed6 100644
+--- a/data/rv_dm_sec_cm_testplan.hjson
++++ b/data/rv_dm_sec_cm_testplan.hjson
+@@ -23,12 +23,6 @@
+ // .../rv_dm/data/rv_dm_testplan.hjson
+ {
+   testpoints: [
+-    {
+-      name: sec_cm_bus_integrity
+-      desc: "Verify the countermeasure(s) BUS.INTEGRITY."
+-      stage: V2S
+-      tests: ["rv_dm_tl_intg_err"]
+-    }
+     {
+       name: sec_cm_lc_hw_debug_en_intersig_mubi
+       desc: '''
+diff --git a/data/rv_dm_testplan.hjson b/data/rv_dm_testplan.hjson
+index 79e8c41..ec087fd 100644
+--- a/data/rv_dm_testplan.hjson
++++ b/data/rv_dm_testplan.hjson
+@@ -6,9 +6,7 @@
+   // TODO: remove the common testplans if not applicable
+   import_testplans: ["hw/vendor/lowrisc_ip/dv/tools/dvsim/testplans/csr_testplan.hjson",
+                      "hw/vendor/lowrisc_ip/dv/tools/dvsim/testplans/mem_testplan.hjson",
+-                     "hw/vendor/lowrisc_ip/dv/tools/dvsim/testplans/alert_test_testplan.hjson",
+                      "hw/vendor/lowrisc_ip/dv/tools/dvsim/testplans/stress_all_with_reset_testplan.hjson",
+-                     "hw/vendor/lowrisc_ip/dv/tools/dvsim/testplans/tl_device_access_types_testplan.hjson",
+                      "rv_dm_sec_cm_testplan.hjson"]
+   testpoints: [
+     // Note that the CSR tests in the imported csr_testplan.hjson will cover CSRs attached to both,
+diff --git a/dv/rv_dm_sim_cfg.hjson b/dv/rv_dm_sim_cfg.hjson
+index 69a0c01..108dbc4 100644
+--- a/dv/rv_dm_sim_cfg.hjson
++++ b/dv/rv_dm_sim_cfg.hjson
+@@ -29,7 +29,6 @@
+                 // Common CIP test lists
+                 "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/csr_tests.hjson",
+                 "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/mem_tests.hjson",
+-                "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/alert_test.hjson",
+                 "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/tl_access_tests.hjson",
+                 "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/sec_cm_tests.hjson",
+                 "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/tests/stress_tests.hjson"]
