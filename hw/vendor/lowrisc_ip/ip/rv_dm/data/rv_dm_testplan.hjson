@@ -6,9 +6,7 @@
   // TODO: remove the common testplans if not applicable
   import_testplans: ["hw/vendor/lowrisc_ip/dv/tools/dvsim/testplans/csr_testplan.hjson",
                      "hw/vendor/lowrisc_ip/dv/tools/dvsim/testplans/mem_testplan.hjson",
-                     "hw/vendor/lowrisc_ip/dv/tools/dvsim/testplans/alert_test_testplan.hjson",
                      "hw/vendor/lowrisc_ip/dv/tools/dvsim/testplans/stress_all_with_reset_testplan.hjson",
-                     "hw/vendor/lowrisc_ip/dv/tools/dvsim/testplans/tl_device_access_types_testplan.hjson",
                      "rv_dm_sec_cm_testplan.hjson"]
   testpoints: [
     // Note that the CSR tests in the imported csr_testplan.hjson will cover CSRs attached to both,
