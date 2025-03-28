@@ -16,6 +16,7 @@ class top_chip_dv_env_cfg extends uvm_object;
 
   // External interface agent configs
   rand i2c_agent_cfg     m_i2c_agent_cfgs[NI2cs];
+  rand jtag_agent_cfg    m_jtag_agent_cfg;
   rand pattgen_agent_cfg m_pattgen_agent_cfg;
   rand spi_agent_cfg     m_spi_device_agent_cfgs[NSpis];
   rand uart_agent_cfg    m_uart_agent_cfgs[NUarts];
@@ -36,6 +37,9 @@ class top_chip_dv_env_cfg extends uvm_object;
       // Set default monitor enable to zero for shared io agents.
       m_i2c_agent_cfgs[i].en_monitor = 1'b0;
     end
+
+    // create jtag agent config obj
+    m_jtag_agent_cfg = jtag_agent_cfg::type_id::create("m_jtag_agent_cfg");
 
     // create pattgen agent config obj
     m_pattgen_agent_cfg = pattgen_agent_cfg::type_id::create("m_pattgen_agent_cfg");
