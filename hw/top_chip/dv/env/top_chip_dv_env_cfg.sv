@@ -16,7 +16,7 @@ class top_chip_dv_env_cfg extends uvm_object;
 
   // External interface agent configs
   rand i2c_agent_cfg     m_i2c_agent_cfgs[NI2cs];
-  //rand jtag_agent_cfg    m_jtag_agent_cfg;
+  rand jtag_agent_cfg    m_jtag_agent_cfg;
   rand pattgen_agent_cfg m_pattgen_agent_cfg;
   rand spi_agent_cfg     m_spi_device_agent_cfgs[NSpis];
   rand uart_agent_cfg    m_uart_agent_cfgs[NUarts];
@@ -29,6 +29,7 @@ class top_chip_dv_env_cfg extends uvm_object;
   endfunction
 
   virtual function void initialize();
+    `uvm_info(`gfn, "top_chip_env_cfg.initialize() start", UVM_LOW);
     get_mem_image_files_from_plusargs();
 
     // create i2c agent config obj
@@ -38,8 +39,12 @@ class top_chip_dv_env_cfg extends uvm_object;
       m_i2c_agent_cfgs[i].en_monitor = 1'b0;
     end
 
+    `uvm_info(`gfn, "m_jtag_agent_cfg::create() start", UVM_LOW);
     // create jtag agent config obj
-    //m_jtag_agent_cfg = jtag_agent_cfg::type_id::create("m_jtag_agent_cfg");
+    m_jtag_agent_cfg = jtag_agent_cfg::type_id::create("m_jtag_agent_cfg");
+    m_jtag_agent_cfg.if_mode = dv_utils_pkg::Host;
+    m_jtag_agent_cfg.is_active = 1'b1;
+    `uvm_info(`gfn, "m_jtag_agent_cfg::create() end", UVM_LOW);
 
     // create pattgen agent config obj
     m_pattgen_agent_cfg = pattgen_agent_cfg::type_id::create("m_pattgen_agent_cfg");
@@ -63,6 +68,8 @@ class top_chip_dv_env_cfg extends uvm_object;
       m_uart_agent_cfgs[i].en_tx_monitor = 0;
       m_uart_agent_cfgs[i].en_rx_monitor = 0;
     end
+
+    `uvm_info(`gfn, "top_chip_env_cfg.initialize() end", UVM_LOW);
   endfunction
 
   function void get_mem_image_files_from_plusargs();

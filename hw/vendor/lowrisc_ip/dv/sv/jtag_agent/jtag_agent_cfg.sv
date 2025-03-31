@@ -41,15 +41,22 @@ class jtag_agent_cfg extends dv_base_agent_cfg;
 
   function new (string name = "");
     super.new(name);
+    `uvm_info(`gfn, "jtag_agent_cfg.new() start", UVM_LOW);
     jtag_if_connected = new();
     // Create the JTAG DTM RAL.
+    `uvm_info(`gfn, "jtag_dtm_reg_block::create()", UVM_LOW);
     jtag_dtm_ral = jtag_dtm_reg_block::type_id::create("jtag_dtm_ral");
+    `uvm_info(`gfn, "jtag_dtm_ral.build()", UVM_LOW);
     jtag_dtm_ral.build(.base_addr(0), .csr_excl(null));
     jtag_dtm_ral.set_supports_byte_enable(1'b0);
+    `uvm_info(`gfn, "jtag_dtm_ral.lock_model()", UVM_LOW);
     jtag_dtm_ral.lock_model();
+    `uvm_info(`gfn, "jtag_dtm_ral.compute_mapped_addr_ranges()", UVM_LOW);
     jtag_dtm_ral.compute_mapped_addr_ranges();
+    `uvm_info(`gfn, "jtag_dtm_ral.compute_unmapped_addr_ranges()", UVM_LOW);
     jtag_dtm_ral.compute_unmapped_addr_ranges();
     // TODO: fix the computation of mapped and unmapped ranges.
+    `uvm_info(`gfn, "jtag_agent_cfg.new() end", UVM_LOW);
   endfunction : new
 
 endclass
