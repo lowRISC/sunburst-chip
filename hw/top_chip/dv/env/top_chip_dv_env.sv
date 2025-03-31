@@ -69,8 +69,8 @@ class top_chip_dv_env extends uvm_env;
     end
 
     // Instantiate JTAG agent
-    //m_jtag_agent = jtag_agent::type_id::create("m_jtag_agent", this);
-    //uvm_config_db#(jtag_agent_cfg)::set(this, "m_jtag_agent*", "cfg", cfg.m_jtag_agent_cfg);
+    m_jtag_agent = jtag_agent::type_id::create("m_jtag_agent", this);
+    uvm_config_db#(jtag_agent_cfg)::set(this, "m_jtag_agent*", "cfg", cfg.m_jtag_agent_cfg);
 
     // Instantiate pattgen agent
     m_pattgen_agent = pattgen_agent::type_id::create("m_pattgen_agent", this);
@@ -105,7 +105,7 @@ class top_chip_dv_env extends uvm_env;
     foreach (m_i2c_agents[i]) begin
       virtual_sequencer.i2c_sequencer_hs[i] = m_i2c_agents[i].sequencer;
     end
-    //virtual_sequencer.jtag_sequencer_hs = m_jtag_agent.sequencer;
+    virtual_sequencer.jtag_sequencer_hs = m_jtag_agent.sequencer;
     foreach (m_spi_device_agents[i]) begin
       virtual_sequencer.spi_device_sequencer_hs[i] = m_spi_device_agents[i].sequencer;
     end
@@ -118,7 +118,7 @@ class top_chip_dv_env extends uvm_env;
     foreach (m_i2c_agents[i]) begin
       m_i2c_agents[i].monitor.controller_mode_rd_item_port.connect(virtual_sequencer.i2c_rd_fifos[i].analysis_export);
     end
-    //m_jtag_agent.monitor.analysis_port.connect(virtual_sequencer.jtag_rx_fifo.analysis_export);
+    m_jtag_agent.monitor.analysis_port.connect(virtual_sequencer.jtag_rx_fifo.analysis_export);
     for (int i = 0; i < NUM_PATTGEN_CHANNELS; i++) begin
       m_pattgen_agent.monitor.item_port[i].connect(virtual_sequencer.pattgen_rx_fifo[i].analysis_export);
     end

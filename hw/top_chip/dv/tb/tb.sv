@@ -358,7 +358,7 @@ module top_chip_asic_tb;
     // Feed certain I/O signals to matching agents for vseq-specific driving/checking
     uvm_config_db#(virtual pins_if#(NGpioPins))::set(null, "*", "gpio_pins_vif", gpio_pins_if);
     uvm_config_db#(virtual pattgen_if)::set(null, "*.env.m_pattgen_agent*", "vif", pattgen_if);
-    //uvm_config_db#(virtual jtag_if)::set(null, "*.env.m_jtag_agent*", "vif", jtag_if);
+    uvm_config_db#(virtual jtag_if)::set(null, "*.env.m_jtag_agent*", "vif", jtag_if);
 
     run_test();
   end
