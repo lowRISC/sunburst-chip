@@ -21,7 +21,7 @@ class top_chip_dv_virtual_sequencer extends uvm_sequencer;
   // FIFOs for monitor output. Used by some virtual sequences to check
   // TX (from-chip) items.
   uvm_tlm_analysis_fifo #(i2c_item)     i2c_rd_fifos[NI2cs];
-  //um_tlm_analysis_fifo #(jtag_item)    jtag_rx_fifo;
+  uvm_tlm_analysis_fifo #(jtag_item)    jtag_rx_fifo;
   uvm_tlm_analysis_fifo #(pattgen_item) pattgen_rx_fifo[NUM_PATTGEN_CHANNELS];
   uvm_tlm_analysis_fifo #(uart_item)    uart_tx_fifos[NUarts];
 
@@ -29,7 +29,7 @@ class top_chip_dv_virtual_sequencer extends uvm_sequencer;
     super.build_phase(phase);
     // Construct monitor output FIFOs
     foreach (i2c_rd_fifos[i]) i2c_rd_fifos[i] = new($sformatf("i2c_rd_fifo%0d", i), this);
-    //jtag_rx_fifo = new("jtag_rx_fifo", this);
+    jtag_rx_fifo = new("jtag_rx_fifo", this);
     foreach (pattgen_rx_fifo[i]) pattgen_rx_fifo[i] = new($sformatf("pattgen_rx_fifo%0d", i), this);
     foreach (uart_tx_fifos[i]) uart_tx_fifos[i] = new($sformatf("uart_tx_fifo%0d", i), this);
   endfunction
