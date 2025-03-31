@@ -26,6 +26,19 @@
       "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/common_sim_cfg.hjson"
   ]
 
+  // Override existing project defaults to supply chip-specific values.
+  overrides: [
+    // The jtag agent requires the data and bytenable widths to be increased.
+    {
+      name: tl_dw
+      value: 64
+    }
+    {
+      name: tl_dbw
+      value: 8
+    }
+  ]
+
   sim_tops: [""]
 
   build_opts: ["+define+RVFI=1"]
