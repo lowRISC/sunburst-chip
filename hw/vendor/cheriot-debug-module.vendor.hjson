@@ -6,7 +6,7 @@
   target_dir: "cheriot_debug_module",
   patch_dir: "patches/cheriot_debug_module",
   upstream: {
-    url: "https://github.com/SamuelRiedel/riscv-dbg.git",
-    rev: "cheriot-rebased",
+    url: "https://github.com/CHERIoT-Platform/cheriot-dbg-module.git",
+    rev: "main",
   }
 }
