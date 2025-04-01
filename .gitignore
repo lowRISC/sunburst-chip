@@ -6,6 +6,9 @@ sunburst-py-venv/
 build/
 scratch/
 
+# Nix build directory symlink
+result
+
 # Xcelium output
 xrun.history
 
@@ -13,6 +16,8 @@ xrun.history
 *.pyc
 *.log
 *.fst
+*.fst.hier
 *.shm
 *.jou
 *.str
+*.gtkw
