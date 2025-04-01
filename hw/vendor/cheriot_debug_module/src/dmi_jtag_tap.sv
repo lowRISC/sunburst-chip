@@ -34,8 +34,7 @@ module dmi_jtag_tap #(
   input  logic        testmode_i,
   // JTAG is interested in writing the DTM CSR register
   output logic        tck_o,
-  // Synchronous reset of the dmi module triggered by JTAG TAP
-  output logic        dmi_clear_o,
+  output logic        trst_no,
   output logic        update_o,
   output logic        capture_o,
   output logic        shift_o,
@@ -313,11 +312,10 @@ module dmi_jtag_tap #(
   // Pass through JTAG signals to debug custom DR logic.
   // In case of a single TAP those are just feed-through.
   assign tck_o = tck_i;
+  assign trst_no = !test_logic_reset;
   assign tdi_o = td_i;
   assign update_o = update_dr;
   assign shift_o = shift_dr;
   assign capture_o = capture_dr;
-  assign dmi_clear_o = test_logic_reset;
-
 
 endmodule : dmi_jtag_tap
