@@ -21,6 +21,7 @@ filesets:
       - src/dmi_jtag.sv
       - "!tool_vivado ? (src/dmi_jtag_tap.sv)"
       - "tool_vivado ? (src/dmi_bscane_tap.sv)"
+      - src/dm_top.sv
     file_type: systemVerilogSource
 
 targets:
