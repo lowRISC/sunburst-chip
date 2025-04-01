@@ -116,6 +116,20 @@ It is strongly recommended you build Verilator from source as packaged versions 
 Verilator v5.026 was used when writing this README.
 Instructions to do this can be found in the [Verilator documentation](https://verilator.org/guide/latest/install.html).
 
+### Nix environment
+
+There is a Nix environment available to build the Sunburst simulator.
+We recommend using [Zero to Nix](https://zero-to-nix.com/start/install/) to install Nix.
+You should set yourself up as a trusted user to use the Nix cache by adding the following line to `/etc/nix/nix.conf`:
+```
+trusted-users = root @sudo
+```
+
+Then you can build the simulator using:
+```
+nix build .#sunburst_simulator
+```
+
 ## Test software
 
 Test software is built **by the user** using CMake and [CHERIoT LLVM](https://github.com/CHERIoT-Platform/llvm-project).
