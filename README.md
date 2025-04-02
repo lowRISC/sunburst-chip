@@ -25,6 +25,8 @@ Major sections below include:
 
 ## Overview
 
+![Sunburst Chip Block Diagram](sc-block-diag.svg)
+
 Sunburst Chip combines the CHERIoT Ibex core with a useful selection of peripherals (among other bits) from the open-source [OpenTitan](https://github.com/lowRISC/opentitan) project, along with some bits from the open-source [Sonata](https://github.com/lowRISC/sonata-system) project.
 The [OpenTitan Documentation](https://opentitan.org/book) is a good reference for these peripherals.
 They have been imported and patched using a vendoring process defined by files in the vendor sub-directory and enacted by [vendor.py](util/vendor.py).
