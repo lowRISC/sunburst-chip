@@ -372,6 +372,7 @@ class jtag_dtm_reg_block extends dv_base_reg_block;
 
   virtual function void build(uvm_reg_addr_t base_addr,
                               csr_excl_item csr_excl = null);
+    `uvm_info(`gfn, $sformatf("jtag_dtm_reg_block::build() JTAG_DRW %d", JTAG_DRW), UVM_LOW);
     // create default map
     this.default_map = create_map(.name("default_map"),
                                   .base_addr(base_addr),
