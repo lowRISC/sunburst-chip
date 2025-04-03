@@ -8,7 +8,7 @@ database.
 The tool uses the pyelftools utility to extract the log fields from a given
 section and the strings from read only sections. It processes the log fields
 & the strings and converts them into a database. The script produces 2 outputs:
-- <name_logs.txt, which is the log database
+- <name>_logs.txt, which is the log database
 - <name>_rodata.txt which contains {addr: string} pairs.
 """
 
