@@ -147,6 +147,25 @@
         ];
         dontFixup = true;
       };
+
+      test_simulator = pkgs.stdenvNoCC.mkDerivation {
+        name = "test_simulator";
+        src = fileset.toSource {
+          root = ./.; # an empty source directory
+          fileset = fileset.unions [];
+        };
+        dontBuild = true;
+        doCheck = true;
+        buildInputs = [sunburst_simulator];
+        checkPhase = ''
+          set -e
+          sunburst_simulator -E ${sunburst_device_software}/bin/usbdev_vbus_test
+          echo "USB smoke complete!"
+          sunburst_simulator -E ${sunburst_baremetal_software}/bin/chip_check
+          echo "Chip check complete!"
+        '';
+        installPhase = "mkdir $out";
+      };
     in {
       formatter = pkgs.alejandra;
       packages = {
@@ -155,6 +174,7 @@
           cheriotPkgs
           sunburst_device_software
           sunburst_baremetal_software
+          test_simulator
           ;
       };
     };
