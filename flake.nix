@@ -74,6 +74,8 @@
 
       pythonEnv = pythonSet.mkVirtualEnv "sunburst-chip-env" workspace.deps.default;
 
+      cheriotPkgs = lowrisc-nix.outputs.devShells.${system}.cheriot.nativeBuildInputs;
+
       sunburst_simulator_source = fileset.toSource {
         root = ./.;
         fileset = fileset.unions [
@@ -97,11 +99,62 @@
         '';
         meta.mainProgram = name;
       };
+
+      sunburst_device_software = pkgs.stdenv.mkDerivation rec {
+        name = "sunburst_device_software";
+        src = fileset.toSource {
+          root = ./.;
+          fileset = fileset.unions [
+            ./sw/device
+            ./hw/top_chip/sw/autogen
+            ./util/extract_sw_logs.py
+          ];
+        };
+        sourceRoot = "${src.name}/sw/device";
+        nativeBuildInputs = [cheriotPkgs pythonEnv pkgs.cmake];
+        dontFixup = true;
+      };
+
+      # Baremetal software dependencies
+      cheriotRtosSource = pkgs.fetchFromGitHub {
+        owner = "CHERIoT-Platform";
+        repo = "CHERIoT-RTOS";
+        rev = "64d846091a43053fbdd0312fb9419e05429109c6";
+        fetchSubmodules = true;
+        hash = "sha256-mtsmJ4mY+b7Jm244Rn3nEfmwX4cy2dzeoXNY5yvXHpo=";
+      };
+      reisfmtSource = pkgs.fetchFromGitHub {
+        owner = "engdoreis";
+        repo = "reisfmt";
+        rev = "4ce04e1bc88d37ad359da051b91b4071f740c3d8";
+        fetchSubmodules = true;
+        hash = "sha256-sj4nyevLiCSEQk5KW8wea0rgAnI2quOi1h71dU+QYpU=";
+      };
+
+      sunburst_baremetal_software = pkgs.stdenv.mkDerivation rec {
+        name = "sunburst_baremetal_software";
+        src = fileset.toSource {
+          root = ./.;
+          fileset = fileset.unions [
+            ./scratch_sw/bare_metal
+          ];
+        };
+        sourceRoot = "${src.name}/scratch_sw/bare_metal";
+        nativeBuildInputs = cheriotPkgs ++ (with pkgs; [cmake git]);
+        cmakeFlags = [
+          "-DFETCHCONTENT_SOURCE_DIR_CHERIOT_RTOS=${cheriotRtosSource}"
+          "-DFETCHCONTENT_SOURCE_DIR_REISFMT=${reisfmtSource}"
+        ];
+        dontFixup = true;
+      };
     in {
       formatter = pkgs.alejandra;
       packages = {
         inherit
           sunburst_simulator
+          cheriotPkgs
+          sunburst_device_software
+          sunburst_baremetal_software
           ;
       };
     };
