@@ -38,3 +38,12 @@ jobs:
 
     - name: Build simulator
       run: nix build .#sunburst_simulator -L
+
+    - name: Build software
+      run: |
+        set -e
+        nix build .#sunburst_device_software -L
+        nix build .#sunburst_baremetal_software -L
+
+    - name: Test simulator
+      run: nix build .#test_simulator -L
