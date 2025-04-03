@@ -4,10 +4,12 @@
 {
   description = "Sunburst Chip";
   inputs = {
+    # Standard packages
     lowrisc-nix.url = "github:lowRISC/lowrisc-nix";
-
     nixpkgs.follows = "lowrisc-nix/nixpkgs";
     flake-utils.follows = "lowrisc-nix/flake-utils";
+
+    # Python environment
     pyproject-nix = {
       url = "github:pyproject-nix/pyproject.nix";
       inputs.nixpkgs.follows = "nixpkgs";
