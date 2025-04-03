@@ -120,16 +120,37 @@ Instructions to do this can be found in the [Verilator documentation](https://ve
 
 ### Nix environment
 
-There is a Nix environment available to build the Sunburst simulator.
+There is a Nix environment available to build the Sunburst simulator and software.
 We recommend using [Zero to Nix](https://zero-to-nix.com/start/install/) to install Nix.
 You should set yourself up as a trusted user to use the Nix cache by adding the following line to `/etc/nix/nix.conf`:
 ```
 trusted-users = root @sudo
 ```
 
-Then you can build the simulator using:
+Then there are multiple things you can do in Nix:
+```sh
+# Build the Verilator simulator
+nix build .#sunburst_simulator -L
+# Build the software
+nix build .#sunburst_device_software -L
+nix build .#sunburst_baremetal_software -L
+# Run some smoke tests
+nix build .#test_simulator -L
 ```
-nix build .#sunburst_simulator
+
+The benefit of using Nix is that you don't need to set up a local Python environment or acquire your own version of CHERIoT LLVM.
+Nix build automatically stores everything in the Nix store so you won't see the USB and UART logs in the current directory.
+If you need to inspect the logs you can enter a Nix shell.
+```sh
+# Enter the Nix shell
+nix develop .#test_simulator -L
+```
+You can look through the printed log and find lines starting with `sunburst_baremetal_software> -- Installing: /nix/store/`.
+Once inside the Nix shell you can run the software found using the path you found:
+```sh
+# Once inside the Nix shell you can run the simulator using the software built in the Nix store
+sunburst_simulator -E /nix/store/<magic-hash>-sunburst_baremetal_software/bin/chip_check
+cat uart0.log
 ```
 
 ## Test software
