@@ -8,7 +8,7 @@
 {
   upstream:
   {
-    url: https://github.com/SamuelRiedel/riscv-dbg.git
-    rev: c2991e163a21c2142fba79d316fdb5423e3503e2
+    url: https://github.com/CHERIoT-Platform/cheriot-dbg-module.git
+    rev: 845f74ce6deb8e811f695c8dab1e6b4ba9cf2fbd
   }
 }

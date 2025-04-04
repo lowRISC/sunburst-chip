@@ -30,8 +30,8 @@ package dm;
 
   // address to which a hart should jump when it was requested to halt
   localparam logic [63:0] HaltAddress = 64'h800;
-  localparam logic [63:0] ResumeAddress = HaltAddress + 8;
-  localparam logic [63:0] ExceptionAddress = HaltAddress + 16;
+  localparam logic [63:0] ResumeAddress = HaltAddress + 4;
+  localparam logic [63:0] ExceptionAddress = HaltAddress + 8;
 
   // address where data0-15 is shadowed or if shadowed in a CSR
   // address of the first CSR used for shadowing the data
@@ -201,12 +201,6 @@ package dm;
     DTM_WRITE = 2'h2
   } dtm_op_e;
 
-  typedef enum logic [1:0] {
-    DTM_SUCCESS = 2'h0,
-    DTM_ERR     = 2'h2,
-    DTM_BUSY    = 2'h3
-  } dtm_op_status_e;
-
   typedef struct packed {
     logic [31:29] sbversion;
     logic [28:23] zero0;
@@ -225,8 +219,10 @@ package dm;
     logic         sbaccess8;
   } sbcs_t;
 
+  localparam logic [1:0] DTM_SUCCESS = 2'h0;
+
   typedef struct packed {
-    logic [31:0] addr;
+    logic [6:0]  addr;
     dtm_op_e     op;
     logic [31:0] data;
   } dmi_req_t;

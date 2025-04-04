@@ -473,13 +473,11 @@ module rv_dm
 
   // JTAG TAP
   dmi_jtag #(
-    .IdcodeValue    (IdcodeValue),
-    .NumDmiWordAbits(7)
+    .IdcodeValue    (IdcodeValue)
   ) dap (
     .clk_i            (clk_i),
     .rst_ni           (rst_ni),
     .testmode_i       (testmode),
-    .test_rst_ni      (scan_rst_ni),
 
     .dmi_rst_no       (dmi_rst_n),
     .dmi_req_o        (dmi_req),

@@ -20,7 +20,6 @@
 // Auto-generated code
 module debug_rom (
   input  logic         clk_i,
-  input  logic         rst_ni,
   input  logic         req_i,
   input  logic [63:0]  addr_i,
   output logic [63:0]  rdata_o
@@ -32,11 +31,11 @@ module debug_rom (
   assign mem = {
     64'h00000000_7b200073,
     64'h0390045b_03a0055b,
-    64'h10852823_f1402473,
+    64'h10852423_f1402473,
     64'ha85ff06f_0390045b,
-    64'h03a0055b_10052423,
+    64'h03a0055b_10052223,
     64'h00100073_0390045b,
-    64'h03a0055b_10052c23,
+    64'h03a0055b_10052623,
     64'h00c51513_00c55513,
     64'h00000517_fd5ff06f,
     64'hfa041ce3_00247413,
@@ -51,15 +50,11 @@ module debug_rom (
     64'h07c0006f_00c0006f
   };
 
-  logic [$clog2(RomSize)-1:0] addr_d, addr_q;
+  logic [$clog2(RomSize)-1:0] addr_q;
 
-  assign addr_d = req_i ? addr_i[$clog2(RomSize)-1+3:3] : addr_q;
-
-  always_ff @(posedge clk_i or negedge rst_ni) begin
-    if (!rst_ni) begin
-      addr_q <= '0;
-    end else begin
-      addr_q <= addr_d;
+  always_ff @(posedge clk_i) begin
+    if (req_i) begin
+      addr_q <= addr_i[$clog2(RomSize)-1+3:3];
     end
   end
 
@@ -68,7 +63,7 @@ module debug_rom (
   always_comb begin : p_outmux
     rdata_o = '0;
     if (addr_q < $clog2(RomSize)'(RomSize)) begin
-      rdata_o = mem[addr_q];
+        rdata_o = mem[addr_q];
     end
   end
 

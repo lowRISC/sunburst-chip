@@ -22,11 +22,7 @@ if not os.path.isfile(file):
 filename = os.path.splitext(file)[0]
 
 license = """\
-/*
- * Conversion to CHERIoT Ibex ISA from RISC-V
- *   Copyright SCI Semiconductor 2025
- *
- * Copyright 2018 ETH Zurich and University of Bologna.
+/* Copyright 2018 ETH Zurich and University of Bologna.
  * Copyright and related rights are licensed under the Solderpad Hardware
  * License, Version 0.51 (the "License"); you may not use this file except in
  * compliance with the License.  You may obtain a copy of the License at
@@ -47,7 +43,6 @@ license = """\
 module = """\
 module $filename (
   input  logic         clk_i,
-  input  logic         rst_ni,
   input  logic         req_i,
   input  logic [63:0]  addr_i,
   output logic [63:0]  rdata_o
@@ -60,15 +55,11 @@ module $filename (
 $content
   };
 
-  logic [$$clog2(RomSize)-1:0] addr_d, addr_q;
+  logic [$$clog2(RomSize)-1:0] addr_q;
 
-  assign addr_d = req_i ? addr_i[$$clog2(RomSize)-1+3:3] : addr_q;
-
-  always_ff @(posedge clk_i or negedge rst_ni) begin
-    if (!rst_ni) begin
-      addr_q <= '0;
-    end else begin
-      addr_q <= addr_d;
+  always_ff @(posedge clk_i) begin
+    if (req_i) begin
+      addr_q <= addr_i[$$clog2(RomSize)-1+3:3];
     end
   end
 
@@ -77,7 +68,7 @@ $content
   always_comb begin : p_outmux
     rdata_o = '0;
     if (addr_q < $$clog2(RomSize)'(RomSize)) begin
-      rdata_o = mem[addr_q];
+        rdata_o = mem[addr_q];
     end
   end
 
@@ -97,8 +88,9 @@ $content
 def read_bin():
 
     with open(filename + ".img", 'rb') as f:
-        rom = bytes.hex(f.read())
+        rom = binascii.hexlify(f.read()).decode("utf-8")
         rom = list(map(''.join, zip(rom[::2], rom[1::2])))
+
 
     # align to 64 bit
     align = (int((len(list(rom)) + 7) / 8 )) * 8;
