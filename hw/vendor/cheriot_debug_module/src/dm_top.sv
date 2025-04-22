@@ -122,7 +122,6 @@ module dm_top #(
   ) i_dm_csrs (
     .clk_i,
     .rst_ni,
-    .next_dm_addr_i,
     .testmode_i,
     .dmi_rst_ni,
     .dmi_req_valid_i,
@@ -132,7 +131,6 @@ module dm_top #(
     .dmi_resp_ready_i,
     .dmi_resp_o,
     .ndmreset_o              ( ndmreset              ),
-    .ndmreset_ack_i          ( ndmreset_ack_i        ),
     .dmactive_o,
     .hartsel_o               ( hartsel               ),
     .hartinfo_i,
@@ -183,8 +181,6 @@ module dm_top #(
     .master_be_o,
     .master_gnt_i,
     .master_r_valid_i,
-    .master_r_err_i,
-    .master_r_other_err_i,
     .master_r_rdata_i,
 
     .sbaddress_i             ( sbaddress_csrs_sba    ),
@@ -234,8 +230,7 @@ module dm_top #(
     .addr_i                  ( slave_addr_i          ),
     .wdata_i                 ( slave_wdata_i         ),
     .be_i                    ( slave_be_i            ),
-    .rdata_o                 ( slave_rdata_o         ),
-    .err_o                   ( slave_err_o           )
+    .rdata_o                 ( slave_rdata_o         )
   );
 
 endmodule : dm_top
