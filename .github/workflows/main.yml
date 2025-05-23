@@ -8,7 +8,7 @@ on:
 
 jobs:
   python-reqs:
-    name: Python requirements
+    name: Repository checks
     runs-on: ubuntu-latest
 
     steps:
@@ -21,6 +21,12 @@ jobs:
         source ./sunburst-py-venv/bin/activate
         pip3 install -U pip "setuptools<66.0.0"
         pip3 install -r ./python-requirements.txt
+
+    - name: Check vendoring application
+      run: |
+        set -e
+        source ./sunburst-py-venv/bin/activate
+        ./util/check_vendor_apply.sh
 
   simulator:
     name: Simulator
